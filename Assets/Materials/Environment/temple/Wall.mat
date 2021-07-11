@@ -18,11 +18,12 @@ Material:
   stringTagMap:
     MotionVector: User
   disabledShaderPasses:
-  - RayTracingPrepass
+  - DistortionVectors
   - MOTIONVECTORS
   - TransparentDepthPrepass
   - TransparentDepthPostpass
   - TransparentBackface
+  - RayTracingPrepass
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -134,7 +135,6 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
     m_Floats:
     - Vector1_08ac8275380442328106a5232a2214e7: 0
     - Vector1_2aab83fc3751468db6ee39b50aa091c9: 32

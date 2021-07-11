@@ -18,7 +18,7 @@ public class AnimationDeath : AnimationHumanoid
     void Start()
     {
         orientationHead = transform.Find("Orientation");
-        orientationBody = transform.Find("Model");
+        orientationBody = orientationHead.Find("Model");     
     }
 
     void Update()
