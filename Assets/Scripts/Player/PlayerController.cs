@@ -16,19 +16,16 @@ public class PlayerController : MonoBehaviour
 
     // Mouse variables
     [Header("Mouse Sensitivity")]
-    [Range(0f, 1000f)]
-    public float horizontalSensitivity = 10f;
-    [Range(0f, 1000f)]
-    public float verticalSensitivity = 10f;
+    [SerializeField, Range(0f, 1000f)] private float horizontalSensitivity = 10f;
+    [SerializeField, Range(0f, 1000f)] private float verticalSensitivity = 10f;
     private float xRotation, yRotation;
 
     // Movement variables
     [Header("Movement Modifiers")]
-    public float walkSpeed = 6f;
-    public float sprintSpeed = 12f;
-    public float sprintTime = 0.25f;
-    [Range(0f, 1f)]
-    public float airResistance = 0.4f;
+    [SerializeField] private float walkSpeed = 6f;
+    [SerializeField] private float sprintSpeed = 12f;
+    [SerializeField] private float sprintTime = 0.25f;
+    [SerializeField, Range(0f, 1f)] private float airResistance = 0.4f;
     private float moveSpeed = 6f;
     private bool isMoving;
     private Vector3 moveDirection;
@@ -37,16 +34,15 @@ public class PlayerController : MonoBehaviour
 
     // Jump variables
     [Header("Jump Modifiers")]
-    public float jumpForce = 3f;
-    public float jumpCooldown = 0.5f;
+    [SerializeField] private float jumpForce = 3f;
+    [SerializeField] private float jumpCooldown = 0.5f;
     private bool canJump = true;
 
     // Crouch variables
     [Header("Crouch Modifiers")]
-    [Range(0f, 2f)]
-    public float crouchHeight = 0.5f;
-    public float crouchTime = 0.25f;
-    public float ceilingDetection = 0.4f;
+    [SerializeField, Range(0f, 2f)] private float crouchHeight = 0.5f;
+    [SerializeField] private float crouchTime = 0.25f;
+    [SerializeField] private float ceilingDetection = 0.4f;
     private float defaultHeight;
     private bool underCeiling = false;
     private bool stuckCrouching = false;
@@ -54,11 +50,9 @@ public class PlayerController : MonoBehaviour
 
     // Stair and Slope variables
     [Header("Stair/Slope Modifiers")]
-    [Range(0f, 5f)]
-    public float stepUpHeight = 0.6f;
-    [Range(0f, 2f)]
-    public float detectionRadius = 0.75f;
-    public bool realisticSlopes = false;
+    [SerializeField, Range(0f, 5f)] private float stepUpHeight = 0.6f;
+    [SerializeField, Range(0f, 2f)] private float detectionRadius = 0.75f;
+    [SerializeField] private bool realisticSlopes = false;
     private bool onSlope = false;
     private bool onStair = false;
     private RaycastHit slopeHit;
@@ -66,29 +60,32 @@ public class PlayerController : MonoBehaviour
 
     // Drag variables
     [Header("Drag Modifiers")]
-    public float groundDrag = 6f;
-    public float airDrag = 2f;
+    [SerializeField] private float groundDrag = 6f;
+    [SerializeField] private float airDrag = 2f;
 
     // Gravity variables
     [Header("Gravity Modifiers")]
-    [Range(0f, 10f)]
-    public float gravityScalar = 6.5f;
+    [SerializeField, Range(0f, 10f)] private float gravityScalar = 6.5f;
 
     // Ground variables
     [Header("Ground Modifiers")]
-    public LayerMask groundMask;
-    public Transform playerFeet;
-    public float groundDetection = 0.4f;
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private Transform playerFeet;
+    [SerializeField] private float groundDetection = 0.4f;
     private bool isGrounded = false;
 
     // Camera variables
     [Header("Camera Modifiers")]
-    public Transform playerCamera;
+    [SerializeField] private Transform playerCamera;
     private Vector3 defaultLocalPosition;
 
+    // Animation variables
+    [Header("Animation Modifiers")]
+    [SerializeField] private AnimationHumanoid animator;
+
     [Header("Debug Options")]
-    public Text debugText;
-    public bool debugMode = false;
+    [SerializeField] private Text debugText;
+    [SerializeField] private bool debugMode = false;
 
     // Miscellaneous
     private Rigidbody playerBody;
@@ -163,6 +160,10 @@ public class PlayerController : MonoBehaviour
         onSlope = surfaceType == 1;
         onStair = surfaceType == 2;
 
+        // Animation
+        if (isGrounded && !animator.IsGrounded()) animator.Land();
+        animator.SetGrounded(isGrounded);
+
         // Print user information (debug mode)
         if (debugMode && debugText)
         {
@@ -228,6 +229,9 @@ public class PlayerController : MonoBehaviour
             // Disable jump capability
             canJump = false;
 
+            // Crouch animation
+            animator.Jump();
+
             // Jump force
             playerBody.velocity = new Vector3(playerBody.velocity.x, 0f, playerBody.velocity.z);
             playerBody.AddForce(transform.up * jumpForce * 10f, ForceMode.Impulse);
@@ -246,12 +250,8 @@ public class PlayerController : MonoBehaviour
     {
         isCrouching = true;
 
-        // Put crouch animation code here
-        // --------------------------------
-
-
-
-        // --------------------------------
+        // Crouch animation
+        animator.Crouch();
 
         // Run coroutine to adjust camera and collider's position/height
         if (crouchCoroutine != null) StopCoroutine(crouchCoroutine);
@@ -269,12 +269,8 @@ public class PlayerController : MonoBehaviour
         {
             isCrouching = false;
 
-            // Put uncrouch animation code here
-            // --------------------------------
-
-
-
-            // --------------------------------
+            // Crouch animation
+            animator.UnCrouch();
 
             // Run coroutine to reset camera and collider's position/height
             if (crouchCoroutine != null) StopCoroutine(crouchCoroutine);
