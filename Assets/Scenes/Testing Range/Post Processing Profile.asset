@@ -258,7 +258,7 @@ MonoBehaviour:
     m_Value: 60
   _isEnabled:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 1
 --- !u!114 &3643088821003939093
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -445,7 +445,7 @@ MonoBehaviour:
     m_Value: 5
   limitMax:
     m_OverrideState: 1
-    m_Value: 13
+    m_Value: 13.971429
   curveMap:
     m_OverrideState: 0
     m_Value:
