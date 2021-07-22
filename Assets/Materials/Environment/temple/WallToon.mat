@@ -290,11 +290,11 @@ Material:
         a: 0}
     - Color_ecbeb011327441fd9382c63a6ebe55b8: {r: 1, g: 1, b: 1, a: 0}
     - Light_strength: {r: 0.3, g: 0.1, b: 0.1, a: 0.1}
-    - MainColor: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 0}
+    - MainColor: {r: 0.8490566, g: 0.7656497, b: 0.7249021, a: 0}
     - MainTiling: {r: 1, g: 1, b: 1, a: 1}
     - Maintiling: {r: 1, g: 1, b: 0, a: 0}
     - RimColor: {r: 1, g: 1, b: 1, a: 0}
-    - SecondaryColor: {r: 0.3490566, g: 0.3243592, b: 0.3243592, a: 0}
+    - SecondaryColor: {r: 0.3679245, g: 0.31412423, b: 0.31412423, a: 0}
     - SpecularColor: {r: 1, g: 1, b: 1, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
