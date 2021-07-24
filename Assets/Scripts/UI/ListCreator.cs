@@ -33,10 +33,14 @@ public class ListCreator : MonoBehaviour
             Vector3 pos = new Vector3(0, -spawnY, SpawnPoint.position.z);
             //instantiate item
             GameObject SpawnedItem = Instantiate(item, pos, SpawnPoint.rotation);
+
             //setParent
             SpawnedItem.transform.SetParent(SpawnPoint, false);
             //get ItemDetails Component
             ItemDetails itemDetails = SpawnedItem.GetComponent<ItemDetails>();
+
+            Debug.Log("steamFriends[i].Name" + steamFriends[i].Name);
+
             //set name
             itemDetails.text.text = steamFriends[i].Name;
 

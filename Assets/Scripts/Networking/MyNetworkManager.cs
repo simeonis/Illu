@@ -98,7 +98,7 @@ public class MyNetworkManager : NetworkManager
     {
         Debug.Log("Server Change Scene");
         // From menu to game
-        if (SceneManager.GetActiveScene().name == "LaunchScreen" && newSceneName == "Hub")
+        if (SceneManager.GetActiveScene().name == menuScene && newSceneName == "Testing Range")
         {
             Debug.Log("RoomPlayers Count" + RoomPlayers.Count);
             for (int i = RoomPlayers.Count - 1; i >= 0; i--)
@@ -122,7 +122,7 @@ public class MyNetworkManager : NetworkManager
 
     public void StartGame()
     {
-        ServerChangeScene("Hub");
+        ServerChangeScene("Testing Range");
     }
 
     public override void OnServerAddPlayer(NetworkConnection conn)
