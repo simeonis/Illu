@@ -138,15 +138,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
     m_Floats:
-    - Glossiness: 0.5
+    - Glossiness: 0
     - LS: 0.18
-    - Light_Strength: 0.05
+    - Light_Strength: 0.026
     - NormalStrength: 0.001
-    - RimAmount: 0.7
-    - RimThreshold: 0.765
-    - Smoothness: 0.1
+    - RimAmount: 0.9
+    - RimThreshold: 0.453
+    - Smoothness: 0.2
     - Vector1_08ac8275380442328106a5232a2214e7: 0
     - Vector1_2aab83fc3751468db6ee39b50aa091c9: 32
     - Vector1_2ec64fbcd47748c985b8887dad3d88f2: 0.7
@@ -281,7 +280,7 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
-    - AmbientColor: {r: 0.990566, g: 0.990566, b: 0.990566, a: 0}
+    - AmbientColor: {r: 0.8867924, g: 0.8867924, b: 0.8867924, a: 0}
     - Color2: {r: 0.6415094, g: 0.28746885, b: 0.28746885, a: 0}
     - Color_274d7baaa09a4590b8ae0996ad3a126b: {r: 1, g: 1, b: 1, a: 0}
     - Color_7594960b5d884c8485b0b15160cc058d: {r: 0.9339623, g: 0.7974652, b: 0.19824666,
@@ -290,11 +289,11 @@ Material:
         a: 0}
     - Color_ecbeb011327441fd9382c63a6ebe55b8: {r: 1, g: 1, b: 1, a: 0}
     - Light_strength: {r: 0.3, g: 0.1, b: 0.1, a: 0.1}
-    - MainColor: {r: 0.8490566, g: 0.7656497, b: 0.7249021, a: 0}
+    - MainColor: {r: 0.8301887, g: 0.5929386, b: 0.5286579, a: 0}
     - MainTiling: {r: 1, g: 1, b: 1, a: 1}
     - Maintiling: {r: 1, g: 1, b: 0, a: 0}
     - RimColor: {r: 1, g: 1, b: 1, a: 0}
-    - SecondaryColor: {r: 0.3679245, g: 0.31412423, b: 0.31412423, a: 0}
+    - SecondaryColor: {r: 0.38679248, g: 0.36307406, b: 0.36307406, a: 0}
     - SpecularColor: {r: 1, g: 1, b: 1, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}

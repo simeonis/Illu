@@ -981,8 +981,6 @@
         "m_GuidSerialized": "1fcee133-2cf0-4f3f-a2dc-e7a496f68111"
     },
     "m_Name": "RimColor",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "RimColor",
     "m_DefaultReferenceName": "RimColor",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
@@ -1541,8 +1539,6 @@
         "m_GuidSerialized": "21a0f5cb-e86a-49f5-a4b7-dc9b37cee43e"
     },
     "m_Name": "RimAmount",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "RimAmount",
     "m_DefaultReferenceName": "RimAmount",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
@@ -1623,8 +1619,6 @@
         "m_GuidSerialized": "ccd06cb1-19f8-4091-9608-6b424557e192"
     },
     "m_Name": "AmbientColor",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "AmbientColor",
     "m_DefaultReferenceName": "AmbientColor",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
@@ -1757,8 +1751,6 @@
         "m_GuidSerialized": "e1f286a9-6f39-4ba3-b982-d2e47ce6815e"
     },
     "m_Name": "SpecularColor",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "SpecularColor",
     "m_DefaultReferenceName": "SpecularColor",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
@@ -2393,8 +2385,6 @@
         "m_GuidSerialized": "10f5f0de-9b1b-47a2-bb91-9dda9c276b36"
     },
     "m_Name": "RimThreshold",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "RimThreshold",
     "m_DefaultReferenceName": "RimThreshold",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
@@ -3334,8 +3324,6 @@
         "m_GuidSerialized": "fda355a5-8c76-475c-a846-e8b983e10823"
     },
     "m_Name": "Glossiness",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Glossiness",
     "m_DefaultReferenceName": "Glossiness",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
@@ -4045,8 +4033,6 @@
         "m_GuidSerialized": "88c11331-5b60-441b-9105-d20962a41c16"
     },
     "m_Name": "MainColor",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "MainColor",
     "m_DefaultReferenceName": "MainColor",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
@@ -4796,8 +4782,6 @@
         "m_GuidSerialized": "572f6628-2105-4664-b95e-a92ff1b2e2ff"
     },
     "m_Name": "Smoothness",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Smoothness",
     "m_DefaultReferenceName": "Smoothness",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
@@ -4805,7 +4789,7 @@
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
     "m_Hidden": false,
-    "m_Value": 0.0,
+    "m_Value": 0.0010000000474974514,
     "m_FloatType": 0,
     "m_RangeValues": {
         "x": 0.0,
@@ -5413,8 +5397,6 @@
         "m_GuidSerialized": "d0c912f2-2757-4d7a-b496-6bd4eef151b2"
     },
     "m_Name": "SecondaryColor",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "SecondaryColor",
     "m_DefaultReferenceName": "SecondaryColor",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
@@ -6417,8 +6399,6 @@
         "m_GuidSerialized": "a2ab4336-c8b3-4964-bae0-60bc290ce004"
     },
     "m_Name": "Light Strength",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Light Strength",
     "m_DefaultReferenceName": "Light_Strength",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
