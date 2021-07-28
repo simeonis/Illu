@@ -5,7 +5,8 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     // UserInput variables
-    private PlayerControls playerControls;
+    [HideInInspector]
+    public PlayerControls playerControls;
     private Vector2 movementInput;
     private Vector2 lookInput;
     private bool isSprinting, isCrouching;
@@ -77,6 +78,7 @@ public class PlayerController : MonoBehaviour
     // Camera variables
     [Header("Camera Modifiers")]
     [SerializeField] private Transform playerCamera;
+    [HideInInspector] public bool visionLocked = false;
     private Vector3 defaultLocalPosition;
 
     // Animation variables
@@ -107,11 +109,11 @@ public class PlayerController : MonoBehaviour
     }
 
     void OnEnable() {
-        playerControls.Enable();
+        playerControls.Land.Enable();
     }
 
     void OnDisable() {
-        playerControls.Disable();
+        playerControls.Land.Disable();
     }
 
     void Start()
@@ -194,6 +196,8 @@ public class PlayerController : MonoBehaviour
 
     private void LookDirection()
     {
+        if (visionLocked) return;
+
         // Rotation along the y-axis (left-right)
         yRotation += lookInput.x;
         // Rotation along the x-axis (up-down)
