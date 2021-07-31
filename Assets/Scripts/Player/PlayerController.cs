@@ -37,7 +37,7 @@ public class PlayerController : MonoBehaviour
     [Header("Jump Modifiers")]
     [SerializeField] private float jumpForce = 3f;
     [SerializeField] private float jumpCooldown = 0.5f;
-    private bool canJump = true;
+    public bool canJump = true;
 
     // Crouch variables
     [Header("Crouch Modifiers")]
@@ -212,6 +212,12 @@ public class PlayerController : MonoBehaviour
 
         // Rotate orientation so that movement matches the look direction
         orientation.RotateAround(orientation.position, transform.up, lookInput.x);
+    }
+
+    public void ResetLookDirection()
+    {
+        yRotation = xRotation = 0;
+        orientation.rotation = new Quaternion();
     }
 
     private void MovementModifiers() {
@@ -394,7 +400,7 @@ public class PlayerController : MonoBehaviour
             {
                 if (Physics.Raycast(playerWaistPosition + moveDirectionNormalized * detectionRadius, waistToFeet, out slopeHit, groundMask))
                 {
-                    if (Vector3.Dot(feetHit.normal, slopeHit.normal) > 0)
+                    if (Vector3.Dot(Vector3Int.RoundToInt(feetHit.normal), Vector3Int.RoundToInt(slopeHit.normal)) > 0)
                     {
                         return 1; // Slope
                     } 

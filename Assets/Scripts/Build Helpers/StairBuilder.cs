@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class StairBuilder : MonoBehaviour
 {
+    [Header("Aesthetics")]
+    public Material material;
+    
+    [Header("Dimensions")]
     public int numberOfSteps;
     public Vector2 offset = new Vector2(0.5f, 0.5f);
 
@@ -22,6 +26,9 @@ public class StairBuilder : MonoBehaviour
             cube.transform.position = transform.position + transform.forward * (i * offset.x) + transform.up * (i * offset.y);
             cube.transform.rotation = transform.rotation;
             cube.transform.localScale = Vector3.one;
+
+            // Material
+            cube.GetComponent<Renderer>().material = material;
         }
     }
 }
