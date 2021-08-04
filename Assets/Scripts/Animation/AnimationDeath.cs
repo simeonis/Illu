@@ -5,7 +5,6 @@ using UnityEngine.Animations.Rigging;
 
 public class AnimationDeath : AnimationHumanoid
 {
-    [SerializeField] private Transform headTracker;
     [SerializeField] private float minAngleThreshold = 15f;
 
     private Transform orientationHead;
