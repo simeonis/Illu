@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "ca.andydbc.unity-texture-packer": "file:F:/Unity/unity-texture-packer-master",
     "com.unity.animation.rigging": "1.0.3",
     "com.unity.ide.vscode": "1.2.3",
     "com.unity.inputsystem": "1.0.2",

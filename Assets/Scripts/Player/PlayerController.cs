@@ -81,10 +81,6 @@ public class PlayerController : MonoBehaviour
     [HideInInspector] public bool visionLocked = false;
     private Vector3 defaultLocalPosition;
 
-    // Animation variables
-    [Header("Animation Modifiers")]
-    [SerializeField] private AnimationHumanoid animator;
-
     [Header("Debug Options")]
     [SerializeField] private Text debugText;
     [SerializeField] private bool debugMode = false;
@@ -162,10 +158,6 @@ public class PlayerController : MonoBehaviour
         onSlope = surfaceType == 1;
         onStair = surfaceType == 2;
 
-        // Animation
-        if (isGrounded && !animator.IsGrounded()) animator.Land();
-        animator.SetGrounded(isGrounded);
-
         // Print user information (debug mode)
         if (debugMode && debugText)
         {
@@ -239,9 +231,6 @@ public class PlayerController : MonoBehaviour
             // Disable jump capability
             canJump = false;
 
-            // Crouch animation
-            animator.Jump();
-
             // Jump force
             playerBody.velocity = new Vector3(playerBody.velocity.x, 0f, playerBody.velocity.z);
             playerBody.AddForce(transform.up * jumpForce * 10f, ForceMode.Impulse);
@@ -260,9 +249,6 @@ public class PlayerController : MonoBehaviour
     {
         isCrouching = true;
 
-        // Crouch animation
-        animator.Crouch();
-
         // Run coroutine to adjust camera and collider's position/height
         if (crouchCoroutine != null) StopCoroutine(crouchCoroutine);
         crouchCoroutine = AdjustHeightOverTime(defaultHeight * crouchHeight, crouchTime);
@@ -278,9 +264,6 @@ public class PlayerController : MonoBehaviour
         if (!underCeiling)
         {
             isCrouching = false;
-
-            // Crouch animation
-            animator.UnCrouch();
 
             // Run coroutine to reset camera and collider's position/height
             if (crouchCoroutine != null) StopCoroutine(crouchCoroutine);

@@ -1,124 +1,41 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Lever : Machine
+public class Lever : AnimatedInteractable
 {
-    [Header("Animation")]
-    [SerializeField] protected Animator animator;
+    [Header("Target Script")]
+    [SerializeField] private Trigger target;
     
-    [Header("Activation Settings")]
-    [SerializeField, ColorUsageAttribute(true, true)] private Color poweredOnColor;
-    [SerializeField] private bool powered;
+    private bool onState = false;
+    private bool locked = false;
+    private IEnumerator enumerator;
 
-    private Material activationMaterial;
-    private Vector2 movementInput;
-    private string originalMessage;
-
-    private enum Orientation { Up, Down, Right, Left, Null };
-    private Orientation currentOrientation;
-
-    protected override void Start()
+    public override void Interaction(Interactor interactor)
     {
-        base.Start();
+        if (!enabled || locked || !target) return;
 
-        // Store interact message to append Powered/Unpowered
-        originalMessage = interactMessage;
-
-        // Search for light material
-        foreach (Material material in GetComponent<Renderer>().materials)
-        {
-            if (material.name.Replace(" (Instance)", "") == "Inner Face")
-            {
-                activationMaterial = material;
-            }
-        }
-
-        // Initial state
-        if (powered) Enable();
-        else Disable();
+        locked = true;
+        onState = !onState;
+        if (enumerator != null) StopCoroutine(enumerator);
+        StartCoroutine(enumerator = Switch());
     }
 
-    public void Enable()
+    public override void InteractionCancelled(Interactor interactor){}
+
+    private IEnumerator Switch()
     {
-        powered = true;
-        interactMessage = originalMessage + " (Powered)";
-        activationMaterial.SetColor("_EmissiveColor", poweredOnColor);
+        float currentState = onState ? 0 : 1;
+        float targetState = onState ? 1 : 0;
+
+        float percent = 0.0f;
+        while (percent < 1.0f)
+        {
+            percent += Time.deltaTime * animationSpeed;
+            animator.SetFloat("Pulled", Mathf.Lerp(currentState, targetState, percent));
+            yield return null;
+        }
+
+        locked = false;
+        target.Activate();
     }
-
-    public void Disable()
-    {
-        powered = false;
-        interactMessage = originalMessage + " (Unpowered)";
-        activationMaterial.SetColor("_EmissiveColor", poweredOnColor * 0f);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (!isInteracting || !powered) return;
-
-        // Get User Input
-        movementInput = playerControls.Lever.Movement.ReadValue<Vector2>();
-
-        // Nullify diagonals
-        if (Mathf.Abs(movementInput.x) == Mathf.Abs(movementInput.y))
-        {
-            movementInput = new Vector2();
-        }
-
-        // Set Animation
-        animator.SetFloat("Horizontal", movementInput.x, 1f, Time.deltaTime * 10f);
-        animator.SetFloat("Vertical", movementInput.y, 1f, Time.deltaTime * 10f);
-
-        // Up
-        if (movementInput.y > 0f && movementInput.x == 0f)
-        {
-            if (currentOrientation != Orientation.Up)
-            {
-                currentOrientation = Orientation.Up;
-                Up();
-            }
-        }
-        // Down
-        else if (movementInput.y < 0f && movementInput.x == 0f)
-        {
-            if (currentOrientation != Orientation.Down)
-            {
-                currentOrientation = Orientation.Down;
-                Down();
-            }
-        }
-        // Right
-        else if (movementInput.y == 0f && movementInput.x > 0f)
-        {
-            if (currentOrientation != Orientation.Right)
-            {
-                currentOrientation = Orientation.Right;
-                Right();
-            }
-        }
-        // Left
-        else if (movementInput.y == 0f && movementInput.x < 0f)
-        {
-            if (currentOrientation != Orientation.Left)
-            {
-                currentOrientation = Orientation.Left;
-                Left();
-            }
-        }
-        // Null
-        else
-        {
-            if (currentOrientation != Orientation.Null)
-            {
-                currentOrientation = Orientation.Null;
-            }
-        }
-    }
-
-    protected abstract void Up();
-    protected abstract void Down();
-    protected abstract void Right();
-    protected abstract void Left();
 }

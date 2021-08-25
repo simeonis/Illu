@@ -21,10 +21,23 @@ public class PortalRender : MonoBehaviour
     void LateUpdate()
     {
         // Check if screen is visible to player
-        // if (!VisibleFromCamera(screen, playerCamera))
-        // {
-        //     return;
-        // }
+        // If not visible, disable camera
+        if (!VisibleFromCamera(screen, playerCamera))
+        {
+            if (portal.targetPortal.camera.enabled)
+            {
+                Debug.Log(transform.parent.name + " is not visible to " + playerCamera.transform.parent.name);
+                portal.targetPortal.camera.enabled = false;
+            }
+        }
+        else 
+        {
+            if (!portal.targetPortal.camera.enabled)
+            {
+                Debug.Log(transform.parent.name + " is visible to " + playerCamera.transform.parent.name);
+                portal.targetPortal.camera.enabled = true;
+            }
+        }
 
         Transform selfPortal = portal.camera.transform; // Current camera
         Transform targetPortal = portal.targetPortal.camera.transform.parent; // Target camera
