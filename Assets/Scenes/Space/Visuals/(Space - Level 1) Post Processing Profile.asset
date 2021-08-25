@@ -1,5 +1,43 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7273752686856449877
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e549cb098b07d434ab274daec174d7ad, type: 3}
+  m_Name: PostProcessOutline
+  m_EditorClassIdentifier: 
+  active: 1
+  m_AdvancedMode: 0
+  _scale:
+    m_OverrideState: 1
+    m_Value: 32
+  _color:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 0, b: 0, a: 1}
+    hdr: 0
+    showAlpha: 1
+    showEyeDropper: 1
+  _depthThreshold:
+    m_OverrideState: 1
+    m_Value: 1.5
+  _depthNormalThreshold:
+    m_OverrideState: 1
+    m_Value: 0.5
+  _depthNormalThresholdScale:
+    m_OverrideState: 1
+    m_Value: 7
+  _normalThreshold:
+    m_OverrideState: 1
+    m_Value: 5
+  _isEnabled:
+    m_OverrideState: 1
+    m_Value: 0
 --- !u!114 &-7001924691934126416
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -239,6 +277,7 @@ MonoBehaviour:
   - {fileID: -3796593793583451101}
   - {fileID: -7001924691934126416}
   - {fileID: 603500278723869641}
+  - {fileID: -7273752686856449877}
 --- !u!114 &603500278723869641
 MonoBehaviour:
   m_ObjectHideFlags: 3
