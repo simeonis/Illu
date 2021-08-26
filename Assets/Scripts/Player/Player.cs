@@ -1,15 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class Player : Interactor
 {
     [Range(1f, 50f)] public float dropForce = 5f;
     [HideInInspector] public new Rigidbody rigidbody;
-
-    [Header("UI")]
-    [SerializeField] private Text interactUI;
+    private TextMeshProUGUI interactUI;
 
     protected override void Awake()
     {
@@ -28,6 +24,7 @@ public class Player : Interactor
     {
         base.Start();
         rigidbody = GetComponent<Rigidbody>();
+        interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
         equipmentSlot.SetLocation(equipmentParent);
     }
 

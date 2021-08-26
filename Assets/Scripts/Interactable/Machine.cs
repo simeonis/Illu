@@ -32,7 +32,7 @@ public abstract class Machine : Interactable
     public override void Seen()
     {
         if (!isInteracting) base.Seen();
-        else interactUI.text = "";
+        else interactMessage = "";
     }
 
     public override void Interaction(Interactor interactor)
