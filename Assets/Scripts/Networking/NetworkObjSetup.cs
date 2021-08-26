@@ -6,8 +6,8 @@ public class NetworkObjSetup : NetworkBehaviour
     [SerializeField]
     Behaviour[] componentsToDisable;
 
-    public string _netID;
-    public string Name;
+    private string _netID;
+    private string Name;
 
     void Start()
     {

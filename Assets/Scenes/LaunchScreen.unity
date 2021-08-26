@@ -292,18 +292,19 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 7242622422971727020, guid: 3b6736d40d85e45a1aff0b4dad84d2cb,
+  playerPrefab: {fileID: 8453773999225703041, guid: 1942fad8ec81f42f58640c38376a369a,
     type: 3}
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs:
-  - {fileID: 7948431928401724067, guid: 83825803c79ca4d4d9615e405df5a345, type: 3}
-  - {fileID: 8616025372378203841, guid: aa4ce672c444d4c47b969b2b7b4f47d6, type: 3}
-  roomPlayerPrefab: {fileID: 7198437112992415356, guid: 3b6736d40d85e45a1aff0b4dad84d2cb,
+  - {fileID: 7948431928401724067, guid: dcd31c8e0e8ce4176bcb57067e627255, type: 3}
+  - {fileID: 7242622422971727020, guid: ae06d5224d4e44a19ab2b0c8e586f938, type: 3}
+  - {fileID: 8616025372378203841, guid: 74cad80b1fbe24033bb05c8cc83585dc, type: 3}
+  roomPlayerPrefab: {fileID: 7198437112992415356, guid: ae06d5224d4e44a19ab2b0c8e586f938,
     type: 3}
-  gamePlayerPrefab: {fileID: 5780883878499592234, guid: 83825803c79ca4d4d9615e405df5a345,
+  gamePlayerPrefab: {fileID: 5780883878499592234, guid: dcd31c8e0e8ce4176bcb57067e627255,
     type: 3}
-  playerSpawnSystem: {fileID: 8616025372378203841, guid: aa4ce672c444d4c47b969b2b7b4f47d6,
+  playerSpawnSystem: {fileID: 8616025372378203841, guid: 74cad80b1fbe24033bb05c8cc83585dc,
     type: 3}
   launchUI: {fileID: 1138201891}
 --- !u!4 &134069094
@@ -1391,6 +1392,18 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 4626072165244998298, guid: 8b1575dd5ba9c194b9038ed535acdb18,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 57cce84d1d06a4042b45418ef3064010,
+        type: 2}
+    - target: {fileID: 4626072165244998298, guid: 8b1575dd5ba9c194b9038ed535acdb18,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -5611144535697369860, guid: 57cce84d1d06a4042b45418ef3064010,
+        type: 2}
     - target: {fileID: 4851521329304093318, guid: 8b1575dd5ba9c194b9038ed535acdb18,
         type: 3}
       propertyPath: m_Name
@@ -1774,6 +1787,18 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 4626072165244998298, guid: 8b1575dd5ba9c194b9038ed535acdb18,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 57cce84d1d06a4042b45418ef3064010,
+        type: 2}
+    - target: {fileID: 4626072165244998298, guid: 8b1575dd5ba9c194b9038ed535acdb18,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -5611144535697369860, guid: 57cce84d1d06a4042b45418ef3064010,
+        type: 2}
     - target: {fileID: 4851521329304093318, guid: 8b1575dd5ba9c194b9038ed535acdb18,
         type: 3}
       propertyPath: m_Name
