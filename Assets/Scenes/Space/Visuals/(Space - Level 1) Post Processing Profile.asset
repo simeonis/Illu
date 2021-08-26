@@ -238,27 +238,6 @@ MonoBehaviour:
   - {fileID: 4027206109919702582}
   - {fileID: -3796593793583451101}
   - {fileID: -7001924691934126416}
-  - {fileID: 603500278723869641}
---- !u!114 &603500278723869641
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d29a1c084ca7042a282d3af669ea5c58, type: 3}
-  m_Name: ToonShadingPP
-  m_EditorClassIdentifier: 
-  active: 0
-  m_AdvancedMode: 0
-  _posterizeAmount:
-    m_OverrideState: 1
-    m_Value: 60
-  _isEnabled:
-    m_OverrideState: 0
-    m_Value: 0
 --- !u!114 &3643088821003939093
 MonoBehaviour:
   m_ObjectHideFlags: 3
