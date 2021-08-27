@@ -262,11 +262,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 453bf9859a0724cfbb46e8fe3306e341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hostButton: {fileID: 1955185830}
-  joinButton: {fileID: 690403847}
-  startButton: {fileID: 1493935006}
-  launchUI: {fileID: 1138201891}
-  scrollView: {fileID: 239431558}
+  UIManager: {fileID: 1138201896}
 --- !u!114 &134069093
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,25 +284,25 @@ MonoBehaviour:
   onlineScene: 
   transport: {fileID: 134069091}
   networkAddress: localhost
-  maxConnections: 100
+  maxConnections: 2
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 8453773999225703041, guid: 1942fad8ec81f42f58640c38376a369a,
+  playerPrefab: {fileID: 7242622422971727020, guid: ae06d5224d4e44a19ab2b0c8e586f938,
     type: 3}
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 7948431928401724067, guid: dcd31c8e0e8ce4176bcb57067e627255, type: 3}
-  - {fileID: 7242622422971727020, guid: ae06d5224d4e44a19ab2b0c8e586f938, type: 3}
   - {fileID: 8616025372378203841, guid: 74cad80b1fbe24033bb05c8cc83585dc, type: 3}
+  - {fileID: 8453773999225703041, guid: 1942fad8ec81f42f58640c38376a369a, type: 3}
   roomPlayerPrefab: {fileID: 7198437112992415356, guid: ae06d5224d4e44a19ab2b0c8e586f938,
     type: 3}
   gamePlayerPrefab: {fileID: 5780883878499592234, guid: dcd31c8e0e8ce4176bcb57067e627255,
     type: 3}
   playerSpawnSystem: {fileID: 8616025372378203841, guid: 74cad80b1fbe24033bb05c8cc83585dc,
     type: 3}
-  launchUI: {fileID: 1138201891}
+  UIManager: {fileID: 1138201896}
 --- !u!4 &134069094
 Transform:
   m_ObjectHideFlags: 0
@@ -456,7 +452,6 @@ GameObject:
   m_Component:
   - component: {fileID: 396965112}
   - component: {fileID: 396965111}
-  - component: {fileID: 396965110}
   - component: {fileID: 396965113}
   m_Layer: 0
   m_Name: Main Camera
@@ -465,14 +460,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &396965110
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 396965109}
-  m_Enabled: 1
 --- !u!20 &396965111
 Camera:
   m_ObjectHideFlags: 0
@@ -659,7 +646,7 @@ GameObject:
   - component: {fileID: 614283053}
   - component: {fileID: 614283052}
   m_Layer: 0
-  m_Name: Background
+  m_Name: Lobby UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -906,6 +893,17 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 4626072165244998298, guid: 8b1575dd5ba9c194b9038ed535acdb18,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 57cce84d1d06a4042b45418ef3064010,
+        type: 2}
+    - target: {fileID: 4626072165244998298, guid: 8b1575dd5ba9c194b9038ed535acdb18,
+        type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4851521329304093318, guid: 8b1575dd5ba9c194b9038ed535acdb18,
         type: 3}
       propertyPath: m_Name
@@ -1025,6 +1023,7 @@ GameObject:
   - component: {fileID: 1138201895}
   - component: {fileID: 1138201894}
   - component: {fileID: 1138201893}
+  - component: {fileID: 1138201896}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -1113,6 +1112,23 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &1138201896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138201891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18f1428c31542449860f1a1c82c8e18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lobbyUI: {fileID: 614283050}
+  hostButton: {fileID: 1955185830}
+  joinButton: {fileID: 690403847}
+  startButton: {fileID: 1493935006}
+  scrollView: {fileID: 239431558}
 --- !u!1 &1222497430
 GameObject:
   m_ObjectHideFlags: 0
@@ -1145,7 +1161,7 @@ RectTransform:
   m_Father: {fileID: 1085160707}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.33333337}
+  m_AnchorMin: {x: 0, y: 0.3333333}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
@@ -1807,7 +1823,7 @@ PrefabInstance:
     - target: {fileID: 4851521329304093318, guid: 8b1575dd5ba9c194b9038ed535acdb18,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6497363180490009880, guid: 8b1575dd5ba9c194b9038ed535acdb18,
         type: 3}
@@ -1828,7 +1844,7 @@ PrefabInstance:
         type: 3}
       propertyPath: myOnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 134069092}
+      objectReference: {fileID: 134069093}
     - target: {fileID: 6497363180490009880, guid: 8b1575dd5ba9c194b9038ed535acdb18,
         type: 3}
       propertyPath: myOnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
@@ -1837,12 +1853,12 @@ PrefabInstance:
     - target: {fileID: 6497363180490009880, guid: 8b1575dd5ba9c194b9038ed535acdb18,
         type: 3}
       propertyPath: myOnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: launchGame
+      value: StartGame
       objectReference: {fileID: 0}
     - target: {fileID: 6497363180490009880, guid: 8b1575dd5ba9c194b9038ed535acdb18,
         type: 3}
       propertyPath: myOnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: SteamLobby, Assembly-CSharp
+      value: MyNetworkManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 6497363180490009880, guid: 8b1575dd5ba9c194b9038ed535acdb18,
         type: 3}
@@ -2006,7 +2022,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1222497431}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.6666666
+  m_Size: 0.6666667
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

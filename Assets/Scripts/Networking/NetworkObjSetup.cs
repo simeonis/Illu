@@ -4,19 +4,18 @@ using Mirror;
 public class NetworkObjSetup : NetworkBehaviour
 {
     [SerializeField]
-    Behaviour[] componentsToDisable;
+    GameObject[] componentsToDisable;
 
     private string _netID;
     private string Name;
 
     void Start()
     {
-        Debug.Log("Name: " + name + " " + "isServer: " + isServer + " " + "isClient: " + isClient + " " + "isLocalPlayer: " + isLocalPlayer);
+        // Debug.Log("Name: " + name + " " + "isServer: " + isServer + " " + "isClient: " + isClient + " " + "isLocalPlayer: " + isLocalPlayer + "hasAuthority: " + hasAuthority);
         if (!hasAuthority)
         {
             DisableComponents();
         }
-
     }
 
     public override void OnStartClient()
@@ -31,7 +30,7 @@ public class NetworkObjSetup : NetworkBehaviour
     {
         for (int i = 0; i < componentsToDisable.Length; i++)
         {
-            componentsToDisable[i].enabled = false;
+            componentsToDisable[i].SetActive(false);
         }
     }
 

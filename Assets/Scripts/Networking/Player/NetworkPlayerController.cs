@@ -142,11 +142,6 @@ public class NetworkPlayerController : NetworkBehaviour
 
     void Start()
     {
-        if (isLocalPlayer)
-        {
-
-        }
-
         // Transform
         orientation = transform.Find("Orientation");
         head = transform.Find("Head");

@@ -19,101 +19,127 @@ public struct SteamUserRecord
 
 public class SteamLobby : MonoBehaviour
 {
-    [SerializeField] private GameObject hostButton = null;
-    [SerializeField] private GameObject joinButton = null;
-    [SerializeField] private GameObject startButton = null;
-    [SerializeField] private GameObject launchUI = null;
-    [SerializeField] private GameObject scrollView = null;
+    // UI
+    [SerializeField] private UIManager UIManager;
 
+    // Callbacks
     protected Callback<LobbyCreated_t> lobbyCreated;
     protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
     protected Callback<LobbyEnter_t> lobbyEntered;
     protected Callback<LobbyInvite_t> lobbyInvited;
 
-    private const string HostAddressKey = "Host Address Key";
-
+    // Steam IDs
     private CSteamID LobbyID;
     private CSteamID invitedLobbyID;
     private CSteamID hostID;
 
+    // Networking
+    private const string HostAddressKey = "Host Address Key";
     private MyNetworkManager networkManager;
-
-    private ListCreator listCreator;
-
-    private List<SteamUserRecord> steamFriends;
 
     private void Start()
     {
         networkManager = GetComponent<MyNetworkManager>();
-        listCreator = scrollView.GetComponent<ListCreator>();
 
         if (!SteamManager.Initialized) { return; }
 
-        lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
+        lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreateAttempt);
         gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
-        lobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
+        lobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyJoinAttempt);
         lobbyInvited = Callback<LobbyInvite_t>.Create(OnLobbyInvited);
     }
 
-    public void HostLobby()
+    /*  --------------------------
+    *       Callback functions
+    *   -------------------------- */
+
+    // HOST attempts to create lobby
+    private void OnLobbyCreateAttempt(LobbyCreated_t callback)
     {
-        hostButton.SetActive(false);
-
-        Debug.Log("Host Lobby Called");
-
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
-
-        getSteamFriends();
-        listCreator.renderList(steamFriends, this);
-        scrollView.SetActive(true);
-
-    }
-
-    private void OnLobbyCreated(LobbyCreated_t callback)
-    {
+        // Error creating lobby
         if (callback.m_eResult != EResult.k_EResultOK)
         {
-            hostButton.SetActive(true);
+            Debug.Log("Error creating steam lobby.");
+            UIManager.HostGameFailed();
             return;
         }
 
+        // Successfully created lobby
+        Debug.Log("Steam lobby created successfully.\nAttempting to host...");
         networkManager.StartHost();
-
         LobbyID = new CSteamID(callback.m_ulSteamIDLobby);
         SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey, SteamUser.GetSteamID().ToString());
     }
 
-    private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t callback)
+    // CLIENT ONLY
+    private void OnLobbyJoinAttempt(LobbyEnter_t callback)
     {
-        SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
-    }
+        // Checks if server has started.
+        if (NetworkServer.active) 
+        { 
+            Debug.Log("Failed to join lobby.\nReason: Game already started.");
+            return;
+        }
 
-    private void OnLobbyEntered(LobbyEnter_t callback)
-    {
-        if (NetworkServer.active) { return; }
-
-        string hostAddress = SteamMatchmaking.GetLobbyData(
-            new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey);
-
+        string hostAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey);
         networkManager.networkAddress = hostAddress;
         networkManager.StartClient();
 
-        hostButton.SetActive(false);
-
-        if (networkManager.RoomPlayers.Count == 2)
-        {
-            Debug.Log("Game can start");
-            startButton.SetActive(true);
-        }
+        UIManager.JoinedHost();
     }
 
-
-    private void getSteamFriends()
+    // CLIENT invited by HOST
+    private void OnLobbyInvited(LobbyInvite_t callback)
     {
-        steamFriends = new List<SteamUserRecord>();
+        Debug.Log("Invite Received.");
+        invitedLobbyID = new CSteamID(callback.m_ulSteamIDLobby);
+        hostID = new CSteamID(callback.m_ulSteamIDUser);
+
+        // TODO: Pass SteamRecord
+        UIManager.InviteReceived();
+    }
+
+    // CLIENT attemps to join via steam or invite
+    private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t callback)
+    {
+        Debug.Log("Attempting to join...");
+        SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
+    }
+
+    /*  --------------------------
+    *   Button activated functions
+    *   -------------------------- */
+
+    // USER becomes HOST
+    public void HostLobby()
+    {
+        Debug.Log("Attempting to create steam lobby...");
+        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
+        UIManager.HostGame(this, GetSteamFriends());
+    }
+
+    // HOST invites CLIENT
+    public void InviteToLobby(CSteamID friendID)
+    {
+        SteamMatchmaking.InviteUserToLobby(LobbyID, friendID);
+    }
+
+    // CLIENT joins HOST via invite
+    public void JoinSteamLobby()
+    {
+        SteamMatchmaking.JoinLobby(invitedLobbyID);
+        UIManager.InviteAccepted();
+    }
+
+    /*  --------------------------
+    *        Helper functions
+    *   -------------------------- */
+
+    private List<SteamUserRecord> GetSteamFriends()
+    {
+        List<SteamUserRecord> steamFriends = new List<SteamUserRecord>();
 
         int nFriend = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagImmediate);
-
         for (int i = 0; i < nFriend; i++)
         {
             CSteamID friendSteamID = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagImmediate);
@@ -124,34 +150,7 @@ public class SteamLobby : MonoBehaviour
 
             steamFriends.Add(new SteamUserRecord(friendSteamID, friendName, friendAvatar));
         }
-    }
 
-    public void InviteToLobby(CSteamID friendID)
-    {
-        //Debug.Log("ID" + id)
-        SteamMatchmaking.InviteUserToLobby(LobbyID, friendID);
-        scrollView.SetActive(false);
-
-        //networkManager.StartGame();
-    }
-
-    private void OnLobbyInvited(LobbyInvite_t callback)
-    {
-        Debug.Log("Invite Received");
-        joinButton.SetActive(true);
-        invitedLobbyID = new CSteamID(callback.m_ulSteamIDLobby);
-        hostID = new CSteamID(callback.m_ulSteamIDUser);
-    }
-
-    public void JoinSteamLobby()
-    {
-        SteamMatchmaking.JoinLobby(invitedLobbyID);
-        joinButton.SetActive(false);
-    }
-
-    public void launchGame()
-    {
-        networkManager.StartGame();
-        launchUI.SetActive(false);
+        return steamFriends;
     }
 }

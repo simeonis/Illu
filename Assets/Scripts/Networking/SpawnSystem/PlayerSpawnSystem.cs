@@ -15,18 +15,12 @@ public class PlayerSpawnSystem : NetworkBehaviour
     public static void AddSpawnPoint(Transform transform)
     {
         spawnPoints.Add(transform);
-
         spawnPoints = spawnPoints.OrderBy(x => x.GetSiblingIndex()).ToList();
     }
+
     public static void RemoveSpawnPoint(Transform transform) => spawnPoints.Remove(transform);
 
     public override void OnStartServer() => MyNetworkManager.OnServerReadied += SpawnPlayer;
-
-    //public override void OnStartClient()
-    //{
-    //    //InputManager.Add(ActionMapNames.Player);
-    //    //InputManager.Controls.Player.Look.Enable();
-    //}
 
     [ServerCallback]
     private void OnDestroy() => MyNetworkManager.OnServerReadied -= SpawnPlayer;
@@ -34,8 +28,8 @@ public class PlayerSpawnSystem : NetworkBehaviour
     [Server]
     public void SpawnPlayer(NetworkConnection conn)
     {
-        Debug.Log("Spawn Player Now");
         Transform spawnPoint = spawnPoints.ElementAtOrDefault(nextIndex);
+        Debug.Log("[Server]: Spawning player " + "at position: " + spawnPoint.position + " for Client[" + conn.connectionId + "].");
 
         if (spawnPoint == null)
         {
@@ -43,11 +37,8 @@ public class PlayerSpawnSystem : NetworkBehaviour
             return;
         }
 
-        GameObject playerInstance = Instantiate(playerPrefab, spawnPoints[nextIndex].position, spawnPoints[nextIndex].rotation);
+        GameObject playerInstance = Instantiate(playerPrefab, spawnPoints[0].position, spawnPoints[nextIndex].rotation);
         NetworkServer.Spawn(playerInstance, conn);
-
-
-
 
         nextIndex++;
     }

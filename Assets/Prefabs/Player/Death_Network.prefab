@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4446985993700699230}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Right Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39,7 +39,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4446985993725635025}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Orientation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -70,7 +70,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4446985993730578152}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Hands
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102,7 +102,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4446985994231398379}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Feet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -137,7 +137,7 @@ GameObject:
   - component: {fileID: 4446985994531773178}
   - component: {fileID: 4446985994531773175}
   - component: {fileID: 4446985994531773174}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Player Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -361,7 +361,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4446985994721449033}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Left Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -391,7 +391,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8117988011677854267}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Camera Holder
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -425,7 +425,7 @@ GameObject:
   - component: {fileID: 8453773999225703052}
   - component: {fileID: 8453773999225703053}
   - component: {fileID: 8453773999225703054}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -533,7 +533,7 @@ GameObject:
   - component: {fileID: 8453773999225703055}
   - component: {fileID: 1596715246450041839}
   - component: {fileID: 8453773999225703103}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Death_Network
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -547,8 +547,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8453773999225703041}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 2.5, y: -1, z: -2.5}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 8117988011677854267}
@@ -556,7 +556,7 @@ Transform:
   - {fileID: 4446985994231398379}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4720543406924334008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -658,7 +658,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   componentsToDisable:
-  - {fileID: 4446985994531773176}
+  - {fileID: 4446985994531773180}
 --- !u!114 &3079833293040566167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -694,7 +694,7 @@ MonoBehaviour:
   gravityScalar: 6.5
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   playerFeet: {fileID: 4446985994231398379}
   groundDetection: 0.4
   playerCamera: {fileID: 4446985994531773179}
@@ -714,10 +714,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  clientAuthority: 0
+  clientAuthority: 1
   moveTriggerSensitivity: 0.01
   allowedLagDistance: 10
-  debugPos: 0
+  debug: 1
   controller: {fileID: 8453773999225703031}
 --- !u!114 &8453773999225703055
 MonoBehaviour:

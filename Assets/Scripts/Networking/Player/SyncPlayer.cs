@@ -16,7 +16,7 @@ public class SyncPlayer : NetworkBehaviour
     public float allowedLagDistance = 10.0f;
 
     [Header("Debug Position")]
-    public bool debugPos;
+    public bool debug;
 
     public Transform controller;
 
@@ -112,7 +112,7 @@ public class SyncPlayer : NetworkBehaviour
     [ClientRpc]
     public void RPCSyncPosition(Vector3 Position, Quaternion Rotation)
     {
-        if (debugPos)
+        if (debug)
             Debug.Log("RPC Position: " + Position);
         RemotePlayerPosition = Position;
         RemotePlayerRotation = Rotation;
@@ -126,7 +126,8 @@ public class SyncPlayer : NetworkBehaviour
         //High distance => sync is to much off => send to position
         if (LagDistance.magnitude > allowedLagDistance)
         {
-            Debug.Log("Sync Position to Great");
+            if (debug) 
+                Debug.LogWarning("Sync Position to Great");
             controller.position = RemotePlayerPosition;
             LagDistance = Vector3.zero;
         }
