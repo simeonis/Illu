@@ -1,6 +1,7 @@
 using UnityEngine;
+using Mirror;
 
-public abstract class Interactor : MonoBehaviour
+public abstract class Interactor : NetworkBehaviour
 {
     [Header("Interaction")]
     [SerializeField] public Transform source;

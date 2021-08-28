@@ -133,6 +133,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 056ec5dbaa4541840838c2b086339b51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   interactMessage: Press Me
   enabled: 1
   animationSpeed: 1

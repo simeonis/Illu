@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mirror;
 using TMPro;
 
 public class Player : Interactor
@@ -6,6 +7,37 @@ public class Player : Interactor
     [Range(1f, 50f)] public float dropForce = 5f;
     [HideInInspector] public new Rigidbody rigidbody;
     private TextMeshProUGUI interactUI;
+
+    [Command]
+    public void GetAuthority(NetworkIdentity ni)
+    {
+        Debug.Log("Lever requested authority");
+        CalledOnServer();
+        Debug.Log("Player Authority: " + hasAuthority);
+        if (hasAuthority) 
+        {
+            ni.AssignClientAuthority(connectionToClient);
+            Debug.Log("Lever has authority?: " + ni.hasAuthority);
+        }
+    }
+
+    [Server]
+    public void CalledOnServer()
+    {
+        Debug.Log("[Server]: I've been called!");
+    }
+
+    [Command]
+    public void RemoveAuthority(NetworkIdentity ni)
+    {
+        Debug.Log("Lever requested authority removal");
+        Debug.Log("Player Authority: " + hasAuthority);
+        if (hasAuthority) 
+        {
+            ni.RemoveClientAuthority();
+            Debug.Log("Lever has authority?: " + ni.hasAuthority);
+        }
+    }
 
     protected override void Awake()
     {
