@@ -16,7 +16,6 @@ public class Player : Interactor
 
         ni.AssignClientAuthority(connectionToClient);
         Debug.Log("Lever has authority?: " + ni.hasAuthority);
-
     }
 
     [Command]
