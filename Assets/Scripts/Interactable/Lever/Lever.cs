@@ -3,7 +3,6 @@ using UnityEngine;
 
 
 public class Lever : AnimatedInteractable
-//, INetworkSimpleData<bool>
 {
     [Header("Target Script")]
     [SerializeField] private Trigger target;
@@ -11,21 +10,20 @@ public class Lever : AnimatedInteractable
     private bool onState = false;
     private bool locked = false;
     private IEnumerator enumerator;
-    NetworkSimpleData _networkSimpeData { get; set; }
+    //NetworkSimpleData _networkSimpeData;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         _networkSimpeData = new NetworkSimpleData();
         _networkSimpeData.DataChanged += l_EventHandler;
     }
     void l_EventHandler(object sender, DataChangedEventArgs e)
     {
-        Debug.Log(e.data + " changed at " + e.TimeSent);
+        Debug.Log("From lever " + e.data + " changed at " + e.TimeSent);
 
-        if (onState != e.data)
-        {
-            StartCoroutine(enumerator = Switch());
-        }
+        //onState = e.data;
+        //StartCoroutine(enumerator = Switch());
     }
 
     public override void Interaction(Interactor interactor)
@@ -36,6 +34,8 @@ public class Lever : AnimatedInteractable
         onState = !onState;
         if (enumerator != null) StopCoroutine(enumerator);
         StartCoroutine(enumerator = Switch());
+
+        Debug.Log("Interact: Lever");
 
         _networkSimpeData.SendData(onState);
     }
@@ -51,7 +51,9 @@ public class Lever : AnimatedInteractable
         while (percent < 1.0f)
         {
             percent += Time.deltaTime * animationSpeed;
+
             animator.SetFloat("Pulled", Mathf.Lerp(currentState, targetState, percent));
+
             yield return null;
         }
 

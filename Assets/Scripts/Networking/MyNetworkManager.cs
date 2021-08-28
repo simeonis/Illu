@@ -61,18 +61,18 @@ public class MyNetworkManager : NetworkManager
         }
         else if (numConnections > maxConnections)
         {
-           conn.Disconnect();
-           numConnections--;
-           Debug.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
-           return;
+            conn.Disconnect();
+            numConnections--;
+            Debug.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
+            return;
         }
 
         if (SceneManager.GetActiveScene().name != menuScene)
         {
-           conn.Disconnect();
-           numConnections--;
-           Debug.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
-           return;
+            conn.Disconnect();
+            numConnections--;
+            Debug.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
+            return;
         }
     }
 
@@ -167,6 +167,8 @@ public class MyNetworkManager : NetworkManager
     public override void OnClientSceneChanged(NetworkConnection conn)
     {
         base.OnClientSceneChanged(conn);
+        UIManager.GameStarted();
+        Debug.Log("[Client]: Scene successfully changed.");
     }
 
     // SERVER notified that CLIENT is ready
@@ -176,7 +178,7 @@ public class MyNetworkManager : NetworkManager
 
         OnServerReadied?.Invoke(conn);
 
-        Debug.Log("[Server]: Client" + "[" + conn.connectionId + "]" 
+        Debug.Log("[Server]: Client" + "[" + conn.connectionId + "]"
         + " has successfully loaded scene: " + SceneManager.GetActiveScene().name + ".");
     }
 
@@ -188,8 +190,7 @@ public class MyNetworkManager : NetworkManager
             GameObject playerSpawnSystemInstance = Instantiate(playerSpawnSystem);
             NetworkServer.Spawn(playerSpawnSystemInstance);
         }
-        
-        UIManager.GameStarted();
+
 
         Debug.Log("[Server]: Scene successfully changed.");
     }
@@ -209,9 +210,9 @@ public class MyNetworkManager : NetworkManager
 
     private void OnCreateCharacter(NetworkConnection conn, CreateCharacterMessage characterMessage)
     {
-        Debug.Log("[Server]: Created character " + characterMessage.name + 
+        Debug.Log("[Server]: Created character " + characterMessage.name +
         " for Client" + "[" + conn.connectionId + "].");
-        
+
         // playerPrefab is the one assigned in the inspector in Network
         // Manager but you can use different prefabs per race for example
         GameObject gameobject = Instantiate(playerPrefab);
