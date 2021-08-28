@@ -1,14 +1,32 @@
 using System.Collections;
 using UnityEngine;
 
+
 public class Lever : AnimatedInteractable
+//, INetworkSimpleData<bool>
 {
     [Header("Target Script")]
     [SerializeField] private Trigger target;
-    
+
     private bool onState = false;
     private bool locked = false;
     private IEnumerator enumerator;
+    NetworkSimpleData _networkSimpeData { get; set; }
+
+    void Start()
+    {
+        _networkSimpeData = new NetworkSimpleData();
+        _networkSimpeData.DataChanged += l_EventHandler;
+    }
+    void l_EventHandler(object sender, DataChangedEventArgs e)
+    {
+        Debug.Log(e.data + " changed at " + e.TimeSent);
+
+        if (onState != e.data)
+        {
+            StartCoroutine(enumerator = Switch());
+        }
+    }
 
     public override void Interaction(Interactor interactor)
     {
@@ -18,9 +36,11 @@ public class Lever : AnimatedInteractable
         onState = !onState;
         if (enumerator != null) StopCoroutine(enumerator);
         StartCoroutine(enumerator = Switch());
+
+        _networkSimpeData.SendData(onState);
     }
 
-    public override void InteractionCancelled(Interactor interactor){}
+    public override void InteractionCancelled(Interactor interactor) { }
 
     private IEnumerator Switch()
     {
