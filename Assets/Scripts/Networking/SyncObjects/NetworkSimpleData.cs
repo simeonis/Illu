@@ -27,18 +27,21 @@ public class NetworkSimpleData : NetworkBehaviour
     [Client]
     public void SendData(bool data)
     {
+        Debug.Log("Send Data");
         CmdSendData(data);
     }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdSendData(bool data)
     {
+        Debug.Log("Cmd Send Data");
         RpcData(data);
     }
 
     [ClientRpc]
     private void RpcData(bool data)
     {
+        Debug.Log("RpcData Data");
         DataChangedEventArgs args = new DataChangedEventArgs();
         args.data = data;
         args.TimeSent = DateTime.Now;
@@ -47,6 +50,7 @@ public class NetworkSimpleData : NetworkBehaviour
 
     protected virtual void OnDataChanged(DataChangedEventArgs e)
     {
+        Debug.Log("OnDataChanged");
         CustomEventHandler handler = DataChanged;
         handler?.Invoke(this, e);
     }

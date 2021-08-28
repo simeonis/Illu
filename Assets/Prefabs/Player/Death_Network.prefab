@@ -717,7 +717,7 @@ MonoBehaviour:
   clientAuthority: 1
   moveTriggerSensitivity: 0.01
   allowedLagDistance: 10
-  debug: 1
+  debug: 0
   controller: {fileID: 8453773999225703031}
 --- !u!114 &8453773999225703055
 MonoBehaviour:

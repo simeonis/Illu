@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mirror;
 using TMPro;
 
 public class Player : Interactor
@@ -6,6 +7,29 @@ public class Player : Interactor
     [Range(1f, 50f)] public float dropForce = 5f;
     [HideInInspector] public new Rigidbody rigidbody;
     private TextMeshProUGUI interactUI;
+
+    [Command]
+    public void GetAuthority(NetworkIdentity ni)
+    {
+        Debug.Log("Lever requested authority from address: " + connectionToClient.address);
+        Debug.Log("Player Authority: " + hasAuthority);
+
+        ni.AssignClientAuthority(connectionToClient);
+        Debug.Log("Lever has authority?: " + ni.hasAuthority);
+
+    }
+
+    [Command]
+    public void RemoveAuthority(NetworkIdentity ni)
+    {
+        Debug.Log("Lever requested authority removal");
+        Debug.Log("Player Authority: " + hasAuthority);
+        if (hasAuthority)
+        {
+            ni.RemoveClientAuthority();
+            Debug.Log("Lever has authority?: " + ni.hasAuthority);
+        }
+    }
 
     protected override void Awake()
     {
@@ -38,35 +62,35 @@ public class Player : Interactor
         }
     }
 
-    private void FirePressed() 
-    { 
+    private void FirePressed()
+    {
         if (equipmentSlot.HasEquipment())
         {
             equipmentSlot.GetEquipment().EquipmentPrimaryPressed();
         }
     }
 
-    private void FireReleased() 
-    { 
+    private void FireReleased()
+    {
         if (equipmentSlot.HasEquipment())
         {
             equipmentSlot.GetEquipment().EquipmentPrimaryReleased();
         }
     }
 
-    private void AlternateFirePressed() 
-    { 
+    private void AlternateFirePressed()
+    {
         if (equipmentSlot.HasEquipment())
         {
             equipmentSlot.GetEquipment().EquipmentSecondaryPressed();
         }
     }
 
-    private void AlternateFireReleased() 
-    { 
+    private void AlternateFireReleased()
+    {
         if (equipmentSlot.HasEquipment())
         {
             equipmentSlot.GetEquipment().EquipmentSecondaryReleased();
-        } 
+        }
     }
 }
