@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using Mirror;
 using UnityEngine;
 
@@ -16,20 +17,20 @@ public class Lever : AnimatedInteractable
     protected override void Start()
     {
         base.Start();
-        _networkSimpleData = GetComponent<NetworkSimpleData>();
-        _networkSimpleData.RegisterData();
-
-        CustomEventHandler<bool> subToEvent = _networkSimpleData.EventHandlersDictionary["yoo"] as CustomEventHandler<bool>;
-        subToEvent += lever_EventHandler;
+        _networkSimpleData = new NetworkSimpleData();
+        _networkSimpleData.RegisterData("toggle", onState);
+        _networkSimpleData.DataChanged += lever_EventHandler;
     }
 
-    void lever_EventHandler(object sender, DataChangedEventArgs<bool> e)
+    void lever_EventHandler(object sender, DataChangedEventArgs e)
     {
-        Debug.Log("From lever " + e.data + " changed at " + e.TimeSent);
-
-        onState = e.data;
-        if (enumerator != null) StopCoroutine(enumerator);
-        StartCoroutine(enumerator = Switch());
+        Debug.Log("From lever key for data" + e.Key + " fired at " + e.EventFired);
+        
+        if(e.Key == "toggle"){
+            onState = (bool)_networkSimpleData.GetData(e.Key); 
+            if (enumerator != null) StopCoroutine(enumerator);
+            StartCoroutine(enumerator = Switch());
+        }
     }
 
     public override void Interaction(Interactor interactor)
@@ -48,7 +49,8 @@ public class Lever : AnimatedInteractable
     public override void OnStartAuthority()
     {
         Debug.Log("I the lever, the mighty lever, have been granted authority.");
-        _networkSimpleData.SendData(onState);
+
+        _networkSimpleData.SendData("toggle", onState);
     }
 
     private IEnumerator Switch()

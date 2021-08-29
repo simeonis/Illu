@@ -1,76 +1,99 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 using Mirror;
 
-public delegate void CustomEventHandler<T>(object sender, DataChangedEventArgs<T> args);
+public delegate void CustomEventHandler(object sender, DataChangedEventArgs args);
 
-//public delegate void EventHandler<TEventArgs>(object? sender, TEventArgs e);
-
-public class DataChangedEventArgs<T> : EventArgs
-{
-    public T data { get; set; }
-    public DateTime TimeSent { get; set; }
+public class DataChangedEventArgs : EventArgs
+{ 
+    public string Key { get; set; }
+    public DateTime EventFired { get; set; }
 }
-
-// public interface INetworkSimpleData<T>
-// {
-//     //NetworkSimpleData _networkSimpleData { get; set; }
-//     void Start();
-//     //void CustomEventHandler(object sender, DataChangedEventArgs<T> e);
-// }
 
 public class NetworkSimpleData : NetworkBehaviour
 {
-    public Dictionary<string, Delegate> EventHandlersDictionary = new Dictionary<string, Delegate>();
+    private Dictionary<string, NetData> _data = new Dictionary<string, NetData>();
 
-    //public List<CustomEventHandler> _listEventHandlers;
-
-    // public event CustomEventHandler<T> DataChanged;
-
+    public event CustomEventHandler DataChanged;
 
     [Client]
-    public void RegisterData()
-    {
-        //make param string key, Type type
-        CustomEventHandler<bool> bob = null;
-        EventHandlersDictionary.Add("yoo", bob);
+    public void RegisterData(string key, object initialValue){
+        NetData netData = new NetData(initialValue, DateTime.Now);
+
+        _data.Add(key, netData);
     }
-
-
-
+    
     [Client]
-    public void SendData(bool data)
+    public void SendData(string key, object data)
     {
         // Send key
         Debug.Log("Send Data");
-        CmdSendData(data);
+        NetData netData = new NetData(data, DateTime.Now);
+        CmdSendData(key, netData);
     }
 
     [Command(channel = Channels.Unreliable)]
-    private void CmdSendData(bool data)
+    private void CmdSendData(string key, NetData data)
     {
         Debug.Log("Cmd Send Data");
-        RpcData(data);
+        RpcData(key, data);
     }
 
     [ClientRpc]
-    private void RpcData(bool data)
+    private void RpcData(string key, NetData data)
     {
         Debug.Log("RpcData Data");
-        DataChangedEventArgs<bool> args = new DataChangedEventArgs<bool>();
-        args.data = data;
-        args.TimeSent = DateTime.Now;
+        _data[key] = data;
+
+        DataChangedEventArgs args = new DataChangedEventArgs();
+        args.Key = key;
+        args.EventFired = DateTime.Now;
         OnDataChanged(args);
     }
 
-    protected virtual void OnDataChanged(DataChangedEventArgs<bool> e)
+    [Client]
+    protected virtual void OnDataChanged(DataChangedEventArgs e)
     {
         Debug.Log("OnDataChanged");
-        //CustomEventHandler<bool> handler = DataChanged;
-        //handler?.Invoke(this, e);
-        //------------------------
-        CustomEventHandler<bool> handler = EventHandlersDictionary["yoo"] as CustomEventHandler<bool>;
+
+        CustomEventHandler handler = DataChanged;
         handler?.Invoke(this, e);
     }
+
+    public object GetData(string key){
+        return _data[key];
+    }
+
+}
+
+public class NetData{
+
+    public DateTime TimeSent {get;set;}
+    public object SingleData {get;set;}
+
+    public NetData(){}
+    public NetData(object data, DateTime time)
+    {
+        SingleData = data;
+        TimeSent = time;
+    }
+    
+    public object GetData(){
+        return SingleData;
+    }
+}
+
+public static class DateTimeReaderWriter
+{
+      public static void WriteDateTime(this NetworkWriter writer, DateTime dateTime)
+      {
+          writer.WriteInt64(dateTime.Ticks);
+      }
+     
+      public static DateTime ReadDateTime(this NetworkReader reader)
+      {
+          return new DateTime(reader.ReadInt64());
+      }
 }
