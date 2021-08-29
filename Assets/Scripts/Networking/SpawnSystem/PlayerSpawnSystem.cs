@@ -6,7 +6,8 @@ using System.Linq;
 
 public class PlayerSpawnSystem : NetworkBehaviour
 {
-    [SerializeField] private GameObject playerPrefab = null;
+    [SerializeField] private GameObject playerPrefab1 = null;
+    [SerializeField] private GameObject playerPrefab2 = null;
 
     private static List<Transform> spawnPoints = new List<Transform>();
 
@@ -36,6 +37,16 @@ public class PlayerSpawnSystem : NetworkBehaviour
             Debug.LogError($"Missing spawn point for player {nextIndex}");
             return;
         }
+
+        GameObject playerPrefab = null; 
+        if(nextIndex % 2 == 0)
+        {
+            playerPrefab = playerPrefab1;
+        } 
+        else
+        {
+            playerPrefab =  playerPrefab2;
+        };  
 
         GameObject playerInstance = Instantiate(playerPrefab, spawnPoints[0].position, spawnPoints[nextIndex].rotation);
         NetworkServer.Spawn(playerInstance, conn);
