@@ -82,4 +82,16 @@ public abstract class Interactor : NetworkBehaviour
             return false;
         }
     }
+
+    [Command]
+    public void GetAuthority(NetworkIdentity ni)
+    {
+        ni.AssignClientAuthority(connectionToClient);
+    }
+
+    [Command]
+    public void RemoveAuthority(NetworkIdentity ni)
+    {
+        ni.RemoveClientAuthority();
+    }
 }

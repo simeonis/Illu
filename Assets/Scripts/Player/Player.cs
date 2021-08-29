@@ -8,28 +8,6 @@ public class Player : Interactor
     [HideInInspector] public new Rigidbody rigidbody;
     private TextMeshProUGUI interactUI;
 
-    [Command]
-    public void GetAuthority(NetworkIdentity ni)
-    {
-        Debug.Log("Lever requested authority from address: " + connectionToClient.address);
-        Debug.Log("Player Authority: " + hasAuthority);
-
-        ni.AssignClientAuthority(connectionToClient);
-        Debug.Log("Lever has authority?: " + ni.hasAuthority);
-    }
-
-    [Command]
-    public void RemoveAuthority(NetworkIdentity ni)
-    {
-        Debug.Log("Lever requested authority removal");
-        Debug.Log("Player Authority: " + hasAuthority);
-        if (hasAuthority)
-        {
-            ni.RemoveClientAuthority();
-            Debug.Log("Lever has authority?: " + ni.hasAuthority);
-        }
-    }
-
     protected override void Awake()
     {
         base.Awake();

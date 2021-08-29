@@ -11,16 +11,19 @@ public class Lever : AnimatedInteractable
     private bool onState = false;
     private bool locked = false;
     private IEnumerator enumerator;
-    NetworkSimpleData _networkSimpeData;
+    NetworkSimpleData _networkSimpleData;
 
     protected override void Start()
     {
         base.Start();
-        _networkSimpeData = GetComponent<NetworkSimpleData>();
-        _networkSimpeData.DataChanged += l_EventHandler;
+        _networkSimpleData = GetComponent<NetworkSimpleData>();
+        _networkSimpleData.RegisterData();
+
+        CustomEventHandler<bool> subToEvent = _networkSimpleData.EventHandlersDictionary["yoo"] as CustomEventHandler<bool>;
+        subToEvent += lever_EventHandler;
     }
 
-    void l_EventHandler(object sender, DataChangedEventArgs e)
+    void lever_EventHandler(object sender, DataChangedEventArgs<bool> e)
     {
         Debug.Log("From lever " + e.data + " changed at " + e.TimeSent);
 
@@ -33,44 +36,19 @@ public class Lever : AnimatedInteractable
     {
         if (!enabled || locked || !target) return;
 
+        // Request Authority
+        base.Interaction(interactor);
+
         locked = true;
         onState = !onState;
         if (enumerator != null) StopCoroutine(enumerator);
         StartCoroutine(enumerator = Switch());
-
-        Debug.Log("Interact: Lever");
-
-        if (interactor is Player)
-        {
-            Player player = interactor as Player;
-            player.GetAuthority(GetComponent<NetworkIdentity>());
-        }
-
-
-    }
-
-    public override void OnStopAuthority()
-    {
-        base.OnStopAuthority();
-        Debug.Log("I the lever, the not so mighty lever, have lost authority");
     }
 
     public override void OnStartAuthority()
     {
-        base.OnStartAuthority();
         Debug.Log("I the lever, the mighty lever, have been granted authority.");
-        _networkSimpeData.SendData(onState);
-    }
-
-    public override void InteractionCancelled(Interactor interactor)
-    {
-        if (interactor is Player)
-        {
-
-            Player player = interactor as Player;
-            NetworkIdentity ni = GetComponent<NetworkIdentity>();
-            player.RemoveAuthority(ni);
-        }
+        _networkSimpleData.SendData(onState);
     }
 
     private IEnumerator Switch()

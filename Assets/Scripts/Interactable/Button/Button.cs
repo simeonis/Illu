@@ -26,5 +26,10 @@ namespace Illu_Interactable
         {
             locked = false;
         }
+
+        public override void OnStartAuthority()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

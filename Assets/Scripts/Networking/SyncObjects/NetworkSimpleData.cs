@@ -1,15 +1,15 @@
-using UnityEngine;
-using Mirror;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+using Mirror;
 
-public delegate void CustomEventHandler(object sender, DataChangedEventArgs args);
+public delegate void CustomEventHandler<T>(object sender, DataChangedEventArgs<T> args);
 
 //public delegate void EventHandler<TEventArgs>(object? sender, TEventArgs e);
 
-public class DataChangedEventArgs : EventArgs
+public class DataChangedEventArgs<T> : EventArgs
 {
-    public bool data { get; set; }
+    public T data { get; set; }
     public DateTime TimeSent { get; set; }
 }
 
@@ -22,11 +22,27 @@ public class DataChangedEventArgs : EventArgs
 
 public class NetworkSimpleData : NetworkBehaviour
 {
-    public event CustomEventHandler DataChanged;
+    public Dictionary<string, Delegate> EventHandlersDictionary = new Dictionary<string, Delegate>();
+
+    //public List<CustomEventHandler> _listEventHandlers;
+
+    // public event CustomEventHandler<T> DataChanged;
+
+
+    [Client]
+    public void RegisterData()
+    {
+        //make param string key, Type type
+        CustomEventHandler<bool> bob = null;
+        EventHandlersDictionary.Add("yoo", bob);
+    }
+
+
 
     [Client]
     public void SendData(bool data)
     {
+        // Send key
         Debug.Log("Send Data");
         CmdSendData(data);
     }
@@ -42,16 +58,19 @@ public class NetworkSimpleData : NetworkBehaviour
     private void RpcData(bool data)
     {
         Debug.Log("RpcData Data");
-        DataChangedEventArgs args = new DataChangedEventArgs();
+        DataChangedEventArgs<bool> args = new DataChangedEventArgs<bool>();
         args.data = data;
         args.TimeSent = DateTime.Now;
         OnDataChanged(args);
     }
 
-    protected virtual void OnDataChanged(DataChangedEventArgs e)
+    protected virtual void OnDataChanged(DataChangedEventArgs<bool> e)
     {
         Debug.Log("OnDataChanged");
-        CustomEventHandler handler = DataChanged;
+        //CustomEventHandler<bool> handler = DataChanged;
+        //handler?.Invoke(this, e);
+        //------------------------
+        CustomEventHandler<bool> handler = EventHandlersDictionary["yoo"] as CustomEventHandler<bool>;
         handler?.Invoke(this, e);
     }
 }

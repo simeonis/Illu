@@ -8,10 +8,12 @@ public abstract class Interactable : NetworkBehaviour
     public string interactMessage;
     [HideInInspector] public new bool enabled = true;
 
+    private NetworkIdentity networkIdentity;
     private TextMeshProUGUI interactUI;
 
     protected virtual void Awake()
     {
+        networkIdentity = GetComponent<NetworkIdentity>();
         interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
     }
 
@@ -23,6 +25,15 @@ public abstract class Interactable : NetworkBehaviour
         }
     }
 
-    public abstract void Interaction(Interactor interactor);
-    public abstract void InteractionCancelled(Interactor interactor);
+    public virtual void Interaction(Interactor interactor)
+    {
+        interactor.GetAuthority(networkIdentity);
+    }
+
+    public virtual void InteractionCancelled(Interactor interactor)
+    {
+        interactor.RemoveAuthority(networkIdentity);
+    }
+
+    public abstract override void OnStartAuthority();
 }
