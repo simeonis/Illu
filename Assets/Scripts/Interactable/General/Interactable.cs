@@ -6,14 +6,16 @@ public abstract class Interactable : NetworkBehaviour
 {
     [Header("Interactable")]
     public string interactMessage;
-    [HideInInspector] public new bool enabled = true;
 
+    [HideInInspector] public new bool enabled = true;
+    protected NetworkSimpleData networkSimpleData;
     private NetworkIdentity networkIdentity;
     private TextMeshProUGUI interactUI;
 
     protected virtual void Awake()
     {
         networkIdentity = GetComponent<NetworkIdentity>();
+        networkSimpleData = GetComponent<NetworkSimpleData>();
         interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
     }
 
@@ -36,5 +38,4 @@ public abstract class Interactable : NetworkBehaviour
     }
 
     public abstract override void OnStartAuthority();
-
 }

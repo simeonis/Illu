@@ -12,6 +12,7 @@ public class DataChangedEventArgs : EventArgs
         this.key = key;
         this.eventFired = time;
     }
+    
     public string key { get; set; }
     public DateTime eventFired { get; set; }
 }
@@ -23,12 +24,12 @@ public class NetworkSimpleData : NetworkBehaviour
     public event CustomEventHandler DataChanged;
 
     [Client]
-    public void RegisterData(string key, object temporaryData){
-        _data.Add(key, temporaryData);
+    public void RegisterKey(string key){
+        _data.Add(key, null);
     }
     
     [Client]
-    public void SendData(string key, object data)
+    public void SendData(string key, object data = null)
     {
         if (data is bool)
         {
@@ -46,86 +47,90 @@ public class NetworkSimpleData : NetworkBehaviour
         {
             CmdSendString(key, (string)data);
         }
+        else
+        {
+            // Useful for triggering without sending data
+            // Example: button
+            CmdSendNull(key);
+        }
+    }
+
+    [Command(channel = Channels.Unreliable)]
+    private void CmdSendNull(string key)
+    {
+        Debug.Log("[Server]: Received NSD_Null(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        RpcNull(key);
     }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdSendBool(string key, bool data)
     {
-        RpcBool(connectionToClient.connectionId, key, data);
+        Debug.Log("[Server]: Received NSD_Bool(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        RpcBool(key, data);
     }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdSendInt(string key, int data)
     {
-        RpcInt(connectionToClient.connectionId, key, data);
+        Debug.Log("[Server]: Received NSD_Int(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        RpcInt(key, data);
     }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdSendFloat(string key, float data)
     {
-        RpcFloat(connectionToClient.connectionId, key, data);
+        Debug.Log("[Server]: Received NSD_Float(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        RpcFloat(key, data);
     }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdSendString(string key, string data)
     {
-        RpcString(connectionToClient.connectionId, key, data);
+        Debug.Log("[Server]: Received NSD_String(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        RpcString(key, data);
+    }
+
+    [ClientRpc]
+    private void RpcNull(string key)
+    {
+        OnDataChanged(new DataChangedEventArgs(key, DateTime.Now));
     }
 
    [ClientRpc]
-    private void RpcBool(int netID, string key, bool data)
+    private void RpcBool(string key, bool data)
     {
-        if (netID == connectionToServer.connectionId)
-        {
-            _data[key] = data;
-            RpcData(key);
-        }
+        _data[key] = data;
+        OnDataChanged(new DataChangedEventArgs(key, DateTime.Now));
     }
 
     [ClientRpc]
-    private void RpcInt(int netID, string key, int data)
+    private void RpcInt(string key, int data)
     {
-        if (netID == connectionToServer.connectionId)
-        {
-            _data[key] = data;
-            RpcData(key);
-        }
+        _data[key] = data;
+        OnDataChanged(new DataChangedEventArgs(key, DateTime.Now));
     }
 
     [ClientRpc]
-    private void RpcFloat(int netID, string key, float data)
+    private void RpcFloat(string key, float data)
     {
-        if (netID == connectionToServer.connectionId)
-        {
-            _data[key] = data;
-            RpcData(key);
-        }
+        _data[key] = data;
+        OnDataChanged(new DataChangedEventArgs(key, DateTime.Now));
     }
 
     [ClientRpc]
-    private void RpcString(int netID, string key, string data)
+    private void RpcString(string key, string data)
     {
-        if (netID == connectionToServer.connectionId)
-        {
-            _data[key] = data;
-            RpcData(key);
-        }
-    }
-
-    private void RpcData(string key)
-    {
+        _data[key] = data;
         OnDataChanged(new DataChangedEventArgs(key, DateTime.Now));
     }
 
     [Client]
     protected virtual void OnDataChanged(DataChangedEventArgs e)
     {
-        Debug.Log("OnDataChanged");
         DataChanged?.Invoke(this, e);
     }
 
     public object GetData(string key){
         return _data[key];
     }
-
 }

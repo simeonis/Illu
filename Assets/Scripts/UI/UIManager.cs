@@ -6,8 +6,10 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField] private GameObject lobbyUI = null;
     [SerializeField] private GameObject hostButton = null;
-    [SerializeField] private GameObject joinButton = null;
+    [SerializeField] private GameObject inviteButton = null;
     [SerializeField] private GameObject startButton = null;
+    [SerializeField] private GameObject joinButton = null;
+    [SerializeField] private GameObject backButton = null;
     [SerializeField] private GameObject scrollView = null;
 
     private ListCreator listCreator;
@@ -20,14 +22,17 @@ public class UIManager : MonoBehaviour
     public void HostGame(SteamLobby lobby, List<SteamUserRecord> friends) 
     {
         hostButton.SetActive(false);
+        inviteButton.SetActive(true);
+        startButton.SetActive(true);
+
         listCreator.renderList(friends, lobby);
-        scrollView.SetActive(true);
     }
 
     public void HostGameFailed()
     {
         hostButton.SetActive(true);
-        scrollView.SetActive(false);
+        inviteButton.SetActive(false);
+        startButton.SetActive(false);
     }
 
     // CLIENT joined HOST
@@ -36,7 +41,7 @@ public class UIManager : MonoBehaviour
         hostButton.SetActive(false);
         joinButton.SetActive(false);
         // Should replace with "Ready" button
-        startButton.SetActive(true);
+        // startButton.SetActive(true);
     }
 
     // HOST received CLIENT
@@ -45,6 +50,22 @@ public class UIManager : MonoBehaviour
         scrollView.SetActive(false);
         // Should replace with "Ready" button
         // Once both players hit the "Ready" button, then activate start button
+        // startButton.SetActive(true);
+    }
+
+    public void OpenFriendList()
+    {
+        scrollView.SetActive(true);
+        backButton.SetActive(true);
+        inviteButton.SetActive(false);
+        startButton.SetActive(false);
+    }
+
+    public void ExitFriendList()
+    {
+        scrollView.SetActive(false);
+        backButton.SetActive(false);
+        inviteButton.SetActive(true);
         startButton.SetActive(true);
     }
 

@@ -8,19 +8,13 @@ public class Lever : AnimatedInteractable
     [SerializeField] private Trigger target;
 
     private bool onState = false;
-    private bool locked = false;
     private IEnumerator enumerator;
-    private NetworkSimpleData networkSimpleData;
 
-    protected override void Awake()
-    {
-        base.Awake();
-    }
+    protected override void Awake() { base.Awake(); }
 
     void Start()
     {
-        networkSimpleData = GetComponent<NetworkSimpleData>();
-        networkSimpleData.RegisterData("LEVER_PULL", onState);
+        networkSimpleData.RegisterKey("LEVER_PULL");
         networkSimpleData.DataChanged += LeverEventHandler;
     }
 
@@ -31,25 +25,27 @@ public class Lever : AnimatedInteractable
 
     void LeverEventHandler(object sender, DataChangedEventArgs e)
     {
-        Debug.Log("Received data from other client");
         if (e.key == "LEVER_PULL")
         {
-            onState = (bool)networkSimpleData.GetData(e.key);
-            if (enumerator != null) StopCoroutine(enumerator);
-            StartCoroutine(enumerator = Switch());
+            bool data = (bool)networkSimpleData.GetData(e.key);
+            // Ensures data doesn't match current
+            if (onState != data)
+            {
+                onState = data;
+                if (enumerator != null) StopCoroutine(enumerator);
+                StartCoroutine(enumerator = Switch());
+            }
         }
     }
 
     public override void Interaction(Interactor interactor)
     {
-        if (!enabled || locked || !target) return;
-
-        Debug.Log("Yeet1");
+        if (!enabled || !target) return;
 
         // Request Authority
         base.Interaction(interactor);
 
-        locked = true;
+        enabled = false;
         onState = !onState;
         if (enumerator != null) StopCoroutine(enumerator);
         StartCoroutine(enumerator = Switch());
@@ -70,7 +66,7 @@ public class Lever : AnimatedInteractable
             yield return null;
         }
 
-        locked = false;
+        enabled = true;
         target.Activate();
     }
 }
