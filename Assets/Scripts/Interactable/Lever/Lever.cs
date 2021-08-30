@@ -23,7 +23,7 @@ public class Lever : AnimatedInteractable
         networkSimpleData.SendData("LEVER_PULL", onState);
     }
 
-    void LeverEventHandler(object sender, DataChangedEventArgs e)
+    private void LeverEventHandler(object sender, DataChangedEventArgs e)
     {
         if (e.key == "LEVER_PULL")
         {

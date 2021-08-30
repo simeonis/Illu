@@ -1,5 +1,4 @@
 using UnityEngine;
-using Mirror;
 using TMPro;
 
 public class Player : Interactor

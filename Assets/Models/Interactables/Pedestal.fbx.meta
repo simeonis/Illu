@@ -1,9 +1,29 @@
 fileFormatVersion: 2
-guid: 6b18f63b16ee88e42ba81a5a84d6f894
+guid: bb23de052d2fb2a4d9d9aa60c81344de
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Glass
+    second: {fileID: 2100000, guid: f621db40dfcf3414fae6b2df9bedc786, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Glow
+    second: {fileID: 2100000, guid: 3717a467d979beb42bf0338bf965d4a2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Primary
+    second: {fileID: 2100000, guid: 18bf77b52e1fe5544af102716b1384b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Secondary
+    second: {fileID: 2100000, guid: 3717a467d979beb42bf0338bf965d4a2, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
