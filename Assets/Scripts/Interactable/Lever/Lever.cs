@@ -12,29 +12,28 @@ public class Lever : AnimatedInteractable
     private bool onState = false;
     private bool locked = false;
     private IEnumerator enumerator;
-    NetworkSimpleData _networkSimpleData;
 
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
-        _networkSimpleData = GetComponent<NetworkSimpleData>();
-        _networkSimpleData.RegisterData("toggle", onState);
-        _networkSimpleData.DataChanged += LeverEventHandler;
+        base.Awake();
+        networkSimpleData.RegisterData("leverPull", onState);
+        networkSimpleData.DataChanged += LeverEventHandler;
+        Debug.Log("Here");
     }
 
     public override void OnStartAuthority()
     {
-        _networkSimpleData.SendData("toggle", onState);
+        networkSimpleData.SendData("leverPull", onState);
     }
 
     void LeverEventHandler(object sender, DataChangedEventArgs e)
     {
-        Debug.Log("From lever key for data" + e.Key + " fired at " + e.EventFired);
-        
-        if (e.Key == "toggle")
+        Debug.Log("Yeet2");
+        if (e.Key == "leverPull")
         {
-            object data = _networkSimpleData.GetData(e.Key);
-            onState = (bool)data;
+            Debug.Log("Yeet3");
+            NetworkData data = networkSimpleData.GetData(e.Key);
+            onState = (bool)networkSimpleData.GetData(e.Key).data;
             if (enumerator != null) StopCoroutine(enumerator);
             StartCoroutine(enumerator = Switch());
         }
@@ -43,6 +42,8 @@ public class Lever : AnimatedInteractable
     public override void Interaction(Interactor interactor)
     {
         if (!enabled || locked || !target) return;
+
+        Debug.Log("Yeet1");
 
         // Request Authority
         base.Interaction(interactor);

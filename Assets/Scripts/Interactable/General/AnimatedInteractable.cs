@@ -8,15 +8,10 @@ public abstract class AnimatedInteractable : Interactable
 
     protected Animator animator = null;
 
-    protected virtual void Start()
+    protected override void Awake()
     {
+        base.Awake();
         animator = GetComponent<Animator>();
         animator.speed = animationSpeed;
     }
-
-    // void Awake()
-    // {
-    //     animator = GetComponent<Animator>();
-    //     animator.speed = animationSpeed;
-    // }
 }

@@ -8,6 +8,26 @@ namespace Illu_Interactable
         [SerializeField] private Trigger target;
         private bool locked = false;
 
+        protected override void Awake()
+        {
+            base.Awake();
+            networkSimpleData.RegisterData("buttonPressed", locked);
+            networkSimpleData.DataChanged += ButtonEventHandler;
+        }
+
+        private void ButtonEventHandler(object sender, DataChangedEventArgs e)
+        {   
+            if (e.Key == "buttonPressed")
+            {
+
+            }
+        }
+
+        public override void OnStartAuthority()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public override void Interaction(Interactor interactor)
         {
             if (!enabled || locked || !target) return;
@@ -25,11 +45,6 @@ namespace Illu_Interactable
         public void Reset()
         {
             locked = false;
-        }
-
-        public override void OnStartAuthority()
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

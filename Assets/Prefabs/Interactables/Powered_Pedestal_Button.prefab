@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8688348162710041382}
   - component: {fileID: 1762538094345367045}
   - component: {fileID: 115657492}
+  - component: {fileID: 3588400897037619867}
   m_Layer: 3
   m_Name: Powered_Pedestal_Button
   m_TagString: Untagged
@@ -153,6 +154,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   poweredOnColor: {r: 0, g: 64, b: 14.305882, a: 0}
   powered: 0
+--- !u!114 &3588400897037619867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8688348162710041380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea85c4e0214754ec99db177bd8b87769, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
 --- !u!1 &8688348164144340301
 GameObject:
   m_ObjectHideFlags: 0

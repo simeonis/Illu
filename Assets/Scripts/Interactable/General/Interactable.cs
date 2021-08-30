@@ -9,11 +9,13 @@ public abstract class Interactable : NetworkBehaviour
     [HideInInspector] public new bool enabled = true;
 
     private NetworkIdentity networkIdentity;
+    protected NetworkSimpleData networkSimpleData;
     private TextMeshProUGUI interactUI;
 
     protected virtual void Awake()
     {
         networkIdentity = GetComponent<NetworkIdentity>();
+        networkSimpleData = GetComponent<NetworkSimpleData>();
         interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
     }
 
