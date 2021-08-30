@@ -1,6 +1,4 @@
 using System.Collections;
-using System;
-using Mirror;
 using UnityEngine;
 
 
@@ -12,28 +10,31 @@ public class Lever : AnimatedInteractable
     private bool onState = false;
     private bool locked = false;
     private IEnumerator enumerator;
+    private NetworkSimpleData networkSimpleData;
 
     protected override void Awake()
     {
         base.Awake();
-        networkSimpleData.RegisterData("leverPull", onState);
+    }
+
+    void Start()
+    {
+        networkSimpleData = GetComponent<NetworkSimpleData>();
+        networkSimpleData.RegisterData("LEVER_PULL", onState);
         networkSimpleData.DataChanged += LeverEventHandler;
-        Debug.Log("Here");
     }
 
     public override void OnStartAuthority()
     {
-        networkSimpleData.SendData("leverPull", onState);
+        networkSimpleData.SendData("LEVER_PULL", onState);
     }
 
     void LeverEventHandler(object sender, DataChangedEventArgs e)
     {
-        Debug.Log("Yeet2");
-        if (e.Key == "leverPull")
+        Debug.Log("Received data from other client");
+        if (e.key == "LEVER_PULL")
         {
-            Debug.Log("Yeet3");
-            NetworkData data = networkSimpleData.GetData(e.Key);
-            onState = (bool)networkSimpleData.GetData(e.Key).data;
+            onState = (bool)networkSimpleData.GetData(e.key);
             if (enumerator != null) StopCoroutine(enumerator);
             StartCoroutine(enumerator = Switch());
         }

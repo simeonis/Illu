@@ -7,17 +7,23 @@ namespace Illu_Interactable
         [Header("Target Script")]
         [SerializeField] private Trigger target;
         private bool locked = false;
+        private NetworkSimpleData networkSimpleData;
 
         protected override void Awake()
         {
             base.Awake();
-            networkSimpleData.RegisterData("buttonPressed", locked);
+        }
+
+        void Start()
+        {
+            networkSimpleData = GetComponent<NetworkSimpleData>();
+            networkSimpleData.RegisterData("BUTTON_PRESSED", locked);
             networkSimpleData.DataChanged += ButtonEventHandler;
         }
 
         private void ButtonEventHandler(object sender, DataChangedEventArgs e)
         {   
-            if (e.Key == "buttonPressed")
+            if (e.key == "BUTTON_PRESSED")
             {
 
             }
