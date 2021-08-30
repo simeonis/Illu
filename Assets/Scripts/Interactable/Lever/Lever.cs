@@ -17,17 +17,24 @@ public class Lever : AnimatedInteractable
     protected override void Start()
     {
         base.Start();
-        _networkSimpleData = new NetworkSimpleData();
+        _networkSimpleData = GetComponent<NetworkSimpleData>();
         _networkSimpleData.RegisterData("toggle", onState);
-        _networkSimpleData.DataChanged += lever_EventHandler;
+        _networkSimpleData.DataChanged += LeverEventHandler;
     }
 
-    void lever_EventHandler(object sender, DataChangedEventArgs e)
+    public override void OnStartAuthority()
+    {
+        _networkSimpleData.SendData("toggle", onState);
+    }
+
+    void LeverEventHandler(object sender, DataChangedEventArgs e)
     {
         Debug.Log("From lever key for data" + e.Key + " fired at " + e.EventFired);
         
-        if(e.Key == "toggle"){
-            onState = (bool)_networkSimpleData.GetData(e.Key); 
+        if (e.Key == "toggle")
+        {
+            object data = _networkSimpleData.GetData(e.Key);
+            onState = (bool)data;
             if (enumerator != null) StopCoroutine(enumerator);
             StartCoroutine(enumerator = Switch());
         }
@@ -44,13 +51,6 @@ public class Lever : AnimatedInteractable
         onState = !onState;
         if (enumerator != null) StopCoroutine(enumerator);
         StartCoroutine(enumerator = Switch());
-    }
-
-    public override void OnStartAuthority()
-    {
-        Debug.Log("I the lever, the mighty lever, have been granted authority.");
-
-        _networkSimpleData.SendData("toggle", onState);
     }
 
     private IEnumerator Switch()

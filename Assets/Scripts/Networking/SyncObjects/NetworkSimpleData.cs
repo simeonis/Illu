@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
@@ -14,39 +15,91 @@ public class DataChangedEventArgs : EventArgs
 
 public class NetworkSimpleData : NetworkBehaviour
 {
-    private Dictionary<string, NetData> _data = new Dictionary<string, NetData>();
+    private Dictionary<string, object> _data = new Dictionary<string, object>();
 
     public event CustomEventHandler DataChanged;
 
     [Client]
     public void RegisterData(string key, object initialValue){
-        NetData netData = new NetData(initialValue, DateTime.Now);
-
-        _data.Add(key, netData);
+        //NetData netData = new NetData(initialValue, DateTime.Now);
+        _data.Add(key, initialValue);
     }
     
     [Client]
     public void SendData(string key, object data)
     {
-        // Send key
-        Debug.Log("Send Data");
-        NetData netData = new NetData(data, DateTime.Now);
-        CmdSendData(key, netData);
+        if (data is bool)
+        {
+            CmdSendBool(key, (bool)data);
+        }
+        else if (data is int)
+        {
+            CmdSendInt(key, (int)data);
+        }
+        else if (data is float)
+        {
+            CmdSendFloat(key, (float)data);
+        }
+        else if (data is string)
+        {
+            CmdSendString(key, (string)data);
+        }
     }
 
     [Command(channel = Channels.Unreliable)]
-    private void CmdSendData(string key, NetData data)
+    private void CmdSendBool(string key, bool data)
     {
-        Debug.Log("Cmd Send Data");
-        RpcData(key, data);
+        RpcBool(key, data);
+    }
+
+    [Command(channel = Channels.Unreliable)]
+    private void CmdSendInt(string key, int data)
+    {
+        RpcInt(key, data);
+    }
+
+    [Command(channel = Channels.Unreliable)]
+    private void CmdSendFloat(string key, float data)
+    {
+        RpcFloat(key, data);
+    }
+
+    [Command(channel = Channels.Unreliable)]
+    private void CmdSendString(string key, string data)
+    {
+        RpcString(key, data);
     }
 
     [ClientRpc]
-    private void RpcData(string key, NetData data)
+    private void RpcBool(string key, bool data)
     {
-        Debug.Log("RpcData Data");
         _data[key] = data;
+        RpcData(key);
+    }
 
+    [ClientRpc]
+    private void RpcInt(string key, int data)
+    {
+        _data[key] = data;
+        RpcData(key);
+    }
+
+    [ClientRpc]
+    private void RpcFloat(string key, float data)
+    {
+        _data[key] = data;
+        RpcData(key);
+    }
+
+    [ClientRpc]
+    private void RpcString(string key, string data)
+    {
+        _data[key] = data;
+        RpcData(key);
+    }
+
+    private void RpcData(string key)
+    {
         DataChangedEventArgs args = new DataChangedEventArgs();
         args.Key = key;
         args.EventFired = DateTime.Now;
@@ -68,7 +121,7 @@ public class NetworkSimpleData : NetworkBehaviour
 
 }
 
-public class NetData{
+public class NetData {
 
     public DateTime TimeSent {get;set;}
     public object SingleData {get;set;}
@@ -85,15 +138,15 @@ public class NetData{
     }
 }
 
-public static class DateTimeReaderWriter
-{
-      public static void WriteDateTime(this NetworkWriter writer, DateTime dateTime)
-      {
-          writer.WriteInt64(dateTime.Ticks);
-      }
+// public static class DateTimeReaderWriter
+// {
+//       public static void WriteDateTime(this NetworkWriter writer, DateTime dateTime)
+//       {
+//           writer.WriteInt64(dateTime.Ticks);
+//       }
      
-      public static DateTime ReadDateTime(this NetworkReader reader)
-      {
-          return new DateTime(reader.ReadInt64());
-      }
-}
+//       public static DateTime ReadDateTime(this NetworkReader reader)
+//       {
+//           return new DateTime(reader.ReadInt64());
+//       }
+// }
