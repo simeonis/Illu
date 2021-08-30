@@ -33,7 +33,6 @@ public abstract class Interactor : NetworkBehaviour
     {
         equipmentSlot = new EquipmentSlot(transform);
         networkSimpleData = GetComponent<NetworkSimpleData>();
-        networkSimpleData.RegisterKey("INTERACTION");
         networkSimpleData.DataChanged += InteractEventHandler;
     }
 
@@ -72,6 +71,7 @@ public abstract class Interactor : NetworkBehaviour
 
     protected virtual void Interact()
     {
+        networkSimpleData.SendData("INTERACTION");
         if (canInteract)
         {
             interactable.Interaction(this);

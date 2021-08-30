@@ -3,6 +3,7 @@ using TMPro;
 
 public class Player : Interactor
 {
+    [SerializeField] private Transform eyes;
     [Range(1f, 50f)] public float dropForce = 5f;
     [HideInInspector] public new Rigidbody rigidbody;
     private TextMeshProUGUI interactUI;
@@ -26,6 +27,11 @@ public class Player : Interactor
         rigidbody = GetComponent<Rigidbody>();
         interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
         equipmentSlot.SetLocation(equipmentParent);
+
+        if (hasAuthority)
+        {
+            eyes.gameObject.layer = LayerMask.NameToLayer("Invisible");
+        }
     }
 
     protected override void Update()

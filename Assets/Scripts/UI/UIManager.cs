@@ -48,6 +48,9 @@ public class UIManager : MonoBehaviour
     public void ClientJoinedHost()
     {
         scrollView.SetActive(false);
+        backButton.SetActive(false);
+        inviteButton.SetActive(true);
+        startButton.SetActive(true);
         // Should replace with "Ready" button
         // Once both players hit the "Ready" button, then activate start button
         // startButton.SetActive(true);

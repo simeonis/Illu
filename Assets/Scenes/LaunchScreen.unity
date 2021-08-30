@@ -1335,7 +1335,7 @@ MonoBehaviour:
   hostButton: {fileID: 1955185830}
   inviteButton: {fileID: 690403847}
   startButton: {fileID: 1493935006}
-  joinButton: {fileID: 690403847}
+  joinButton: {fileID: 1907299561}
   backButton: {fileID: 1433424119}
   scrollView: {fileID: 239431558}
 --- !u!1 &1222497430
@@ -2334,6 +2334,12 @@ RectTransform:
 --- !u!95 &1765367680 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 3225077536057952845, guid: 8b1575dd5ba9c194b9038ed535acdb18,
+    type: 3}
+  m_PrefabInstance: {fileID: 1765367678}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1907299561 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4851521329304093318, guid: 8b1575dd5ba9c194b9038ed535acdb18,
     type: 3}
   m_PrefabInstance: {fileID: 1765367678}
   m_PrefabAsset: {fileID: 0}

@@ -99,8 +99,6 @@ public class NetworkPlayerController : NetworkBehaviour
     private Rigidbody playerBody;
     private CapsuleCollider playerCollider;
 
-
-
     public void PerformJump() => Jump();
     public void PerformCrouch() => Crouch();
     public void PerformUnCrouch() => UnCrouch();
