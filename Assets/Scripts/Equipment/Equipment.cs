@@ -37,11 +37,6 @@ public class Equipment : Interactable
 
     public override void InteractionCancelled(Interactor interactor) {}
 
-    public override void OnStartAuthority()
-    {
-        throw new System.NotImplementedException();
-    }
-
     public void Disable()
     {
         if (isEquipped) return;

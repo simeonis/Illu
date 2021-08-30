@@ -12,44 +12,17 @@ public class Lever : AnimatedInteractable
 
     protected override void Awake() { base.Awake(); }
 
-    void Start()
-    {
-        networkSimpleData.RegisterKey("LEVER_PULL");
-        networkSimpleData.DataChanged += LeverEventHandler;
-    }
-
-    public override void OnStartAuthority()
-    {
-        networkSimpleData.SendData("LEVER_PULL", onState);
-    }
-
-    private void LeverEventHandler(object sender, DataChangedEventArgs e)
-    {
-        if (e.key == "LEVER_PULL")
-        {
-            bool data = (bool)networkSimpleData.GetData(e.key);
-            // Ensures data doesn't match current
-            if (onState != data)
-            {
-                onState = data;
-                if (enumerator != null) StopCoroutine(enumerator);
-                StartCoroutine(enumerator = Switch());
-            }
-        }
-    }
-
     public override void Interaction(Interactor interactor)
     {
         if (!enabled || !target) return;
-
-        // Request Authority
-        base.Interaction(interactor);
 
         enabled = false;
         onState = !onState;
         if (enumerator != null) StopCoroutine(enumerator);
         StartCoroutine(enumerator = Switch());
     }
+
+    public override void InteractionCancelled(Interactor interactor){}
 
     private IEnumerator Switch()
     {

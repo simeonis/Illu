@@ -73,11 +73,6 @@ public class Pedestal : Interactable
         }
     }
 
-    public override void OnStartAuthority()
-    {
-        throw new System.NotImplementedException();
-    }
-
     public override void Interaction(Interactor interactor)
     {
         // Place equipment on pedestal
@@ -99,6 +94,8 @@ public class Pedestal : Interactable
             StartCoroutine(coroutine = Dissolve(interactor));
         }
     }
+
+    public override void InteractionCancelled(Interactor interactor){}
 
     private IEnumerator Dissolve(Interactor interactor)
     {

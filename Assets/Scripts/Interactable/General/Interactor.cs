@@ -19,6 +19,9 @@ public abstract class Interactor : NetworkBehaviour
     // Private
     private Interactable interactable;
 
+    // Network
+    protected NetworkSimpleData networkSimpleData;
+
     protected virtual void Awake()
     {
         playerControls = new PlayerControls();
@@ -29,6 +32,9 @@ public abstract class Interactor : NetworkBehaviour
     protected virtual void Start()
     {
         equipmentSlot = new EquipmentSlot(transform);
+        networkSimpleData = GetComponent<NetworkSimpleData>();
+        networkSimpleData.RegisterKey("INTERACTION");
+        networkSimpleData.DataChanged += InteractEventHandler;
     }
 
     void OnEnable() 
@@ -46,6 +52,21 @@ public abstract class Interactor : NetworkBehaviour
         if (canInteract = CheckInteraction(out interactable))
         {
             interactable.Seen();
+        }
+    }
+
+    private void InteractEventHandler(object sender, DataChangedEventArgs e)
+    {
+        if (e.key == "INTERACTION")
+        {
+            if (canInteract)
+            {
+                interactable.Interaction(this);
+            }
+            else if (equipmentSlot.HasEquipment())
+            {
+                equipmentSlot.GetEquipment().Interaction(this);
+            }
         }
     }
 
@@ -81,17 +102,5 @@ public abstract class Interactor : NetworkBehaviour
             interactable = null;
             return false;
         }
-    }
-
-    [Command]
-    public void GetAuthority(NetworkIdentity ni)
-    {
-        ni.AssignClientAuthority(connectionToClient);
-    }
-
-    [Command]
-    public void RemoveAuthority(NetworkIdentity ni)
-    {
-        ni.RemoveClientAuthority();
     }
 }
