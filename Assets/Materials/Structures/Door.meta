@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Animations/MenuButtons.meta
+guid: 502f581fb43054001aee3e5e6b363aa4
+=======
 guid: 682d558910252a647890437749eaa9a2
+>>>>>>> main:Assets/Materials/Environment/Structures/Door.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

@@ -1,27 +1,57 @@
 using UnityEngine;
 
-public class Button : AnimatedInteractable
+namespace Illu_Interactable
 {
-    [Header("Target Script")]
-    [SerializeField] private Trigger target;
-    private bool locked = false;
-
-    public override void Interaction(Interactor interactor)
+    public class Button : AnimatedInteractable
     {
-        if (!enabled || locked || !target) return;
+        [Header("Target Script")]
+        [SerializeField] private Trigger target;
+        private bool locked = false;
 
-        locked = true;
-        animator.SetBool("Pressed", true);
-        target.Activate(this);
-    }
+        protected override void Awake() { base.Awake(); }
 
-    public override void InteractionCancelled(Interactor interactor)
-    {
-        animator.SetBool("Pressed", false);
-    }
+        void Start()
+        {
+            networkSimpleData.DataChanged += ButtonEventHandler;
+        }
 
-    public void Reset()
-    {
-        locked = false;
+        public override void OnStartAuthority()
+        {
+            networkSimpleData.SendData("BUTTON_PRESSED");
+        }
+
+        private void ButtonEventHandler(object sender, DataChangedEventArgs e)
+        {   
+            if (e.key == "BUTTON_PRESSED" && enabled && !locked)
+            {
+                locked = true;
+                animator.SetBool("Pressed", true);
+                target.Activate(this);
+            }
+        }
+
+        public override void Interaction(Interactor interactor)
+        {
+            if (!enabled || locked || !target) return;
+
+            // Request authority
+            base.Interaction(interactor);
+
+            locked = true;
+            animator.SetBool("Pressed", true);
+            target.Activate(this);
+        }
+
+        public override void InteractionCancelled(Interactor interactor)
+        {
+            // Remove authority
+            base.InteractionCancelled(interactor);
+            animator.SetBool("Pressed", false);
+        }
+
+        public void Reset()
+        {
+            locked = false;
+        }
     }
 }

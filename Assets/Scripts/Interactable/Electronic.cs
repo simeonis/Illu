@@ -16,10 +16,11 @@ public class Electronic : MonoBehaviour
         if (interactable) interactMessage = interactable.interactMessage;
 
         // Create a new unique material
-        material = new Material(Shader.Find("Shader Graphs/Toon"));
-        material.SetColor("MainColor", Color.gray);
-        material.SetColor("SecondaryColor", Color.gray);
-        material.SetColor("RimColor", poweredOnColor);
+        material = new Material(Shader.Find("HDRP/Lit"));
+        //Shae Fix in Future
+        // material.SetColor("MainColor", Color.gray);
+        // material.SetColor("SecondaryColor", Color.gray);
+        // material.SetColor("RimColor", poweredOnColor);
 
         // Determine electronic state
         if (powered) PowerOn();
@@ -27,11 +28,11 @@ public class Electronic : MonoBehaviour
 
         // Get renderer
         Renderer renderer = GetComponent<Renderer>();
-        
+
         // Replace material
         Material[] materials = renderer.materials;
 
-        for(int i=0; i<materials.Length; i++)
+        for (int i = 0; i < materials.Length; i++)
         {
             if (materials[i].name.Replace(" (Instance)", "") == "Default_Powered")
             {
@@ -56,7 +57,8 @@ public class Electronic : MonoBehaviour
     public void PowerOff()
     {
         powered = false;
-        material.SetFloat("RimAmount", 1f);
+        //Shae Fix in Future
+        //material.SetFloat("RimAmount", 1f);
         if (interactable)
         {
             interactable.enabled = false;

@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Artwork.meta
+guid: b3a373e2800024dd5921fd97e925cd0b
+=======
 guid: bd847eefd96595c49a6c185a26dd2436
+>>>>>>> main:Assets/Materials/Environment/Structures.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

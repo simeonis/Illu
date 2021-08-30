@@ -1,6 +1,7 @@
 using UnityEngine;
+using Mirror;
 
-public abstract class Interactor : MonoBehaviour
+public abstract class Interactor : NetworkBehaviour
 {
     [Header("Interaction")]
     [SerializeField] public Transform source;
@@ -80,5 +81,17 @@ public abstract class Interactor : MonoBehaviour
             interactable = null;
             return false;
         }
+    }
+
+    [Command]
+    public void GetAuthority(NetworkIdentity ni)
+    {
+        ni.AssignClientAuthority(connectionToClient);
+    }
+
+    [Command]
+    public void RemoveAuthority(NetworkIdentity ni)
+    {
+        ni.RemoveClientAuthority();
     }
 }

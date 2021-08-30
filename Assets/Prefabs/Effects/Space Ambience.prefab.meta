@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Prefabs/SpawnablePrefabs/RoomPlayer.prefab.meta
+guid: 8a5f71be91a5b47d387ad33b72576614
+=======
 guid: 8689babe53a385045820c1197ed6c546
+>>>>>>> main:Assets/Prefabs/Effects/Space Ambience.prefab.meta
 PrefabImporter:
   externalObjects: {}
   userData: 

@@ -7,12 +7,12 @@ public class Flip : Trigger
     [SerializeField] private Transform rotationPivot;
     [SerializeField] private float flipDuration = 0.25f;
 
-    public override void Activate(Button button)
+    public override void Activate(Illu_Interactable.Button button)
     {
         StartCoroutine(FlipOverTime(button));
     }
 
-    private IEnumerator FlipOverTime(Button button)
+    private IEnumerator FlipOverTime(Illu_Interactable.Button button)
     {
         Quaternion currentRotation = rotationPivot.rotation;
         Quaternion targetRotation = currentRotation * Quaternion.Euler(180f, 0f, 0f);

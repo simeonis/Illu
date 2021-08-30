@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mirror;
 using TMPro;
 
 public class Player : Interactor
@@ -38,35 +39,35 @@ public class Player : Interactor
         }
     }
 
-    private void FirePressed() 
-    { 
+    private void FirePressed()
+    {
         if (equipmentSlot.HasEquipment())
         {
             equipmentSlot.GetEquipment().EquipmentPrimaryPressed();
         }
     }
 
-    private void FireReleased() 
-    { 
+    private void FireReleased()
+    {
         if (equipmentSlot.HasEquipment())
         {
             equipmentSlot.GetEquipment().EquipmentPrimaryReleased();
         }
     }
 
-    private void AlternateFirePressed() 
-    { 
+    private void AlternateFirePressed()
+    {
         if (equipmentSlot.HasEquipment())
         {
             equipmentSlot.GetEquipment().EquipmentSecondaryPressed();
         }
     }
 
-    private void AlternateFireReleased() 
-    { 
+    private void AlternateFireReleased()
+    {
         if (equipmentSlot.HasEquipment())
         {
             equipmentSlot.GetEquipment().EquipmentSecondaryReleased();
-        } 
+        }
     }
 }

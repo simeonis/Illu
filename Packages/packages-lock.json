@@ -1,20 +1,5 @@
 {
   "dependencies": {
-    "ca.andydbc.unity-texture-packer": {
-      "version": "file:F:/Unity/unity-texture-packer-master",
-      "depth": 0,
-      "source": "local",
-      "dependencies": {}
-    },
-    "com.jimmycushnie.noisynodes": {
-      "version": "https://github.com/JimmyCushnie/Noisy-Nodes.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.shadergraph": "7.1.8"
-      },
-      "hash": "1f212c268860dc1dc260bbd60d03246908508b79"
-    },
     "com.unity.animation.rigging": {
       "version": "1.0.3",
       "depth": 0,
@@ -155,7 +140,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.textmeshpro": {
-      "version": "3.0.4",
+      "version": "3.0.6",
       "depth": 0,
       "source": "registry",
       "dependencies": {
