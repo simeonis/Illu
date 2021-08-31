@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.2691813, g: 0.18049672, b: 0.32005298, a: 1}
+  m_IndirectSpecularColor: {r: 0.22038329, g: 0.14790377, b: 0.2596193, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3857,6 +3857,7 @@ GameObject:
   - component: {fileID: 272128941}
   - component: {fileID: 272128940}
   - component: {fileID: 272128939}
+  - component: {fileID: 272128944}
   m_Layer: 3
   m_Name: Bridge
   m_TagString: Untagged
@@ -3954,6 +3955,18 @@ Transform:
   m_Father: {fileID: 532283590}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &272128944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 272128938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfdb05d87e8bd7d4285c34e9962d11f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &279872492
 GameObject:
   m_ObjectHideFlags: 0

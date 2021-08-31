@@ -15,16 +15,15 @@ public class RippledGlass : MonoBehaviour
 
     void OnTriggerEnter(Collider collider)
     {
-        if (collider.gameObject.tag == "Player")
-        {
-            Vector3 worldPostion = collider.ClosestPointOnBounds(transform.position);
-            Vector3 localPostion = transform.InverseTransformPoint(worldPostion);
 
-            material.SetVector("_Center", localPostion);
+        Vector3 worldPostion = collider.ClosestPointOnBounds(transform.position);
+        Vector3 localPostion = transform.InverseTransformPoint(worldPostion);
 
-            if (ripple != null) StopCoroutine(ripple);
-            StartCoroutine(ripple = Ripple());
-        }
+        material.SetVector("_Center", localPostion);
+
+        if (ripple != null) StopCoroutine(ripple);
+        StartCoroutine(ripple = Ripple());
+ 
     }
 
     private IEnumerator Ripple()

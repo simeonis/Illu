@@ -781,7 +781,7 @@ MonoBehaviour:
   syncInterval: 0.1
   clientAuthority: 1
   moveTriggerSensitivity: 0.01
-  allowedLagDistance: 10
+  allowedLagDistance: 4
   correntRotSpeed: 2
   allowRotLagAmount: 0.5
   smoothRot: 1
@@ -806,6 +806,7 @@ MonoBehaviour:
   source: {fileID: 4446985994531773179}
   interactionRange: 5
   equipmentParent: {fileID: 4446985993700699230}
+  networkInteractable: {fileID: 0}
   eyes: {fileID: 7282411105717430080}
   dropForce: 5
   rigidbody: {fileID: 0}

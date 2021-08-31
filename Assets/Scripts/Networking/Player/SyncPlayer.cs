@@ -152,7 +152,7 @@ public class SyncPlayer : NetworkBehaviour
         var LagDistance = RemotePlayerPosition - transform.position;
 
         //High distance => sync is to much off => send to position
-        if (LagDistance.magnitude > allowedLagDistance)
+        if (LagDistance.magnitude > networkPlayerController.moveSpeed / 3)
         {
             if (debug) 
                 Debug.LogWarning("Sync Position to Great");
@@ -163,9 +163,8 @@ public class SyncPlayer : NetworkBehaviour
         //ignore the y distance
         LagDistance.y = 0;
 
-        if (LagDistance.magnitude < 0.5f)
-        {
-            //Player is nearly at the point
+        if (LagDistance.magnitude < 0.025f)
+        {   //Player is nearly at the point
             networkPlayerController.moveDirection = Vector3.zero;
         }
         else

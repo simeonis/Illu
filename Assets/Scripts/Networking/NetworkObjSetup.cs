@@ -34,6 +34,7 @@ public class NetworkObjSetup : NetworkBehaviour
             if (camera != null)
             {
                 camera.enabled = false;
+                camera.GetComponent<AudioListener>().enabled = false;
             }
             else
             {
