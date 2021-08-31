@@ -782,6 +782,9 @@ MonoBehaviour:
   clientAuthority: 1
   moveTriggerSensitivity: 0.01
   allowedLagDistance: 10
+  correntRotSpeed: 2
+  allowRotLagAmount: 0.5
+  smoothRot: 1
   debug: 0
   controller: {fileID: 8453773999225703031}
   playerCamera: {fileID: 4446985994531773179}

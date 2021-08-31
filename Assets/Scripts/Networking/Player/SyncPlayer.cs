@@ -139,7 +139,7 @@ public class SyncPlayer : NetworkBehaviour
     public void RPCSyncPosition(Vector3 position, Quaternion headRot, Quaternion bodyRot)
     {
         
-        //if (debug)
+        if (debug)
             Debug.Log("RPC Position: " + position + "HeadRot " + headRot + "bodyRot " + bodyRot);
         RemotePlayerPosition = position;
         RemotePlayerRotation = headRot;
@@ -189,7 +189,8 @@ public class SyncPlayer : NetworkBehaviour
         float camDiff = Quaternion.Dot(playerCamera.rotation,RemotePlayerRotation);
         float bodyDiff = Quaternion.Dot(orientation.rotation,RemotePlayerBodyRotation);
 
-        Debug.Log("camDiff " + camDiff + " bodyDiff" + bodyDiff);
+        if (debug)
+            Debug.Log("camDiff " + camDiff + " bodyDiff" + bodyDiff);
 
         if(smoothRot && camDiff <= allowRotLagAmount){
             // Rotate our playerCamera a step closer to the target's.

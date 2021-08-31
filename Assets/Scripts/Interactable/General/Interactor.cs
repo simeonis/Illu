@@ -18,6 +18,8 @@ public abstract class Interactor : NetworkBehaviour
 
     // Private
     private Interactable interactable;
+    [SyncVar]
+    public GameObject interactableObject;
 
     // Network
     protected NetworkSimpleData networkSimpleData;
@@ -58,14 +60,21 @@ public abstract class Interactor : NetworkBehaviour
     {
         if (e.key == "INTERACTION")
         {
-            if (canInteract)
+            Debug.Log("Interactable Object: " + interactableObject);
+            if (interactableObject != null)
             {
-                interactable.Interaction(this);
+                Debug.Log("Interactable Object not null");
+                Debug.Log("Interactable Object has interactable: " + interactableObject.GetComponent<Interactable>() != null);
+                interactableObject.GetComponent<Interactable>().Interaction(this);
             }
-            else if (equipmentSlot.HasEquipment())
-            {
-                equipmentSlot.GetEquipment().Interaction(this);
-            }
+            // if (canInteract)
+            // {
+            //     interactable.Interaction(this);
+            // }
+            // else if (equipmentSlot.HasEquipment())
+            // {
+            //     equipmentSlot.GetEquipment().Interaction(this);
+            // }
         }
     }
 
@@ -95,12 +104,22 @@ public abstract class Interactor : NetworkBehaviour
         if (Physics.Raycast(source.position, source.forward, out RaycastHit hit, interactionRange)) 
         {
             interactable = hit.collider.GetComponent<Interactable>();
+            if (interactable != null)
+                SetInteractableObject(hit.collider.gameObject);
             return interactable != null;
         }
         else
         {
             interactable = null;
+            if (interactableObject != null)
+                SetInteractableObject(null);
             return false;
         }
+    }
+
+    [Command]
+    private void SetInteractableObject(GameObject obj) 
+    {
+        interactableObject = obj;
     }
 }
