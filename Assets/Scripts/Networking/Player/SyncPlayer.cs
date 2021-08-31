@@ -22,6 +22,7 @@ public class SyncPlayer : NetworkBehaviour
 
     protected Vector3 RemotePlayerPosition;
     protected Quaternion RemotePlayerRotation;
+    protected Transform RemotePlayerOrientation;
 
     Vector3 lastPosition;
     Quaternion lastRotation;
@@ -42,8 +43,8 @@ public class SyncPlayer : NetworkBehaviour
             // send to server if we are local player
             if (hasAuthority)
             {
-                networkPlayerController.LocalPlayerControls.Land.Crouch.performed += context => CmdHandleCrouch(true);
-                networkPlayerController.LocalPlayerControls.Land.Crouch.canceled += context => CmdHandleCrouch(false);
+                // networkPlayerController.LocalPlayerControls.Land.Crouch.performed += context => CmdHandleCrouch(true);
+                // networkPlayerController.LocalPlayerControls.Land.Crouch.canceled += context => CmdHandleCrouch(false);
 
                 networkPlayerController.LocalPlayerControls.Land.Sprint.performed += context => CmdHandleSprint(true);
                 networkPlayerController.LocalPlayerControls.Land.Sprint.canceled += context => CmdHandleSprint(false);
@@ -65,7 +66,7 @@ public class SyncPlayer : NetworkBehaviour
                     if (HasEitherMovedRotated())
                     {
                         // send to position to clients
-                        CmdSyncTransform(transform.position, transform.rotation);
+                        CmdSyncTransform(transform.position, networkPlayerController.playerCamera.rotation,networkPlayerController.orientation );
                     }
                     lastClientSendTime = Time.time;
                 }
@@ -73,7 +74,7 @@ public class SyncPlayer : NetworkBehaviour
             else
             {
                 HandleRemotePositionUpdates();
-                transform.rotation = RemotePlayerRotation;
+                HandleRemoteRotationUpdates();
             }
         }
         transPosition = transform.position;
@@ -100,22 +101,23 @@ public class SyncPlayer : NetworkBehaviour
 
     // local authority client sends sync message to server for broadcasting
     [Command(channel = Channels.Unreliable)]
-    void CmdSyncTransform(Vector3 Position, Quaternion Rotation)
+    void CmdSyncTransform(Vector3 position, Quaternion headRot, Transform orientation)
     {
         // Ignore messages from client if notCmdClientToServerSync in client authority mode
         if (!clientAuthority)
             return;
 
-        RPCSyncPosition(Position, Rotation);
+        RPCSyncPosition(position, headRot, orientation);
     }
 
     [ClientRpc]
-    public void RPCSyncPosition(Vector3 Position, Quaternion Rotation)
+    public void RPCSyncPosition(Vector3 position, Quaternion headRot, Transform orientation)
     {
         if (debug)
-            Debug.Log("RPC Position: " + Position);
-        RemotePlayerPosition = Position;
-        RemotePlayerRotation = Rotation;
+            Debug.Log("RPC Position: " + position);
+        RemotePlayerPosition = position;
+        RemotePlayerRotation = headRot;
+        RemotePlayerOrientation = orientation;
     }
 
     [Client]
@@ -149,28 +151,36 @@ public class SyncPlayer : NetworkBehaviour
         //jump if the remote player is higher than the player on the current client
         if (RemotePlayerPosition.y - transform.position.y > 0.2f)
             networkPlayerController.PerformJump();
-
-
     }
 
-    [Command(channel = Channels.Unreliable)]
-    private void CmdHandleCrouch(bool CrouchState)
+
+    [Client]
+    private void HandleRemoteRotationUpdates()
     {
-        RpcCrouch(CrouchState);
+        networkPlayerController.playerCamera.rotation = RemotePlayerRotation;
+        networkPlayerController.orientation = RemotePlayerOrientation;
+        networkPlayerController.LookDirection();
     }
 
-    [ClientRpc]
-    private void RpcCrouch(bool CrouchState)
-    {
-        if (CrouchState)
-        {
-            networkPlayerController.PerformCrouch();
-        }
-        else
-        {
-            networkPlayerController.PerformUnCrouch();
-        }
-    }
+
+    // [Command(channel = Channels.Unreliable)]
+    // private void CmdHandleCrouch(bool CrouchState)
+    // {
+    //     RpcCrouch(CrouchState);
+    // }
+
+    // [ClientRpc]
+    // private void RpcCrouch(bool CrouchState)
+    // {
+    //     if (CrouchState)
+    //     {
+    //         networkPlayerController.PerformCrouch();
+    //     }
+    //     else
+    //     {
+    //         networkPlayerController.PerformUnCrouch();
+    //     }
+    // }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdHandleSprint(bool SprintState)
