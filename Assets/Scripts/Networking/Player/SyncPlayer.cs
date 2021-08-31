@@ -1,12 +1,15 @@
 using UnityEngine;
 using Mirror;
 
+///
+///Sync Player
+///Handles sending data over the network and smoothing the 
 public class SyncPlayer : NetworkBehaviour
 {
 
     [Header("Authority")]
     [Tooltip("Set to true if moves come from owner client, set to false if moves always come from server")]
-    public bool clientAuthority;
+    public bool clientAuthority = true;
 
     [Header("Networking Parameters")]
     [Tooltip("How much the local player moves before triggering an Update to all clients")]
@@ -15,10 +18,28 @@ public class SyncPlayer : NetworkBehaviour
     [Tooltip("How far the remote player can be off before snapping to remote position")]
     public float allowedLagDistance = 10.0f;
 
+    [Tooltip("How fast a remote player corrects its look")]
+    [SerializeField] private float correntRotSpeed = 2.0f;
+
+    [Tooltip("How fast a remote player corrects its look")]
+    [SerializeField] private float allowRotLagAmount = 0.5f;
+
+     [Tooltip("Apply Rotation Smoothing")]
+    [SerializeField] private bool smoothRot = false;
+
     [Header("Debug Position")]
     public bool debug;
 
+    //Transforms remember to pass in in Inspector
+    [Header("Players Transforms")]
+    [Tooltip("Pass in the Controller")]
     public Transform controller;
+
+    [Tooltip("Pass in the Player Camera")]
+    public Transform playerCamera;
+
+    [Tooltip("Pass in Orientation")]
+    public Transform orientation;
 
     protected Vector3 RemotePlayerPosition;
     protected Quaternion RemotePlayerRotation;
@@ -26,6 +47,7 @@ public class SyncPlayer : NetworkBehaviour
 
     Vector3 lastPosition;
     Quaternion lastRotation;
+    Quaternion lastBodyRotation;
     Vector3 transPosition;
 
     // local authority send time
@@ -55,18 +77,17 @@ public class SyncPlayer : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        // send to server if we are local player and have authority
         if (isClient)
         {
-            // send to server if we are local player
-            if (hasAuthority)
-            {
+            if(hasAuthority){
                 // check only each 'syncInterval'
                 if (Time.time - lastClientSendTime >= syncInterval)
                 {
                     if (HasEitherMovedRotated())
                     {
                         // send to position to clients
-                        CmdSyncTransform(transform.position, networkPlayerController.playerCamera.rotation,networkPlayerController.orientation.rotation );
+                        CMDSendPosAndRot(transform.position, playerCamera.rotation, orientation.rotation );
                     }
                     lastClientSendTime = Time.time;
                 }
@@ -76,24 +97,28 @@ public class SyncPlayer : NetworkBehaviour
                 HandleRemotePositionUpdates();
                 HandleRemoteRotationUpdates();
             }
+            
+            transPosition = transform.position;
         }
-        transPosition = transform.position;
     }
 
+    //return whether there's been a change in position or rotation 
+    //to prevent spamming the network when not moving 
     bool HasEitherMovedRotated()
     {
         // moved or rotated?
         bool moved = Vector3.Distance(lastPosition, transform.position) > moveTriggerSensitivity;
-        bool rotated = Quaternion.Angle(lastRotation, transform.rotation) > moveTriggerSensitivity;
+        bool headRotated = Quaternion.Angle(lastRotation, playerCamera.rotation) > moveTriggerSensitivity;
+        bool bodyRotated = Quaternion.Angle(lastRotation, orientation.rotation) > moveTriggerSensitivity;
 
-
-        bool change = moved || rotated;
+        bool change = moved || headRotated || bodyRotated;
 
         if (change)
         {
-            //position/rotation
+            //position/rotation/bodyrot
             lastPosition = transform.position;
-            lastRotation = transform.rotation;
+            lastRotation = playerCamera.rotation;
+            lastBodyRotation = orientation.rotation;
         }
 
         return change;
@@ -101,7 +126,7 @@ public class SyncPlayer : NetworkBehaviour
 
     // local authority client sends sync message to server for broadcasting
     [Command(channel = Channels.Unreliable)]
-    void CmdSyncTransform(Vector3 position, Quaternion headRot, Quaternion bodyRot)
+    void CMDSendPosAndRot(Vector3 position, Quaternion headRot, Quaternion bodyRot)
     {
         // Ignore messages from client if notCmdClientToServerSync in client authority mode
         if (!clientAuthority)
@@ -113,8 +138,9 @@ public class SyncPlayer : NetworkBehaviour
     [ClientRpc]
     public void RPCSyncPosition(Vector3 position, Quaternion headRot, Quaternion bodyRot)
     {
-        if (debug)
-            Debug.Log("RPC Position: " + position);
+        
+        //if (debug)
+            Debug.Log("RPC Position: " + position + "HeadRot " + headRot + "bodyRot " + bodyRot);
         RemotePlayerPosition = position;
         RemotePlayerRotation = headRot;
         RemotePlayerBodyRotation = bodyRot;
@@ -157,8 +183,30 @@ public class SyncPlayer : NetworkBehaviour
     [Client]
     private void HandleRemoteRotationUpdates()
     {
-        networkPlayerController.playerCamera.rotation = RemotePlayerRotation;
-        networkPlayerController.orientation.rotation = RemotePlayerBodyRotation;
+        // The step size is equal to speed times frame time.
+        var step = correntRotSpeed * Time.deltaTime;
+
+        float camDiff = Quaternion.Dot(playerCamera.rotation,RemotePlayerRotation);
+        float bodyDiff = Quaternion.Dot(orientation.rotation,RemotePlayerBodyRotation);
+
+        Debug.Log("camDiff " + camDiff + " bodyDiff" + bodyDiff);
+
+        if(smoothRot && camDiff <= allowRotLagAmount){
+            // Rotate our playerCamera a step closer to the target's.
+            playerCamera.rotation = Quaternion.RotateTowards(playerCamera.rotation, RemotePlayerRotation, step);  
+        }
+        else{
+            playerCamera.rotation = RemotePlayerRotation;
+        }
+
+        if(smoothRot && bodyDiff <= allowRotLagAmount){
+            // Rotate our orientation a step closer to the target's.
+            orientation.rotation = Quaternion.RotateTowards(orientation.rotation, RemotePlayerBodyRotation, step);
+        }
+        else{
+            orientation.rotation = RemotePlayerBodyRotation;
+        }
+        
     }
 
 

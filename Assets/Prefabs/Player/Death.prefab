@@ -735,8 +735,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  orientation: {fileID: 4446985993725635025}
   horizontalSensitivity: 10
   verticalSensitivity: 10
+  xRotation: 0
+  yRotation: 0
   walkSpeed: 6
   sprintSpeed: 12
   sprintTime: 0.25
@@ -781,6 +784,8 @@ MonoBehaviour:
   allowedLagDistance: 10
   debug: 0
   controller: {fileID: 8453773999225703031}
+  playerCamera: {fileID: 4446985994531773179}
+  orientation: {fileID: 4446985993725635025}
 --- !u!114 &1596715246450041839
 MonoBehaviour:
   m_ObjectHideFlags: 0
