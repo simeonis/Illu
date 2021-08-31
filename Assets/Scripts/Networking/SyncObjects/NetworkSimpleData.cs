@@ -31,6 +31,9 @@ public class NetworkSimpleData : NetworkBehaviour
     [Client]
     public void SendData(string key, object data = null)
     {
+        // No authority
+        if (!hasAuthority) return;
+
         if (data is bool)
         {
             CmdSendBool(key, (bool)data);

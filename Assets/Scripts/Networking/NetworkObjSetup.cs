@@ -30,7 +30,15 @@ public class NetworkObjSetup : NetworkBehaviour
     {
         for (int i = 0; i < componentsToDisable.Length; i++)
         {
-            componentsToDisable[i].SetActive(false);
+            Camera camera = componentsToDisable[i].GetComponent<Camera>();
+            if (camera != null)
+            {
+                camera.enabled = false;
+            }
+            else
+            {
+                componentsToDisable[i].SetActive(false);
+            }
         }
     }
 
