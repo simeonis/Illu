@@ -17,7 +17,7 @@ public class NetworkPlayerController : NetworkBehaviour
 
     // Transform variables
     private Transform head;
-    private Transform orientation;
+    public Transform orientation;
 
     // Mouse variables
     [Header("Mouse Sensitivity")]
@@ -25,7 +25,7 @@ public class NetworkPlayerController : NetworkBehaviour
     public float horizontalSensitivity = 10f;
     [Range(0f, 1000f)]
     public float verticalSensitivity = 10f;
-    private float xRotation, yRotation;
+    public float xRotation, yRotation;
 
     // Movement variables
     [Header("Movement Modifiers")]
@@ -214,22 +214,27 @@ public class NetworkPlayerController : NetworkBehaviour
         movementInput = playerControls.Land.Movement.ReadValue<Vector2>();
     }
 
-    private void LookDirection()
+    public void LookDirection()
     {
-        // Rotation along the y-axis (left-right)
-        yRotation += lookInput.x;
-        // Rotation along the x-axis (up-down)
-        xRotation -= lookInput.y;
+        //If the local player sending data 
+        if (hasAuthority)
+        {
+            // Rotation along the y-axis (left-right)
+            yRotation += lookInput.x;
+            // Rotation along the x-axis (up-down)
+            xRotation -= lookInput.y;
 
-        // Limit vertical rotation to 180 degrees
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+            // Limit vertical rotation to 180 degrees
+            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        // Rotates camera on both axis'
-        // World Rotation = Target Rotation * Rotation
-        playerCamera.rotation = transform.rotation * Quaternion.Euler(xRotation, yRotation, 0f);
+            // Rotates camera on both axis'
+            // World Rotation = Target Rotation * Rotation
+            playerCamera.rotation = transform.rotation * Quaternion.Euler(xRotation, yRotation, 0f);
 
-        // Rotate orientation so that movement matches the look direction
-        orientation.RotateAround(orientation.position, transform.up, lookInput.x);
+            // Rotate orientation so that movement matches the look direction
+            orientation.RotateAround(orientation.position, transform.up, lookInput.x);
+
+        }        
     }
 
     private void MovementModifiers()
