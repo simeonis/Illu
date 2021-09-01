@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public class Equipment : Interactable
 {
@@ -9,11 +10,18 @@ public class Equipment : Interactable
     protected bool isEquipped = false;
     private Transform defaultParent;
 
+    //adding SyncEquipment
+    private SyncEquipment syncEquipment;
+
     protected override void Awake()
     {
         equipmentBody = GetComponent<Rigidbody>();
         equipmentCollider = GetComponent<Collider>();
         defaultParent = transform.parent;
+
+        //Added for SyncEquipment 
+        syncEquipment = GetComponent<SyncEquipment>();
+
     }
 
     public override void Interaction(Interactor interactor)
@@ -31,18 +39,22 @@ public class Equipment : Interactable
             if (interactor.TryGetComponent(out Player player))
             {
                 AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
+                //Here's where we call sync equipment
+                player.GiveEquipmentAuthority(GetComponent<NetworkIdentity>());
+                syncEquipment.SendAction(player.hasAuthority);
+
             }
         }
     }
 
-    public override void InteractionCancelled(Interactor interactor) {}
+    public override void InteractionCancelled(Interactor interactor) { }
 
     public void Disable()
     {
         if (isEquipped) return;
 
         isEquipped = true;
-        
+
         // Disable rigidbody
         equipmentBody.isKinematic = true;
         equipmentBody.interpolation = RigidbodyInterpolation.None;
@@ -88,7 +100,7 @@ public class Equipment : Interactable
      * Modifies layer of each child inside of parent.
      * If inclusive is true, parent's layer is also modified.
      * Useful for Camera Culling Mask.
-     */ 
+     */
     protected void ChangeChildrenLayerMask(Transform parent, string layer, bool inclusive)
     {
         if (inclusive) ChangeLayerMask(parent, layer);
