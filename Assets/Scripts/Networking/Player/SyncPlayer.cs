@@ -1,9 +1,11 @@
 using UnityEngine;
 using Mirror;
 
-///
+//////////////////////////////////////////////////////////////////////////
 ///Sync Player
-///Handles sending data over the network and smoothing the 
+///Handles sending data over the network and smoothing the recieved values
+//////////////////////////////////////////////////////////////////////////
+
 public class SyncPlayer : NetworkBehaviour
 {
 
@@ -22,13 +24,13 @@ public class SyncPlayer : NetworkBehaviour
     [SerializeField] private float correntRotSpeed = 2.0f;
 
     [Tooltip("How fast a remote player corrects its look")]
-    [SerializeField] private float allowRotLagAmount = 0.5f;
+    [SerializeField] private float allowRotLagAmount = 0.25f;
 
      [Tooltip("Apply Rotation Smoothing")]
     [SerializeField] private bool smoothRot = false;
 
     [Header("Debug Position")]
-    public bool debug;
+    public bool debug = false;
 
     //Transforms remember to pass in in Inspector
     [Header("Players Transforms")]
@@ -65,11 +67,13 @@ public class SyncPlayer : NetworkBehaviour
             // send to server if we are local player
             if (hasAuthority)
             {
-                // networkPlayerController.LocalPlayerControls.Land.Crouch.performed += context => CmdHandleCrouch(true);
-                // networkPlayerController.LocalPlayerControls.Land.Crouch.canceled += context => CmdHandleCrouch(false);
+                networkPlayerController.LocalPlayerControls.Land.Crouch.performed += context => CmdHandleCrouch(true);
+                networkPlayerController.LocalPlayerControls.Land.Crouch.canceled += context => CmdHandleCrouch(false);
 
                 networkPlayerController.LocalPlayerControls.Land.Sprint.performed += context => CmdHandleSprint(true);
                 networkPlayerController.LocalPlayerControls.Land.Sprint.canceled += context => CmdHandleSprint(false);
+
+                networkPlayerController.LocalPlayerControls.Land.Jump.performed += context => CmdSendJump();
             }
         }
     }
@@ -172,10 +176,6 @@ public class SyncPlayer : NetworkBehaviour
             //Player has to go to the point
             networkPlayerController.moveDirection = new Vector3(LagDistance.x, 0, LagDistance.z);
         }
-
-        //jump if the remote player is higher than the player on the current client
-        if (RemotePlayerPosition.y - transform.position.y > 0.2f)
-            networkPlayerController.PerformJump();
     }
 
 
@@ -209,25 +209,27 @@ public class SyncPlayer : NetworkBehaviour
         
     }
 
+    
+    //Handle Sending Crouch, Jump, Sprint
+    //--------------------------------------------------------------
+    [Command(channel = Channels.Unreliable)]
+    private void CmdHandleCrouch(bool CrouchState)
+    {
+        RpcCrouch(CrouchState);
+    }
 
-    // [Command(channel = Channels.Unreliable)]
-    // private void CmdHandleCrouch(bool CrouchState)
-    // {
-    //     RpcCrouch(CrouchState);
-    // }
-
-    // [ClientRpc]
-    // private void RpcCrouch(bool CrouchState)
-    // {
-    //     if (CrouchState)
-    //     {
-    //         networkPlayerController.PerformCrouch();
-    //     }
-    //     else
-    //     {
-    //         networkPlayerController.PerformUnCrouch();
-    //     }
-    // }
+    [ClientRpc]
+    private void RpcCrouch(bool CrouchState)
+    {
+        if (CrouchState)
+        {
+            networkPlayerController.PerformCrouch();
+        }
+        else
+        {
+            networkPlayerController.PerformUnCrouch();
+        }
+    }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdHandleSprint(bool SprintState)
@@ -248,7 +250,20 @@ public class SyncPlayer : NetworkBehaviour
         }
     }
 
+    [Command(channel = Channels.Unreliable)]
+    private void CmdSendJump()
+    {
+        RpcSendJump();
+    }
 
+    [ClientRpc]
+    private void RpcSendJump()
+    {
+        networkPlayerController.PerformJump();
+    }
+
+    //Static Draw Methods
+    //--------------------------------------------------------------
     static void DrawDataPointGizmo(Vector3 pos, Color color)
     {
         // use a little offset because transform.localPosition might be in

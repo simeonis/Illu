@@ -105,7 +105,6 @@ public class NetworkPlayerController : NetworkBehaviour
     public void PerformWalk() => Walk();
     public void PerformSprint() => Sprint();
 
-
     public void Awake()
     {
         playerControls = new PlayerControls();
