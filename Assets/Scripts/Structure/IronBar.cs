@@ -21,7 +21,7 @@ public class IronBar : Trigger
         transform.localScale = new Vector3(transform.localScale.x, closed ? defaultHeight : 0f, transform.localScale.z);
     }
 
-    public override void Activate(Illu_Interactable.Button button)
+    public override void Activate(IlluInteractable.Button button)
     {
         closed = !closed;
 
@@ -30,7 +30,7 @@ public class IronBar : Trigger
         StartCoroutine(Open(button));
     }
 
-    private IEnumerator Open(Illu_Interactable.Button button)
+    private IEnumerator Open(IlluInteractable.Button button)
     {
         Vector3 currentScale = transform.localScale;
         Vector3 targetScale = new Vector3(currentScale.x, closed ? defaultHeight : 0f, currentScale.z);

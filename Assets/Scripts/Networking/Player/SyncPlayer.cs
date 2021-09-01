@@ -223,11 +223,11 @@ public class SyncPlayer : NetworkBehaviour
     {
         if (CrouchState)
         {
-            networkPlayerController.PerformCrouch();
+            networkPlayerController.NetworkCrouch();
         }
         else
         {
-            networkPlayerController.PerformUnCrouch();
+            networkPlayerController.NetworkUnCrouch();
         }
     }
 
@@ -242,11 +242,11 @@ public class SyncPlayer : NetworkBehaviour
     {
         if (SprintState)
         {
-            networkPlayerController.PerformSprint();
+            networkPlayerController.NetworkSprint();
         }
         else
         {
-            networkPlayerController.PerformWalk();
+            networkPlayerController.NetworkWalk();
         }
     }
 
@@ -259,7 +259,7 @@ public class SyncPlayer : NetworkBehaviour
     [ClientRpc]
     private void RpcSendJump()
     {
-        networkPlayerController.PerformJump();
+        networkPlayerController.NetworkJump();
     }
 
     //Static Draw Methods

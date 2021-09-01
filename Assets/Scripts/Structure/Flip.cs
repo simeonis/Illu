@@ -6,16 +6,24 @@ public class Flip : Trigger
     [Header("Functionality")]
     [SerializeField] private Transform rotationPivot;
     [SerializeField] private float flipDuration = 0.25f;
+    [SerializeField] private bool reverseFlip = false;
+    private float rotationAmount = 180f;
 
-    public override void Activate(Illu_Interactable.Button button)
+    private void Start()
+    {
+        rotationAmount *= reverseFlip ? -1 : 1;
+    }
+
+    public override void Activate(IlluInteractable.Button button)
     {
         StartCoroutine(FlipOverTime(button));
     }
 
-    private IEnumerator FlipOverTime(Illu_Interactable.Button button)
+    private IEnumerator FlipOverTime(IlluInteractable.Button button = null)
     {
+        rotationAmount *= -1;
         Quaternion currentRotation = rotationPivot.rotation;
-        Quaternion targetRotation = currentRotation * Quaternion.Euler(180f, 0f, 0f);
+        Quaternion targetRotation = currentRotation * Quaternion.Euler(rotationAmount, 0f, 0f);
 
         float percent = 0.0f;
         while (percent < 1.0f)
@@ -25,6 +33,6 @@ public class Flip : Trigger
             yield return null;
         }
 
-        button.Reset();
+        if (button) button.Reset();
     }
 }
