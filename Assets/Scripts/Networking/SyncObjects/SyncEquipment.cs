@@ -115,7 +115,7 @@ public class SyncEquipment : NetworkBehaviour
         {
             // Disable rigidbody // DO this Once not in update
             equipmentBody.isKinematic = true;
-            equipmentBody.interpolation = RigidbodyInterpolation.None;
+            equipmentBody.interpolation = RigidbodyInterpolation.Interpolate;
         }
     }
 
@@ -142,10 +142,17 @@ public class SyncEquipment : NetworkBehaviour
         }
         else
         {
-            networkIdentity.RemoveClientAuthority();
+            CmdRemoveAuth();
         }
 
     }
+
+    [Command]
+    public void CmdRemoveAuth()
+    {
+        networkIdentity.RemoveClientAuthority();
+    }
+
 
     // Authority sends Pos and Rot 
     [Command(channel = Channels.Unreliable)]
@@ -186,8 +193,8 @@ public class SyncEquipment : NetworkBehaviour
 
         if (LagDistance.magnitude >= 0.025f)
         {
-            float step = speed * Time.fixedDeltaTime; // calculate distance to move
-            transform.position = Vector3.MoveTowards(transform.position, RemoteObjPosition, step);
+            //float step = speed * Time.fixedDeltaTime; // calculate distance to move
+            equipmentBody.MovePosition(transform.position + LagDistance * Time.deltaTime * speed);
         }
     }
 }
