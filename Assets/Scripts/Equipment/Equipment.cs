@@ -38,17 +38,26 @@ public class Equipment : Interactable
 
             if (interactor.TryGetComponent(out Player player))
             {
+                player.syncEquipment.RegisterEquipment(this);
+
                 if (player.hasAuthority)
                 {
+                    Debug.Log("Player Authority");
+
+                    player.syncEquipment.SendAction(player.source.forward, player.dropForce, player.rigidbody.velocity);
                     AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
                 }
-
-                //Here's where we call sync equipment
-                player.GiveEquipmentAuthority(GetComponent<NetworkIdentity>());
-                syncEquipment.SendAction();
-
+                else
+                {
+                    Debug.Log("Player No Authority");
+                }
             }
         }
+    }
+
+    public override void OnStartAuthority()
+    {
+        Debug.Log("I now have authority");
     }
 
     public override void InteractionCancelled(Interactor interactor) { }
@@ -128,4 +137,5 @@ public class Equipment : Interactable
     public void EquipmentPrimaryReleased() { Debug.Log("Equipment Primary Released"); }
     public void EquipmentSecondaryPressed() { Debug.Log("Equipment Secondary Pressed"); }
     public void EquipmentSecondaryReleased() { Debug.Log("Equipment Secondary Released"); }
+
 }
