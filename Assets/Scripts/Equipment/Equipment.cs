@@ -38,10 +38,14 @@ public class Equipment : Interactable
 
             if (interactor.TryGetComponent(out Player player))
             {
-                AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
+                if (player.hasAuthority)
+                {
+                    AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
+                }
+
                 //Here's where we call sync equipment
                 player.GiveEquipmentAuthority(GetComponent<NetworkIdentity>());
-                syncEquipment.SendAction(player.hasAuthority);
+                syncEquipment.SendAction();
 
             }
         }
@@ -90,7 +94,8 @@ public class Equipment : Interactable
 
     public void AddForce(Vector3 direction, float force, Vector3 currVel = new Vector3())
     {
-        float random = Random.Range(-1f, 1f) * force * 2.0f;
+        float random = force * 2.0f;
+        // float random = Random.Range(-1f, 1f) * force * 2.0f;
         equipmentBody.velocity = currVel;
         equipmentBody.AddForce(direction * force, ForceMode.Impulse); // Movement force
         equipmentBody.AddTorque(new Vector3(random, random, random)); // Rotation throw force

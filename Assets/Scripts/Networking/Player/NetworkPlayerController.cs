@@ -14,6 +14,11 @@ public class NetworkPlayerController : NetworkBehaviour
     private bool isSprinting, isCrouching;
 
     public PlayerControls LocalPlayerControls => playerControls;
+    public Quaternion GetRotation() => transform.rotation; // here 
+    public void SetRotation(Quaternion rotation)
+    {
+        transform.rotation = rotation;
+    }
 
     // Transform variables
     private Transform head;
@@ -233,7 +238,7 @@ public class NetworkPlayerController : NetworkBehaviour
             // Rotate orientation so that movement matches the look direction
             orientation.RotateAround(orientation.position, transform.up, lookInput.x);
 
-        }        
+        }
     }
 
     private void MovementModifiers()

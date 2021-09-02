@@ -9,7 +9,9 @@ using Mirror;
 /// after send once more and stop syncing  
 ///////////////////////////////////////////////////////////////////////////
 
-///Alternative Idea: Sim on both and when it recieves updates let it tweak its pos 
+//TODO
+// add on collision with player pass auth 
+// add on interacte change owner 
 
 public class SyncEquipment : NetworkBehaviour
 {
@@ -27,85 +29,122 @@ public class SyncEquipment : NetworkBehaviour
     protected Quaternion RemoteObjRotation;
     protected float RemoteObjSpeed;
 
-    //Hold local RB 
+    //Hold local RB and Netowrk Identity
     protected Rigidbody equipmentBody;
-    private NetworkIdentity ni;
-
-    //local send time 
-    private float lastClientSendTime;
+    private NetworkIdentity networkIdentity;
 
     //local (Not Synced)
-    private bool calledFromAuthority = false;
-    private Vector3 oldPosition; // used to track the the speed
+    private float lastClientSendTime;
+    private Vector3 oldPosition;
+    private float oldMagnitude;
 
-    private bool dropped;
+    private bool simulating;
 
     protected void Awake()
     {
         equipmentBody = GetComponent<Rigidbody>();
-        ni = GetComponent<NetworkIdentity>();
+        networkIdentity = GetComponent<NetworkIdentity>();
     }
 
     //Update loop called on both Authority and other Clients 
     //Checks who it's on internally 
-    void Update()
+    void FixedUpdate()
     {
-        Debug.Log("Called From Authority " + calledFromAuthority);
         //If the object has been drop by a player with authority 
-        if (dropped)
+        if (simulating)
         {
-            if (calledFromAuthority)
+            //simulating physics
+            if (hasAuthority)
             {
+                //check if the velocity is increasing 
+                bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
                 // check only each 'syncInterval'
                 if (Time.time - lastClientSendTime >= syncInterval)
                 {
 
-                    float speed = (Vector3.Distance(oldPosition, transform.position)) / Time.deltaTime;
+                    float speed = (Vector3.Distance(oldPosition, transform.position)) / Time.fixedDeltaTime;
                     CmdSendPositionRotation(transform.position, transform.rotation, speed);
-                    lastClientSendTime = Time.time;
 
-                    //Update the old position to pos now
+
+                    //Update old data for checking against in the next loop
+                    lastClientSendTime = Time.time;
                     oldPosition = transform.position;
+                    oldMagnitude = equipmentBody.velocity.magnitude;
                 }
-                if (equipmentBody.velocity.magnitude == 0)
+                //simulation ended
+                else if (!increasing && equipmentBody.velocity.magnitude <= 0.1)
                 {
-                    OnStopped();
+                    ///send one more position
+                    CmdSendPositionRotation(transform.position, transform.rotation, 2);
+                    CmdOnStop();
                 }
             }
             else
             {
                 HandleRemotePositionUpdates(RemoteObjSpeed);
                 transform.rotation = RemoteObjRotation;
+                transform.position = RemoteObjPosition;
             }
         }
     }
 
     //Trigger the action being sent
     //Entry point for Syncing 
-    public void SendAction(bool hasAuthority)
+    public void SendAction()
     {
-        Debug.Log("Send Action hasAuthority " + hasAuthority);
         //Give Authority 
-        calledFromAuthority = hasAuthority;
-        dropped = true;
+        //calledFromAuthority = hasAuthority;
+        simulating = true;
+        oldPosition = transform.position;
         CmdSendDropped();
     }
 
-    //Called when the moving has stopped on Authority 
-    protected void OnStopped()
+    // Send that the obj has been dropped 
+    [Command(channel = Channels.Unreliable)]
+    public void CmdSendDropped()
     {
+        RpcDropped();
+    }
 
-        if (calledFromAuthority)
+    //If not the client with Authority TEMP disable RB
+    [ClientRpc]
+    public void RpcDropped()
+    {
+        //Checking if not the client with authority 
+        if (!hasAuthority)
         {
-
-            CmdSendPositionRotation(transform.position, transform.rotation, 0);
+            // Disable rigidbody // DO this Once not in update
+            equipmentBody.isKinematic = true;
+            equipmentBody.interpolation = RigidbodyInterpolation.None;
         }
-        else
+    }
+
+    //Command
+    [Command(channel = Channels.Unreliable)]
+    void CmdOnStop()
+    {
+        RpcOnStopped();
+    }
+
+    //Called when the moving has stopped on Authority 
+    [ClientRpc]
+    protected void RpcOnStopped()
+    {
+        simulating = false;
+
+        if (!hasAuthority)
         {
+            HandleRemotePositionUpdates(RemoteObjSpeed);
+            HandleRemotePositionUpdates(0);
             // Enable rigidbody
             equipmentBody.isKinematic = false;
             equipmentBody.interpolation = RigidbodyInterpolation.Interpolate;
         }
+        else
+        {
+            networkIdentity.RemoveClientAuthority();
+        }
+
     }
 
     // Authority sends Pos and Rot 
@@ -126,36 +165,13 @@ public class SyncEquipment : NetworkBehaviour
         RemoteObjSpeed = Speed;
     }
 
-    // Send that the obj has been dropped 
-    [Command(channel = Channels.Unreliable)]
-    public void CmdSendDropped()
-    {
-        RpcDropped();
-    }
-
-    //If not the client with Authority TEMP disable RB
-    [ClientRpc]
-    public void RpcDropped()
-    {
-        //Checking if not the client with authority 
-        if (!calledFromAuthority)
-        {
-            // Disable rigidbody // DO this Once not in update
-            equipmentBody.isKinematic = true;
-            equipmentBody.interpolation = RigidbodyInterpolation.None;
-        }
-        //Reset Authority to false // stops sending on OBJ // Can be re interacted with 
-        calledFromAuthority = false;
-        dropped = false;
-
-        Debug.Log("RPC Dropped: calledFromAuthority" + calledFromAuthority + " dropped " + dropped);
-    }
 
     //While moving on the client with authority that triggered the action
-    //Handle the received positional updates 
+    //Handle the received positional updates
     [Client]
     public void HandleRemotePositionUpdates(float speed)
     {
+        Debug.Log(speed);
         var LagDistance = RemoteObjPosition - transform.position;
 
         //High distance => sync is to much off => send to position
@@ -163,21 +179,15 @@ public class SyncEquipment : NetworkBehaviour
         {
             if (debug)
                 Debug.LogWarning("Sync Position to Great");
-            transform.position = RemoteObjPosition;
 
+            transform.position = RemoteObjPosition;
             LagDistance = Vector3.zero;
         }
 
-        if (LagDistance.magnitude < 0.025f)
+        if (LagDistance.magnitude >= 0.025f)
         {
-            //object is nearly at the same point 
-            transform.position = Vector3.zero;
-        }
-        else
-        {
-            float step = speed * Time.deltaTime; // calculate distance to move
+            float step = speed * Time.fixedDeltaTime; // calculate distance to move
             transform.position = Vector3.MoveTowards(transform.position, RemoteObjPosition, step);
         }
-
     }
 }
