@@ -110,6 +110,16 @@ public class Equipment : Interactable
         equipmentBody.AddTorque(new Vector3(random, random, random)); // Rotation throw force
     }
 
+    public void AddCorrectionalForce(Vector3 direction)
+    {
+        //float random = force * 2.0f;
+        // float random = Random.Range(-1f, 1f) * force * 2.0f;
+        //equipmentBody.velocity = currVel;
+        equipmentBody.AddForce(direction, ForceMode.Acceleration); // Movement force
+        //equipmentBody.AddTorque(new Vector3(random, random, random)); // Rotation throw force
+    }
+
+
     /* 
      * Modifies layer of each child inside of parent.
      * If inclusive is true, parent's layer is also modified.
