@@ -19,6 +19,11 @@ public class UIManager : MonoBehaviour
         listCreator = scrollView.GetComponent<ListCreator>();
     }
 
+    public void Quit()
+    {
+        Application.Quit();
+    }
+
     public void HostGame(SteamLobby lobby, List<SteamUserRecord> friends) 
     {
         hostButton.SetActive(false);

@@ -1,34 +1,38 @@
 using UnityEngine;
-using System.Collections;
 using System;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.VFX;
 
 public class MenuButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] Animator animator;
+    [SerializeField] GameObject effects;
 
-    #region IPointerDownHandler, IPointerUpHandler,  IPointerEnterHandler, IPointerExitHandler implementations
+    #region IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler implementations
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        animator.SetBool("pressed", true);
+        if (animator) animator.SetBool("pressed", true);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         MyOnClicktriggered();
-        animator.SetBool("pressed", false);
+        if (animator) animator.SetBool("pressed", false);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        animator.SetBool("hovered", true);
+        Debug.Log("Entered");
+        if (animator) animator.SetBool("hovered", true);
+        if (effects) effects.SetActive(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        animator.SetBool("hovered", false);
+        if (animator) animator.SetBool("hovered", false);
+        if (effects) effects.SetActive(false);
     }
 
     #endregion
