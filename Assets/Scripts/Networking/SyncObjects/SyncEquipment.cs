@@ -13,6 +13,9 @@ using Mirror;
 // add on collision with player pass auth 
 // add on interacte change owner 
 
+// start filling a buffer of positions
+//try sending a time / by distance to get speed = inerpolate with that 
+
 public class SyncEquipment : NetworkBehaviour
 {
     [Header("Networking Parameters")]
@@ -34,6 +37,7 @@ public class SyncEquipment : NetworkBehaviour
     //private NetworkIdentity networkIdentity;
 
     private Equipment _equipment;
+    private bool simulation;
 
     //local (Not Synced)
     private float lastClientSendTime;
@@ -44,9 +48,9 @@ public class SyncEquipment : NetworkBehaviour
 
     // protected void Awake()
     // {
-    //     equipment = GetComponentInChildren<Equipment>();
-    //     equipmentBody = GetComponent<Rigidbody>();
-    //     networkIdentity = GetComponent<NetworkIdentity>();
+    //     _equipment = GetComponentInChildren<Equipment>();
+    //     // equipmentBody = GetComponent<Rigidbody>();
+    //     // networkIdentity = GetComponent<NetworkIdentity>();
     // }
 
     //Update loop called on both Authority and other Clients 
@@ -62,47 +66,53 @@ public class SyncEquipment : NetworkBehaviour
         //check if the velocity is increasing 
         //bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
         // check only each 'syncInterval'
-        if (hasAuthority)
+        if (simulation)
         {
-            if (Time.time - lastClientSendTime >= syncInterval)
+            if (hasAuthority)
             {
+                if (Time.time - lastClientSendTime >= syncInterval)
+                {
 
-                // float speed = (Vector3.Distance(oldPosition, transform.position)) / Time.fixedDeltaTime;
+                    // float speed = (Vector3.Distance(oldPosition, transform.position)) / Time.fixedDeltaTime;
 
-                CmdSendPosition(transform.position);
+                    CmdSendPosition(transform.position);
 
-                //Update old data for checking against in the next loop
-                lastClientSendTime = Time.time;
-                // oldPosition = transform.position;
-                // oldMagnitude = equipmentBody.velocity.magnitude;
+                    //Update old data for checking against in the next loop
+                    lastClientSendTime = Time.time;
+                    // oldPosition = transform.position;
+                    // oldMagnitude = equipmentBody.velocity.magnitude;
+                }
+
+
+                // //simulation ended
+                // else if (!increasing && equipmentBody.velocity.magnitude <= 0.1)
+                // {
+                //     ///send one more position
+                //     CmdSendPositionRotation(transform.position, transform.rotation, 2);
+                //     CmdOnStop();
+                // }
+                //     }
+                //     else
+                //     {
+                //         HandleRemotePositionUpdates(RemoteObjSpeed);
+                //         transform.rotation = RemoteObjRotation;
+                //         transform.position = RemoteObjPosition;
+                //     }
+                // }
             }
-
-
-            // //simulation ended
-            // else if (!increasing && equipmentBody.velocity.magnitude <= 0.1)
-            // {
-            //     ///send one more position
-            //     CmdSendPositionRotation(transform.position, transform.rotation, 2);
-            //     CmdOnStop();
-            // }
-            //     }
-            //     else
-            //     {
-            //         HandleRemotePositionUpdates(RemoteObjSpeed);
-            //         transform.rotation = RemoteObjRotation;
-            //         transform.position = RemoteObjPosition;
-            //     }
-            // }
+            else
+            {
+                CalculateCorrectionalForce();
+                ADJPosition();
+            }
         }
-        else
-        {
-            CalculateCorrectionalForce();
-        }
+
     }
 
     public void RegisterEquipment(Equipment equipment)
     {
         _equipment = equipment;
+        simulation = true;
     }
 
     //Trigger the action being sent
@@ -218,7 +228,45 @@ public class SyncEquipment : NetworkBehaviour
         var LagDistance = RemoteObjPosition - transform.position;
 
         //try speed later
-        _equimpent.AddCorrectionalForce(LagDistance * 10f);
+        _equipment.AddCorrectionalForce(LagDistance);
     }
+
+    public void ADJPosition()
+    {
+        Vector3 currentPos = _equipment.defaultParent.position;
+        float speed = (Vector3.Distance(currentPos, RemoteObjPosition)) / Time.fixedDeltaTime;
+        _equipment.equipmentBody.MovePosition(currentPos + RemoteObjPosition * speed);
+    }
+
+    //Gizmo stuff for testing 
+    //---------------------------------------------------------------------------------------------
+
+    static void DrawDataPointGizmo(Vector3 pos, Color color)
+    {
+        // use a little offset because transform.localPosition might be in
+        // the ground in many cases
+        Vector3 offset = Vector3.up * 0.01f;
+
+        // draw position
+        Gizmos.color = color;
+        Gizmos.DrawSphere(pos + offset, 0.1f);
+
+    }
+
+    static void DrawLineBetweenDataPoints(Vector3 start, Vector3 end, Color color)
+    {
+        Gizmos.color = color;
+        Gizmos.DrawLine(start, end);
+    }
+
+    // draw the data points for easier debugging
+    void OnDrawGizmos()
+    {
+        // draw start and goal points
+        DrawDataPointGizmo(RemoteObjPosition, Color.yellow);
+        // draw line between them
+        DrawLineBetweenDataPoints(transP_equipment.defaultParent.positionosition, RemoteObjPosition, Color.cyan);
+    }
+
 }
 

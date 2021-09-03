@@ -5,10 +5,10 @@ using Mirror;
 
 public class Equipment : Interactable
 {
-    protected Rigidbody equipmentBody;
+    public Rigidbody equipmentBody;
     protected Collider equipmentCollider;
     protected bool isEquipped = false;
-    private Transform defaultParent;
+    public Transform defaultParent;
 
     //adding SyncEquipment
     private SyncEquipment syncEquipment;
@@ -115,7 +115,7 @@ public class Equipment : Interactable
         //float random = force * 2.0f;
         // float random = Random.Range(-1f, 1f) * force * 2.0f;
         //equipmentBody.velocity = currVel;
-        equipmentBody.AddForce(direction, ForceMode.Acceleration); // Movement force
+        equipmentBody.AddForce(direction, ForceMode.Force); // Movement force
         //equipmentBody.AddTorque(new Vector3(random, random, random)); // Rotation throw force
     }
 
