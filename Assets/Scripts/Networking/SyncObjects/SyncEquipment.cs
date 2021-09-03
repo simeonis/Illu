@@ -23,13 +23,13 @@ public class SyncEquipment : NetworkBehaviour
 
     [Tooltip("How far the remote player can be off before snapping to remote position")]
     public float allowedLagDistance = 2.0f;
+    public float allowedRotationAngle = 5f;
 
     [SerializeField] private bool debug;
 
     //Store the Remote Obj data on the client it was sent too
     private Vector3 RemoteObjPosition;
-    //protected Quaternion RemoteObjRotation;
-    //protected float RemoteObjSpeed;
+    private Quaternion RemoteObjRotation;
 
     private Equipment _equipment;
     private Rigidbody equipmentBody;
@@ -55,7 +55,7 @@ public class SyncEquipment : NetworkBehaviour
             bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
             if (Time.time - lastClientSendTime >= syncInterval)
             {
-                CmdSendPosition(transform.position);
+                CmdSendPositionRotation(transform.position, transform.rotation);
 
                 // Update old data for checking against in the next loop
                 lastClientSendTime = Time.time;
@@ -76,6 +76,7 @@ public class SyncEquipment : NetworkBehaviour
         if (simulation && !hasAuthority)
         {
             HandleRemotePositionUpdates();
+            HandleRemoteRotationUpdates();
         }
     }
 
@@ -132,17 +133,17 @@ public class SyncEquipment : NetworkBehaviour
 
     // Authority sends Pos and Rot 
     [Command(channel = Channels.Unreliable)]
-    void CmdSendPosition(Vector3 position)
+    void CmdSendPositionRotation(Vector3 position, Quaternion rotation)
     {
-        RPCSyncPosition(position);
+        RPCSyncPosition(position, rotation);
     }
 
     //Server broadcasts Pos and Rot to all clients  
     [ClientRpc]
-    public void RPCSyncPosition(Vector3 position)
+    public void RPCSyncPosition(Vector3 position, Quaternion rotation)
     {
         RemoteObjPosition = position;
-        // RemoteObjRotation = Rotation;
+        RemoteObjRotation = rotation;
         // RemoteObjSpeed = Speed;
     }
 
@@ -150,7 +151,7 @@ public class SyncEquipment : NetworkBehaviour
     //While moving on the client with authority that triggered the action
     //Handle the received positional updates
     [Client]
-    public void HandleRemotePositionUpdates()
+    private void HandleRemotePositionUpdates()
     {
         var LagDistance = RemoteObjPosition - transform.position;
 
@@ -165,6 +166,24 @@ public class SyncEquipment : NetworkBehaviour
         if (LagDistance.magnitude >= 0.025f)
         {
             transform.position = Vector3.Lerp(transform.position, RemoteObjPosition, 0.5f);
+        }
+    }
+
+    [Client]
+    private void HandleRemoteRotationUpdates()
+    {
+        var LagRotation = Quaternion.Angle(RemoteObjRotation, transform.rotation);
+
+        if (LagRotation > allowedRotationAngle)
+        {
+            if (debug) Debug.LogWarning("Sync Rotation too Great! Snapping equipment rotation.");
+            transform.rotation = RemoteObjRotation;
+            LagRotation = 0f;
+        }
+
+        if (LagRotation >= 0.5f)
+        {
+            transform.rotation = Quaternion.Lerp(transform.rotation, RemoteObjRotation, 0.5f);
         }
     }
 
