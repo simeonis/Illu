@@ -12,8 +12,6 @@ public class Player : Interactor
     public bool Authority;
     public NetworkConnection networkConnection;
 
-    public SyncEquipment syncEquipment;
-
     protected override void Awake()
     {
         base.Awake();
@@ -25,14 +23,6 @@ public class Player : Interactor
         // Alternate Fire
         playerControls.Land.AlternateFire.performed += context => AlternateFirePressed();
         playerControls.Land.AlternateFire.canceled += context => AlternateFireReleased();
-
-        syncEquipment = GetComponentInChildren<SyncEquipment>();
-
-        // if (hasAuthority)
-        // {
-        //     Authority = hasAuthority;
-        //     networkConnection = GetComponent<NetworkIdentity>().connectionToClient;
-        // }
     }
 
     protected override void Start()
@@ -92,13 +82,8 @@ public class Player : Interactor
 
     //Sync Equipment
     [Command]
-    public void GiveEquipmentAuthority(NetworkIdentity equipNI)
+    public void GiveAuthority(NetworkIdentity equipNI)
     {
         equipNI.AssignClientAuthority(connectionToClient);
-    }
-    [Command]
-    public void CmdRemoveAuth(NetworkIdentity networkIdentity)
-    {
-        networkIdentity.RemoveClientAuthority();
     }
 }

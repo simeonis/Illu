@@ -1,7 +1,6 @@
 using UnityEngine;
 using Mirror;
 
-
 ///////////////////////////////////////////////////////////////////////////
 /// in equimpent if released from player
 /// start sending position and rotation to all client copies
@@ -32,148 +31,104 @@ public class SyncEquipment : NetworkBehaviour
     //protected Quaternion RemoteObjRotation;
     //protected float RemoteObjSpeed;
 
-    //Hold local RB and Netowrk Identity
-    //private Rigidbody equipmentBody;
-    //private NetworkIdentity networkIdentity;
-
     private Equipment _equipment;
-    private bool simulation;
+    private Rigidbody equipmentBody;
 
     //local (Not Synced)
     private float lastClientSendTime;
-    //private Vector3 oldPosition;
-    //private float oldMagnitude;
 
-    //private bool simulating;
+    private bool simulation = false;
+    private float oldMagnitude = 0f;
 
-    // protected void Awake()
-    // {
-    //     _equipment = GetComponentInChildren<Equipment>();
-    //     // equipmentBody = GetComponent<Rigidbody>();
-    //     // networkIdentity = GetComponent<NetworkIdentity>();
-    // }
+    void Start()
+    {
+        _equipment = GetComponent<Equipment>();
+        equipmentBody = _equipment.equipmentBody;
+    }
 
     //Update loop called on both Authority and other Clients 
     //Checks who it's on internally 
     void FixedUpdate()
     {
-        // //If the object has been drop by a player with authority 
-        // if (simulating)
-        // {
-        //     //simulating physics
-        //     if (hasAuthority)
-        //     {
-        //check if the velocity is increasing 
-        //bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
-        // check only each 'syncInterval'
-        if (simulation)
+        if (simulation && hasAuthority)
         {
-            if (hasAuthority)
+            bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
+            if (Time.time - lastClientSendTime >= syncInterval)
             {
-                if (Time.time - lastClientSendTime >= syncInterval)
-                {
+                CmdSendPosition(transform.position);
 
-                    // float speed = (Vector3.Distance(oldPosition, transform.position)) / Time.fixedDeltaTime;
-
-                    CmdSendPosition(transform.position);
-
-                    //Update old data for checking against in the next loop
-                    lastClientSendTime = Time.time;
-                    // oldPosition = transform.position;
-                    // oldMagnitude = equipmentBody.velocity.magnitude;
-                }
-
-
-                // //simulation ended
-                // else if (!increasing && equipmentBody.velocity.magnitude <= 0.1)
-                // {
-                //     ///send one more position
-                //     CmdSendPositionRotation(transform.position, transform.rotation, 2);
-                //     CmdOnStop();
-                // }
-                //     }
-                //     else
-                //     {
-                //         HandleRemotePositionUpdates(RemoteObjSpeed);
-                //         transform.rotation = RemoteObjRotation;
-                //         transform.position = RemoteObjPosition;
-                //     }
-                // }
+                // Update old data for checking against in the next loop
+                lastClientSendTime = Time.time;
+                oldMagnitude = equipmentBody.velocity.magnitude;
             }
-            else
+            // Simulation ended
+            else if (!increasing && equipmentBody.velocity.magnitude <= 0.1)
             {
-                CalculateCorrectionalForce();
-                ADJPosition();
+                // Send one more position
+                // CmdSendPosition(transform.position);
+                CmdOnStop();
             }
         }
-
     }
 
-    public void RegisterEquipment(Equipment equipment)
+    void Update()
     {
-        _equipment = equipment;
-        simulation = true;
+        if (simulation && !hasAuthority)
+        {
+            HandleRemotePositionUpdates();
+        }
     }
 
     //Trigger the action being sent
     //Entry point for Syncing 
-    public void SendAction(Vector3 direction, float force, Vector3 currVel)
+    public void Trigger()
     {
-        //Give Authority 
-        //calledFromAuthority = hasAuthority;
-        // simulating = true;
-        // oldPosition = transform.position;
-
-        CmdSendAction(direction, force, currVel);
+        CmdTrigger();
     }
 
-    // Send that the obj has been dropped 
     [Command(channel = Channels.Unreliable)]
-    public void CmdSendAction(Vector3 direction, float force, Vector3 currVel)
+    private void CmdTrigger()
     {
-        RpcAction(direction, force, currVel);
+        RPCTrigger();
     }
 
-    //If not the client with Authority TEMP disable RB
     [ClientRpc]
-    public void RpcAction(Vector3 direction, float force, Vector3 currVel)
+    private void RPCTrigger()
     {
-        //Checking if not the client with authority 
+        if (!hasAuthority) 
+        {
+            equipmentBody.isKinematic = true;
+            equipmentBody.interpolation = RigidbodyInterpolation.None;
+        }
+
+        simulation = true;
+    }
+
+    //Command
+    [Command(channel = Channels.Unreliable)]
+    void CmdOnStop()
+    {
+        RpcOnStopped();
+    }
+
+    //Called when the moving has stopped on Authority 
+    [ClientRpc]
+    protected void RpcOnStopped()
+    {
+        simulation = false;
         if (!hasAuthority)
         {
-            _equipment.AddForce(direction, force, currVel);
+            equipmentBody.isKinematic = false;
+            equipmentBody.interpolation = RigidbodyInterpolation.Interpolate;
         }
+        else RemoveAuthority();
     }
 
-    // //Command
-    // [Command(channel = Channels.Unreliable)]
-    // void CmdOnStop()
-    // {
-    //     RpcOnStopped();
-    // }
-
-    // //Called when the moving has stopped on Authority 
-    // [ClientRpc]
-    // protected void RpcOnStopped()
-    // {
-    //     simulating = false;
-
-    //     if (!hasAuthority)
-    //     {
-    //         HandleRemotePositionUpdates(RemoteObjSpeed);
-    //         HandleRemotePositionUpdates(0);
-    //         // Enable rigidbody
-    //         equipmentBody.isKinematic = false;
-    //         equipmentBody.interpolation = RigidbodyInterpolation.Interpolate;
-    //     }
-    //     else
-    //     {
-    //         CmdRemoveAuth();
-    //     }
-
-    // }
-
-
+    [Command]
+    private void RemoveAuthority()
+    {
+        GetComponent<NetworkIdentity>().RemoveClientAuthority();
+    }
 
     // Authority sends Pos and Rot 
     [Command(channel = Channels.Unreliable)]
@@ -192,50 +147,25 @@ public class SyncEquipment : NetworkBehaviour
     }
 
 
-    // //While moving on the client with authority that triggered the action
-    // //Handle the received positional updates
-    // [Client]
-    // public void HandleRemotePositionUpdates(float speed)
-    // {
-    //     Debug.Log(speed);
-    //     var LagDistance = RemoteObjPosition - transform.position;
-
-    //     //High distance => sync is to much off => send to position
-    //     if (LagDistance.magnitude > allowedLagDistance)
-    //     {
-    //         if (debug)
-    //             Debug.LogWarning("Sync Position to Great");
-
-    //         transform.position = RemoteObjPosition;
-    //         LagDistance = Vector3.zero;
-    //     }
-
-    //     if (LagDistance.magnitude >= 0.025f)
-    //     {
-    //         //float step = speed * Time.fixedDeltaTime; // calculate distance to move
-    //         equipmentBody.MovePosition(transform.position + LagDistance * Time.deltaTime * speed);
-    //     }
-    // }
-
-
-
-
-    //check remote position against where it is 
-    //determine a vector to correct on
-    //apply force on this vector 
-    public void CalculateCorrectionalForce()
+    //While moving on the client with authority that triggered the action
+    //Handle the received positional updates
+    [Client]
+    public void HandleRemotePositionUpdates()
     {
         var LagDistance = RemoteObjPosition - transform.position;
 
-        //try speed later
-        _equipment.AddCorrectionalForce(LagDistance);
-    }
+        // High distance => sync is to much off => send to position
+        if (LagDistance.magnitude > allowedLagDistance)
+        {
+            if (debug) Debug.LogWarning("Sync Position too Great! Teleporting equipment.");
+            transform.position = RemoteObjPosition;
+            LagDistance = Vector3.zero;
+        }
 
-    public void ADJPosition()
-    {
-        Vector3 currentPos = _equipment.defaultParent.position;
-        float speed = (Vector3.Distance(currentPos, RemoteObjPosition)) / Time.fixedDeltaTime;
-        _equipment.equipmentBody.MovePosition(currentPos + RemoteObjPosition * speed);
+        if (LagDistance.magnitude >= 0.025f)
+        {
+            transform.position = Vector3.Lerp(transform.position, RemoteObjPosition, 0.5f);
+        }
     }
 
     //Gizmo stuff for testing 
@@ -262,10 +192,13 @@ public class SyncEquipment : NetworkBehaviour
     // draw the data points for easier debugging
     void OnDrawGizmos()
     {
-        // draw start and goal points
-        DrawDataPointGizmo(RemoteObjPosition, Color.yellow);
-        // draw line between them
-        DrawLineBetweenDataPoints(transP_equipment.defaultParent.positionosition, RemoteObjPosition, Color.cyan);
+        if (simulation)
+        {
+            // draw start and goal points
+            DrawDataPointGizmo(RemoteObjPosition, Color.yellow);
+            // draw line between them
+            DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
+        }
     }
 
 }

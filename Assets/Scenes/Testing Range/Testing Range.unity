@@ -17573,6 +17573,8 @@ MonoBehaviour:
   syncInterval: 0.1
   interactMessage: Cube
   enabled: 1
+  equipmentBody: {fileID: 0}
+  defaultParent: {fileID: 0}
 --- !u!65 &1339642466
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -17681,7 +17683,7 @@ MonoBehaviour:
   syncInterval: 0.1
   moveTriggerSensitivity: 0.01
   allowedLagDistance: 2
-  debug: 1
+  debug: 0
 --- !u!43 &1368622195
 Mesh:
   m_ObjectHideFlags: 0

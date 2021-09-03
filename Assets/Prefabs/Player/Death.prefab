@@ -595,7 +595,6 @@ GameObject:
   - component: {fileID: 1596715246450041839}
   - component: {fileID: 8453773999225703103}
   - component: {fileID: 8547424904321008786}
-  - component: {fileID: 7919994448206139210}
   m_Layer: 0
   m_Name: Death
   m_TagString: Player
@@ -812,6 +811,7 @@ MonoBehaviour:
   dropForce: 5
   rigidbody: {fileID: 0}
   Authority: 0
+  syncEquipment: {fileID: 0}
 --- !u!114 &8453773999225703103
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -838,20 +838,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
---- !u!114 &7919994448206139210
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8453773999225703041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc2283316da7e4737a8edac991c60f40, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  moveTriggerSensitivity: 0.01
-  allowedLagDistance: 2
-  debug: 0

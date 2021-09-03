@@ -1,27 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
 public class Equipment : Interactable
 {
-    public Rigidbody equipmentBody;
+    [HideInInspector] public Rigidbody equipmentBody;
     protected Collider equipmentCollider;
     protected bool isEquipped = false;
-    public Transform defaultParent;
-
-    //adding SyncEquipment
+    private Transform defaultParent;
     private SyncEquipment syncEquipment;
 
     protected override void Awake()
     {
         equipmentBody = GetComponent<Rigidbody>();
         equipmentCollider = GetComponent<Collider>();
-        defaultParent = transform.parent;
-
-        //Added for SyncEquipment 
         syncEquipment = GetComponent<SyncEquipment>();
-
     }
 
     public override void Interaction(Interactor interactor)
@@ -38,26 +30,15 @@ public class Equipment : Interactable
 
             if (interactor.TryGetComponent(out Player player))
             {
-                player.syncEquipment.RegisterEquipment(this);
-
-                if (player.hasAuthority)
-                {
-                    Debug.Log("Player Authority");
-
-                    player.syncEquipment.SendAction(player.source.forward, player.dropForce, player.rigidbody.velocity);
-                    AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
-                }
-                else
-                {
-                    Debug.Log("Player No Authority");
-                }
+                player.GiveAuthority(GetComponent<NetworkIdentity>());
+                AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
             }
         }
     }
 
     public override void OnStartAuthority()
     {
-        Debug.Log("I now have authority");
+        syncEquipment.Trigger();
     }
 
     public override void InteractionCancelled(Interactor interactor) { }
