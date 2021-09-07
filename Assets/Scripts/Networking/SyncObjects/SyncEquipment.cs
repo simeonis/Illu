@@ -183,17 +183,17 @@ public class SyncEquipment : NetworkBehaviour
             //get difference 
             //fixedDeltaTime
 
-            long timeDiff = 0;
+            double timeDiff = 0;
 
             if(count > 1)
             {
-                timeDiff = (receivedPositions[index].timeSent - receivedPositions[index - 1].timeSent);
+                timeDiff = new TimeSpan(receivedPositions[index].timeSent - receivedPositions[index - 1].timeSent).TotalSeconds;
             }
             else //dont have a first value
             {
-                timeDiff = (receivedPositions[index].timeSent - triggerTimeStamp);
+                timeDiff = new TimeSpan(receivedPositions[index].timeSent - triggerTimeStamp).TotalSeconds;
             }
-
+           
             percent += Time.deltaTime / (float)timeDiff;
             var currentTarget = receivedPositions[index].position;
             var LagDistance = currentTarget- transform.position;
