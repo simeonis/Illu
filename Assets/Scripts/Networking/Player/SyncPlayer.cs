@@ -176,7 +176,7 @@ public class SyncPlayer : NetworkBehaviour
         Vector3 unwantedUp = Vector3.Dot(LagDistance, orientation.up) * orientation.up;
         Vector3 FinalLagDistance = LagDistance - unwantedUp;
 
-        Debug.Log("LagDistance " + LagDistance);
+        
 
         if (LagDistance.magnitude < 0.025f)
         {   //Player is nearly at the point

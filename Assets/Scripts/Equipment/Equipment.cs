@@ -29,8 +29,8 @@ public class Equipment : Interactable
             Enable();
 
             if (interactor.TryGetComponent(out Player player))
-            {
-                player.GiveAuthority(GetComponent<NetworkIdentity>());
+            {   
+                if(player.hasAuthority)player.GiveAuthority(GetComponent<NetworkIdentity>());
                 AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
             }
         }

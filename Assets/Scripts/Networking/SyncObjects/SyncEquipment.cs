@@ -43,7 +43,7 @@ public class SyncEquipment : NetworkBehaviour
 
     private List<Vector3> receivedPositions;
 
-    private bool ended = false;
+    private int index = 0;
 
     void Start()
     {
@@ -79,10 +79,10 @@ public class SyncEquipment : NetworkBehaviour
 
     void Update()
     {
-        if (!ended && !hasAuthority)
+        if (!hasAuthority)
         {
             HandleRemotePositionUpdates();
-            HandleRemoteRotationUpdates();
+            //HandleRemoteRotationUpdates();
         }
     }
 
@@ -102,8 +102,10 @@ public class SyncEquipment : NetworkBehaviour
     [ClientRpc]
     private void RPCTrigger()
     {
+        Debug.Log("Trigger called!");
         if (!hasAuthority) 
         {
+            percent = 0;
             equipmentBody.isKinematic = true;
             equipmentBody.interpolation = RigidbodyInterpolation.None;
         }
@@ -123,10 +125,14 @@ public class SyncEquipment : NetworkBehaviour
     protected void RpcOnStopped()
     {
         simulation = false;
+        
         if (!hasAuthority)
         {
+            index = 0;
             equipmentBody.isKinematic = false;
+            receivedPositions.Clear();
             equipmentBody.interpolation = RigidbodyInterpolation.Interpolate;
+            equipmentBody.velocity = new Vector3();
         }
         else RemoveAuthority();
     }
@@ -148,28 +154,32 @@ public class SyncEquipment : NetworkBehaviour
     [ClientRpc]
     public void RPCSyncPosition(Vector3 position, Quaternion rotation)
     {
-
-        receivedPositions.Add(position);
-        //RemoteObjPosition = position;
-        RemoteObjRotation = rotation;
-        // RemoteObjSpeed = Speed;
+        if(!hasAuthority)
+        {
+            receivedPositions.Add(position);
+            //RemoteObjPosition = position;
+            RemoteObjRotation = rotation;
+            // RemoteObjSpeed = Speed;
+        }
     }
 
 
     //While moving on the client with authority that triggered the action
     //Handle the received positional updates
+
+    private float percent = 0.0f;
+
     [Client]
     private void HandleRemotePositionUpdates()
     {
-        var index = 0;            
-        var lerpSpeed =  Time.deltaTime * 5.0f;
         int count = receivedPositions.Count;
-        if(count != 0 && index <= receivedPositions.Count)
+      
+        if(count > 0 && index <= count - 1)
         {
+            percent += Time.deltaTime / (syncInterval / 2);
             var currentTarget = receivedPositions[index];
+            var currentSource = transform.position;
             var LagDistance = currentTarget- transform.position;
-
-            Debug.Log("lerpSpeed " + lerpSpeed);
 
             // High distance => sync is to much off => send to position
             // if (LagDistance.magnitude > allowedLagDistance)
@@ -179,37 +189,33 @@ public class SyncEquipment : NetworkBehaviour
             //     LagDistance = Vector3.zero;
             // }
 
-            if (LagDistance.magnitude >= 0.025f)
+            
+            transform.position = Vector3.Lerp(transform.position, currentTarget, percent);
+            
+            if(percent >= 1)
             {
-                transform.position = Vector3.Lerp(transform.position, currentTarget, lerpSpeed);
-            }
-
-            if(transform.position == currentTarget)
-            {
+                percent = 0;
                 index++;
             }
         }
-        else{
-            ended = true;
-        }
     }
 
-    [Client]
-    private void HandleRemoteRotationUpdates()
-    {
-        var LagRotation = Quaternion.Angle(RemoteObjRotation, transform.rotation);
+    // [Client]
+    // private void HandleRemoteRotationUpdates()
+    // {
+    //     var LagRotation = Quaternion.Angle(RemoteObjRotation, transform.rotation);
   
-        if (LagRotation > allowedRotationAngle)
-        {
-            if (debug) Debug.LogWarning("Sync Rotation too Great! Snapping equipment rotation.");
-            transform.rotation = RemoteObjRotation;
-            LagRotation = 0f;
-        }
-        if (LagRotation >= 0.5f)
-        {
-            transform.rotation = Quaternion.Lerp(transform.rotation, RemoteObjRotation, 0.5f);
-        }
-    }
+    //     if (LagRotation > allowedRotationAngle)
+    //     {
+    //         if (debug) Debug.LogWarning("Sync Rotation too Great! Snapping equipment rotation.");
+    //         transform.rotation = RemoteObjRotation;
+    //         LagRotation = 0f;
+    //     }
+    //     if (LagRotation >= 0.5f)
+    //     {
+    //         transform.rotation = Quaternion.Lerp(transform.rotation, RemoteObjRotation, 0.5f);
+    //     }
+    // }
 
 
     //Gizmo stuff for testing 
@@ -251,3 +257,28 @@ public class SyncEquipment : NetworkBehaviour
 
 }
 
+// public struct MyData
+// {
+//     public Vector3 position { get; private set; }
+//     public DateTime timeSent { get; private set; }
+
+//     public MyData(Vector3 position, DateTime timeSent)
+//     {
+//         this.position = someValue;
+//         this.timeSent = anotherValue;
+//     }
+// }
+
+// public static class CustomReadWriteFunctions 
+// {
+//     public static void WriteMyType(this NetworkWriter writer, MyData myData)
+//     {
+//         writer.WriteVector3(myData.position);
+//         writer.WriteSingle(myData.timeSent.Ticks);
+//     }
+
+//     public static MyData ReadMyType(this NetworkReader reader)
+//     {
+//         return new MyData(reader.ReadVector3(), reader.ReadSingle());
+//     }
+// }
