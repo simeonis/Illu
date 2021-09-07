@@ -1,95 +1,50 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private GameObject lobbyUI = null;
-    [SerializeField] private GameObject hostButton = null;
-    [SerializeField] private GameObject inviteButton = null;
-    [SerializeField] private GameObject startButton = null;
-    [SerializeField] private GameObject joinButton = null;
-    [SerializeField] private GameObject backButton = null;
-    [SerializeField] private GameObject scrollView = null;
-
-    private ListCreator listCreator;
-
-    void Start()
-    {
-        listCreator = scrollView.GetComponent<ListCreator>();
+    [System.Serializable]
+    public struct SCREENS {
+        public GameObject Root;
+        public GameObject Play;
+        public GameObject Host;
+        public GameObject Friend;
+        public GameObject Join;
+        public GameObject Settings;
     }
+
+    [SerializeField] private SCREENS screens;
 
     public void Quit()
     {
         Application.Quit();
     }
 
-    public void HostGame(SteamLobby lobby, List<SteamUserRecord> friends) 
-    {
-        hostButton.SetActive(false);
-        inviteButton.SetActive(true);
-        startButton.SetActive(true);
-
-        listCreator.renderList(friends, lobby);
-    }
-
     public void HostGameFailed()
     {
-        hostButton.SetActive(true);
-        inviteButton.SetActive(false);
-        startButton.SetActive(false);
+        screens.Host.SetActive(false);
+        screens.Play.SetActive(true);
     }
 
     // CLIENT joined HOST
     public void JoinedHost()
     {
-        hostButton.SetActive(false);
-        joinButton.SetActive(false);
-        // Should replace with "Ready" button
-        // startButton.SetActive(true);
+        // Show HOST in CLIENT's Lobby (top right)
     }
 
     // HOST received CLIENT
     public void ClientJoinedHost()
     {
-        scrollView.SetActive(false);
-        backButton.SetActive(false);
-        inviteButton.SetActive(true);
-        startButton.SetActive(true);
-        // Should replace with "Ready" button
-        // Once both players hit the "Ready" button, then activate start button
-        // startButton.SetActive(true);
-    }
-
-    public void OpenFriendList()
-    {
-        scrollView.SetActive(true);
-        backButton.SetActive(true);
-        inviteButton.SetActive(false);
-        startButton.SetActive(false);
-    }
-
-    public void ExitFriendList()
-    {
-        scrollView.SetActive(false);
-        backButton.SetActive(false);
-        inviteButton.SetActive(true);
-        startButton.SetActive(true);
+        // Show CLIENT in HOST's Lobby (top right)
     }
 
     // TODO: Add SteamRecord parameter so CLIENT knows which HOST invited them
     public void InviteReceived()
     {
-        joinButton.SetActive(true);
-    }
-
-    public void InviteAccepted()
-    {
-        joinButton.SetActive(false);
+        // Enable "Accept Invite Button"
     }
 
     public void GameStarted()
     {
-        lobbyUI.SetActive(false);
+        //lobbyUI.SetActive(false);
     }
 }

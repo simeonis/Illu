@@ -57,36 +57,6 @@ MonoBehaviour:
     m_Value: 0.001
     min: 0.001
     max: 1
---- !u!114 &-3796593793583451101
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a6b00fcf518bb94a90b408492e07b44, type: 3}
-  m_Name: FilmGrain
-  m_EditorClassIdentifier: 
-  active: 1
-  m_AdvancedMode: 0
-  type:
-    m_OverrideState: 1
-    m_Value: 0
-  intensity:
-    m_OverrideState: 1
-    m_Value: 0.2
-    min: 0
-    max: 1
-  response:
-    m_OverrideState: 1
-    m_Value: 0.8
-    min: 0
-    max: 1
-  texture:
-    m_OverrideState: 0
-    m_Value: {fileID: 0}
 --- !u!114 &-3243069662715546157
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -274,7 +244,6 @@ MonoBehaviour:
   - {fileID: -3243069662715546157}
   - {fileID: 3643088821003939093}
   - {fileID: 4027206109919702582}
-  - {fileID: -3796593793583451101}
   - {fileID: -7001924691934126416}
 --- !u!114 &3643088821003939093
 MonoBehaviour:
@@ -441,7 +410,7 @@ MonoBehaviour:
   m_Name: Exposure
   m_EditorClassIdentifier: 
   active: 1
-  m_AdvancedMode: 0
+  m_AdvancedMode: 1
   mode:
     m_OverrideState: 1
     m_Value: 0
@@ -449,11 +418,11 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 0
   luminanceSource:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 1
   fixedExposure:
     m_OverrideState: 1
-    m_Value: 1.5
+    m_Value: 15
   compensation:
     m_OverrideState: 1
     m_Value: 0
@@ -464,7 +433,7 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 1.5
   curveMap:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value:
       serializedVersion: 2
       m_Curve:
@@ -490,7 +459,7 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   limitMinCurveMap:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value:
       serializedVersion: 2
       m_Curve:
@@ -516,7 +485,7 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   limitMaxCurveMap:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value:
       serializedVersion: 2
       m_Curve:
@@ -553,7 +522,7 @@ MonoBehaviour:
     m_Value: 4
     min: 0.001
   weightTextureMask:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {fileID: 0}
   histogramPercentages:
     m_OverrideState: 1
@@ -561,25 +530,25 @@ MonoBehaviour:
     min: 0
     max: 100
   histogramUseCurveRemapping:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 0
   targetMidGray:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 0
   centerAroundExposureTarget:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 0
   proceduralCenter:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {x: 0.5, y: 0.5}
   proceduralRadii:
     m_OverrideState: 1
     m_Value: {x: 0.5, y: 0.5}
   maskMinIntensity:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: -30
   maskMaxIntensity:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 30
   proceduralSoftness:
     m_OverrideState: 1

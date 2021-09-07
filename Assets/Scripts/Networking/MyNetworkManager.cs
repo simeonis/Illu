@@ -24,7 +24,7 @@ public class MyNetworkManager : NetworkManager
     [SerializeField] private UIManager UIManager;
 
     private int numConnections = 0;
-    private readonly string menuScene = "LaunchScreen";
+    private readonly string menuScene = "MainMenu";
 
     public List<NetworkRoomPlayer> RoomPlayers { get; } = new List<NetworkRoomPlayer>();
     public List<NetworkGamePlayer> GamePlayers { get; } = new List<NetworkGamePlayer>();
@@ -55,7 +55,7 @@ public class MyNetworkManager : NetworkManager
         numConnections++;
         Debug.Log("Number of players: " + numConnections);
 
-        if (numConnections == maxConnections)
+        if (numConnections <= maxConnections)
         {
             UIManager.ClientJoinedHost();
         }
