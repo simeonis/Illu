@@ -1,5 +1,6 @@
 using UnityEngine;
 using Mirror;
+using System.Collections.Generic;
 
 ///////////////////////////////////////////////////////////////////////////
 /// in equimpent if released from player
@@ -40,10 +41,15 @@ public class SyncEquipment : NetworkBehaviour
     private bool simulation = false;
     private float oldMagnitude = 0f;
 
+    private List<Vector3> receivedPositions;
+
+    private bool ended = false;
+
     void Start()
     {
         _equipment = GetComponent<Equipment>();
         equipmentBody = _equipment.equipmentBody;
+        receivedPositions = new List<Vector3>();
     }
 
     //Update loop called on both Authority and other Clients 
@@ -73,7 +79,7 @@ public class SyncEquipment : NetworkBehaviour
 
     void Update()
     {
-        if (simulation && !hasAuthority)
+        if (!ended && !hasAuthority)
         {
             HandleRemotePositionUpdates();
             HandleRemoteRotationUpdates();
@@ -142,7 +148,9 @@ public class SyncEquipment : NetworkBehaviour
     [ClientRpc]
     public void RPCSyncPosition(Vector3 position, Quaternion rotation)
     {
-        RemoteObjPosition = position;
+
+        receivedPositions.Add(position);
+        //RemoteObjPosition = position;
         RemoteObjRotation = rotation;
         // RemoteObjSpeed = Speed;
     }
@@ -153,19 +161,36 @@ public class SyncEquipment : NetworkBehaviour
     [Client]
     private void HandleRemotePositionUpdates()
     {
-        var LagDistance = RemoteObjPosition - transform.position;
-
-        // High distance => sync is to much off => send to position
-        if (LagDistance.magnitude > allowedLagDistance)
+        var index = 0;            
+        var lerpSpeed =  Time.deltaTime * 5.0f;
+        int count = receivedPositions.Count;
+        if(count != 0 && index <= receivedPositions.Count)
         {
-            if (debug) Debug.LogWarning("Sync Position too Great! Teleporting equipment.");
-            transform.position = RemoteObjPosition;
-            LagDistance = Vector3.zero;
+            var currentTarget = receivedPositions[index];
+            var LagDistance = currentTarget- transform.position;
+
+            Debug.Log("lerpSpeed " + lerpSpeed);
+
+            // High distance => sync is to much off => send to position
+            // if (LagDistance.magnitude > allowedLagDistance)
+            // {
+            //     if (debug) Debug.LogWarning("Sync Position too Great! Teleporting equipment.");
+            //     transform.position = RemoteObjPosition;
+            //     LagDistance = Vector3.zero;
+            // }
+
+            if (LagDistance.magnitude >= 0.025f)
+            {
+                transform.position = Vector3.Lerp(transform.position, currentTarget, lerpSpeed);
+            }
+
+            if(transform.position == currentTarget)
+            {
+                index++;
+            }
         }
-
-        if (LagDistance.magnitude >= 0.025f)
-        {
-            transform.position = Vector3.Lerp(transform.position, RemoteObjPosition, 0.5f);
+        else{
+            ended = true;
         }
     }
 
@@ -173,19 +198,19 @@ public class SyncEquipment : NetworkBehaviour
     private void HandleRemoteRotationUpdates()
     {
         var LagRotation = Quaternion.Angle(RemoteObjRotation, transform.rotation);
-
+  
         if (LagRotation > allowedRotationAngle)
         {
             if (debug) Debug.LogWarning("Sync Rotation too Great! Snapping equipment rotation.");
             transform.rotation = RemoteObjRotation;
             LagRotation = 0f;
         }
-
         if (LagRotation >= 0.5f)
         {
             transform.rotation = Quaternion.Lerp(transform.rotation, RemoteObjRotation, 0.5f);
         }
     }
+
 
     //Gizmo stuff for testing 
     //---------------------------------------------------------------------------------------------
@@ -198,7 +223,7 @@ public class SyncEquipment : NetworkBehaviour
 
         // draw position
         Gizmos.color = color;
-        Gizmos.DrawSphere(pos + offset, 0.1f);
+        Gizmos.DrawSphere(pos + offset, 0.05f);
 
     }
 
@@ -211,13 +236,17 @@ public class SyncEquipment : NetworkBehaviour
     // draw the data points for easier debugging
     void OnDrawGizmos()
     {
-        if (simulation)
-        {
-            // draw start and goal points
-            DrawDataPointGizmo(RemoteObjPosition, Color.yellow);
-            // draw line between them
-            DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
-        }
+        // if (simulation)
+        // {
+            foreach(Vector3 pos in receivedPositions)
+            {
+                // draw start and goal points
+                DrawDataPointGizmo(pos, Color.yellow);
+                // draw line between them
+                //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
+            }
+            
+       // }
     }
 
 }
