@@ -1,6 +1,7 @@
 using UnityEngine;
 using Mirror;
 using System.Collections.Generic;
+using System;
 
 ///////////////////////////////////////////////////////////////////////////
 /// in equimpent if released from player
@@ -41,7 +42,8 @@ public class SyncEquipment : NetworkBehaviour
     private bool simulation = false;
     private float oldMagnitude = 0f;
 
-    private List<Vector3> receivedPositions;
+    private List<MyNetworkData> receivedPositions;
+    private long triggerTimeStamp;
 
     private int index = 0;
 
@@ -49,7 +51,7 @@ public class SyncEquipment : NetworkBehaviour
     {
         _equipment = GetComponent<Equipment>();
         equipmentBody = _equipment.equipmentBody;
-        receivedPositions = new List<Vector3>();
+        receivedPositions = new List<MyNetworkData>();
     }
 
     //Update loop called on both Authority and other Clients 
@@ -61,7 +63,8 @@ public class SyncEquipment : NetworkBehaviour
             bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
             if (Time.time - lastClientSendTime >= syncInterval)
             {
-                CmdSendPositionRotation(transform.position, transform.rotation);
+                MyNetworkData currentPos = new MyNetworkData(transform.position, DateTime.Now.Ticks);
+                CmdSendPositionRotation(currentPos, transform.rotation);
 
                 // Update old data for checking against in the next loop
                 lastClientSendTime = Time.time;
@@ -88,19 +91,19 @@ public class SyncEquipment : NetworkBehaviour
 
     //Trigger the action being sent
     //Entry point for Syncing 
-    public void Trigger()
+    public void Trigger(long now)
     {
-        CmdTrigger();
+        CmdTrigger(now);
     }
 
     [Command(channel = Channels.Unreliable)]
-    private void CmdTrigger()
+    private void CmdTrigger(long now)
     {
-        RPCTrigger();
+        RPCTrigger(now);
     }
 
     [ClientRpc]
-    private void RPCTrigger()
+    private void RPCTrigger(long now)
     {
         Debug.Log("Trigger called!");
         if (!hasAuthority) 
@@ -109,6 +112,7 @@ public class SyncEquipment : NetworkBehaviour
             equipmentBody.isKinematic = true;
             equipmentBody.interpolation = RigidbodyInterpolation.None;
         }
+        triggerTimeStamp = now;
 
         simulation = true;
     }
@@ -145,14 +149,14 @@ public class SyncEquipment : NetworkBehaviour
 
     // Authority sends Pos and Rot 
     [Command(channel = Channels.Unreliable)]
-    void CmdSendPositionRotation(Vector3 position, Quaternion rotation)
+    void CmdSendPositionRotation(MyNetworkData position, Quaternion rotation)
     {
         RPCSyncPosition(position, rotation);
     }
 
     //Server broadcasts Pos and Rot to all clients  
     [ClientRpc]
-    public void RPCSyncPosition(Vector3 position, Quaternion rotation)
+    public void RPCSyncPosition(MyNetworkData position, Quaternion rotation)
     {
         if(!hasAuthority)
         {
@@ -176,9 +180,22 @@ public class SyncEquipment : NetworkBehaviour
       
         if(count > 0 && index <= count - 1)
         {
-            percent += Time.deltaTime / (syncInterval / 2);
-            var currentTarget = receivedPositions[index];
-            var currentSource = transform.position;
+            //get difference 
+            //fixedDeltaTime
+
+            long timeDiff = 0;
+
+            if(count > 1)
+            {
+                timeDiff = (receivedPositions[index].timeSent - receivedPositions[index - 1].timeSent);
+            }
+            else //dont have a first value
+            {
+                timeDiff = (receivedPositions[index].timeSent - triggerTimeStamp);
+            }
+
+            percent += Time.deltaTime / (float)timeDiff;
+            var currentTarget = receivedPositions[index].position;
             var LagDistance = currentTarget- transform.position;
 
             // High distance => sync is to much off => send to position
@@ -244,41 +261,41 @@ public class SyncEquipment : NetworkBehaviour
     {
         // if (simulation)
         // {
-            foreach(Vector3 pos in receivedPositions)
+            foreach(MyNetworkData data in receivedPositions)
             {
                 // draw start and goal points
-                DrawDataPointGizmo(pos, Color.yellow);
+                DrawDataPointGizmo(data.position, Color.yellow);
                 // draw line between them
                 //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
             }
             
        // }
     }
-
 }
 
-// public struct MyData
-// {
-//     public Vector3 position { get; private set; }
-//     public DateTime timeSent { get; private set; }
+public struct MyNetworkData
+{
+    public Vector3 position { get; private set; }
+    public long timeSent { get; private set; }
 
-//     public MyData(Vector3 position, DateTime timeSent)
-//     {
-//         this.position = someValue;
-//         this.timeSent = anotherValue;
-//     }
-// }
+    public MyNetworkData(Vector3 position, long timeSent)
+    {
+        this.position = position;
+        this.timeSent = timeSent;
+    }
+}
 
-// public static class CustomReadWriteFunctions 
-// {
-//     public static void WriteMyType(this NetworkWriter writer, MyData myData)
-//     {
-//         writer.WriteVector3(myData.position);
-//         writer.WriteSingle(myData.timeSent.Ticks);
-//     }
+public static class CustomReadWriteFunctions 
+{
+    public static void WriteMyNetworkData(this NetworkWriter writer, MyNetworkData MyNetworkData)
+    {
+        writer.WriteVector3(MyNetworkData.position);
+        writer.WriteLong(MyNetworkData.timeSent);
+    }
 
-//     public static MyData ReadMyType(this NetworkReader reader)
-//     {
-//         return new MyData(reader.ReadVector3(), reader.ReadSingle());
-//     }
-// }
+    public static MyNetworkData ReadMyNetworkData(this NetworkReader reader)
+    {
+
+        return new MyNetworkData(reader.ReadVector3(), reader.ReadLong());
+    }
+}

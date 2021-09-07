@@ -1,5 +1,6 @@
 using UnityEngine;
 using Mirror;
+using System;
 
 public class Equipment : Interactable
 {
@@ -38,7 +39,7 @@ public class Equipment : Interactable
 
     public override void OnStartAuthority()
     {
-        syncEquipment.Trigger();
+        syncEquipment.Trigger(DateTime.Now.Ticks);
     }
 
     public override void InteractionCancelled(Interactor interactor) { }
