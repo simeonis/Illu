@@ -114,8 +114,19 @@ public class SteamLobby : MonoBehaviour
             networkManager.networkAddress = hostAddress;
             networkManager.StartClient();
 
+            // Lobby UI
+            CSteamID lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
+
             // Adds Host UI to Client Lobby
-            UIManager.GenerateLobbyFriend(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(new CSteamID(callback.m_ulSteamIDLobby))), true);
+            UIManager.GenerateLobbyFriend(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID)), true);
+
+            // Adds Clients UI to Client Lobby
+            int lobbyCount = SteamMatchmaking.GetNumLobbyMembers(lobbyID);
+            for (int i=0; i<lobbyCount; i++)
+            {
+                CSteamID lobbyMember = SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, i);
+                UIManager.GenerateLobbyFriend(GetSteamFriend(lobbyMember), false);
+            }
         }
     }
 

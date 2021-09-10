@@ -142,7 +142,7 @@ public class UIManager : MonoBehaviour
             {
                 foreach (Transform child in lobbyClient.transform)
                 {
-                    Destroy(child);
+                    Destroy(child.gameObject);
                 }
             }
 
