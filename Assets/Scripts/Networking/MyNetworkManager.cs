@@ -12,6 +12,10 @@ public struct CreateCharacterMessage : NetworkMessage
 
 public class MyNetworkManager : NetworkManager
 {
+    // UI
+    [Header("UI")]
+    [SerializeField] private UIManager UIManager;
+
     // Prefabs
     [Header("Room")]
     [SerializeField] private NetworkRoomPlayer roomPlayerPrefab = null;
@@ -19,9 +23,6 @@ public class MyNetworkManager : NetworkManager
     [Header("Game")]
     [SerializeField] private NetworkGamePlayer gamePlayerPrefab = null;
     [SerializeField] private GameObject playerSpawnSystem = null;
-
-    // UI
-    [SerializeField] private UIManager UIManager;
 
     private int numConnections = 0;
     private readonly string menuScene = "MainMenu";
@@ -55,11 +56,7 @@ public class MyNetworkManager : NetworkManager
         numConnections++;
         Debug.Log("Number of players: " + numConnections);
 
-        if (numConnections <= maxConnections)
-        {
-            UIManager.ClientJoinedHost();
-        }
-        else if (numConnections > maxConnections)
+        if (numConnections > maxConnections)
         {
             conn.Disconnect();
             numConnections--;
@@ -167,8 +164,8 @@ public class MyNetworkManager : NetworkManager
     public override void OnClientSceneChanged(NetworkConnection conn)
     {
         base.OnClientSceneChanged(conn);
-        UIManager.GameStarted();
         Debug.Log("[Client]: Scene successfully changed.");
+        UIManager.HideUI();
     }
 
     // SERVER notified that CLIENT is ready

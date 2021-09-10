@@ -2,19 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
 
-public class UIManager : MonoBehaviour
+public class SteamUI : MonoBehaviour
 {
-    [System.Serializable]
-    public struct SCREENS {
-        public GameObject Root;
-        public GameObject Host;
-        public GameObject Friend;
-        public GameObject Join;
-        public GameObject Settings;
-    }
-
-    [SerializeField] private SCREENS screens;
-
     [Header("Target Parent")]
     [SerializeField] private RectTransform friendList;
     [SerializeField] private RectTransform inviteList;
@@ -25,7 +14,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject steamStatusTitlePrefab;
     [SerializeField] private GameObject steamFriendListPrefab;
     [SerializeField] private GameObject steamLobbyPrefab;
-    [SerializeField] private GameObject steamEmptyLobbyPrefab;
     [SerializeField] private GameObject steamInvitePrefab;
 
     [Header("Color")]
@@ -34,97 +22,36 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Color statusOffline;
 
     private List<string> status = new List<string>() { "Playing Illu", "Online", "Offline" };
-    private Dictionary<string, GameObject> invites = new Dictionary<string, GameObject>();
-
-    void Awake()
-    {
-        DontDestroyOnLoad(this);
-    }
-
-    public void Quit()
-    {
-        Application.Quit();
-    }
-
-    public void HideUI()
-    {
-        gameObject.SetActive(false);
-    }
-
-    /*  --------------------------
-    *       Steam UI functions
-    *   -------------------------- */
+    private Dictionary<CSteamID, GameObject> invites = new Dictionary<CSteamID, GameObject>();
 
     public void GenerateInvite(SteamLobby lobby, CSteamID lobbyID, SteamUserRecord steamFriend)
     {
-        string steamID_s = steamFriend.id.ToString();
+        // Increase invite list vertical size
+        inviteList.sizeDelta = new Vector2(inviteList.sizeDelta.x, inviteList.sizeDelta.y + 80);
+        
+        GameObject inviteUI = Instantiate(steamInvitePrefab, new Vector3(0, 80 - inviteList.sizeDelta.y), Quaternion.Euler(0, 0, 0));
+        inviteUI.transform.SetParent(inviteList, false);
+        SteamFriendInvite inviteDetails = inviteUI.GetComponent<SteamFriendInvite>();
 
-        // Invite exists
-        if (invites.ContainsKey(steamID_s))
-        {
-            // Re-arrange Order
-            foreach (RectTransform child in inviteList)
-            {
-                // Child found, break out of loop
-                if (child.name == steamID_s)
-                {
-                    child.anchoredPosition = new Vector2();
-                    break;
-                }
-                // Push children down
-                else
-                {
-                    child.anchoredPosition = new Vector2(child.anchoredPosition.x, child.anchoredPosition.y - 80);
-                }
-            }
-        }
-        // New invite
-        else 
-        {
-            // Increase invite list vertical size
-            inviteList.sizeDelta = new Vector2(inviteList.sizeDelta.x, inviteList.sizeDelta.y + 80);
+        // Steam Avatar
+        Texture2D tex = GetSteamImageAsTexture2D(steamFriend.avatar);
+        inviteDetails.avatar.sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, -tex.height), new Vector2(0.5f, 0.5f), 100.0f);
 
-            // Push existing invites down
-            foreach (RectTransform child in inviteList)
-            {
-                child.anchoredPosition = new Vector2(child.anchoredPosition.x, child.anchoredPosition.y - 80);
-            }
-            
-            // Create GameObject
-            GameObject inviteUI = Instantiate(steamInvitePrefab);
-            inviteUI.transform.SetParent(inviteList, false);
-            inviteUI.name = steamID_s;
-            SteamFriendInvite inviteDetails = inviteUI.GetComponent<SteamFriendInvite>();
+        // Steam Name
+        inviteDetails.name.text = steamFriend.name;
 
-            // Add to dictionary
-            invites.Add(inviteUI.name, inviteUI);
+        inviteDetails.acceptButton.onClick.AddListener(delegate { 
+            lobby.JoinSteamLobby(lobbyID);
+            DestroyInvite(inviteUI);
+        });
 
-            // Steam Avatar
-            Texture2D tex = GetSteamImageAsTexture2D(steamFriend.avatar);
-            inviteDetails.avatar.sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, -tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-
-            // Steam Name
-            inviteDetails.name.text = steamFriend.name;
-
-            inviteDetails.acceptButton.onClick.AddListener(delegate { 
-                lobby.JoinSteamLobby(lobbyID);
-                screens.Join.SetActive(false);
-                screens.Host.SetActive(true);
-                DestroyInvite(inviteUI);
-            });
-
-            inviteDetails.declineButton.onClick.AddListener(delegate { 
-                DestroyInvite(inviteUI);
-            });
-        }
+        inviteDetails.declineButton.onClick.AddListener(delegate { 
+            DestroyInvite(inviteUI);
+        });
     }
 
     private void DestroyInvite(GameObject invite)
     {
-        // Remove from dictionary
-        invites.Remove(invite.name);
-
-        // Destroy GameObject
         Destroy(invite);
 
         // Decrease invite list vertical size
@@ -135,19 +62,7 @@ public class UIManager : MonoBehaviour
     {
         GameObject friendUI = Instantiate(steamLobbyPrefab);
         if (isHost) friendUI.transform.SetParent(lobbyHost, false);
-        else
-        {
-            // Delete Empty Lobby Prefab for Host
-            if (lobbyClient.transform.childCount > 0)
-            {
-                foreach (Transform child in lobbyClient.transform)
-                {
-                    Destroy(child);
-                }
-            }
-
-            friendUI.transform.SetParent(lobbyClient, false);
-        }
+        else friendUI.transform.SetParent(lobbyClient, false);
 
         SteamFriendLobby lobbyFriendDetails = friendUI.GetComponent<SteamFriendLobby>();
 
@@ -162,20 +77,6 @@ public class UIManager : MonoBehaviour
     public void DestroyLobbyFriend()
     {
 
-    }
-
-    public void GenerateLobbyEmpty(SteamLobby lobby)
-    {
-        GameObject friendUI = Instantiate(steamEmptyLobbyPrefab);
-        friendUI.transform.SetParent(lobbyClient, false);
-
-        SteamEmptyLobby lobbyEmptyDetails = friendUI.GetComponent<SteamEmptyLobby>();
-
-        lobbyEmptyDetails.addButton.onClick.AddListener(delegate { 
-            lobby.GetSteamFriends();
-            screens.Friend.SetActive(true);
-            screens.Host.SetActive(false);
-        });
     }
 
     public void GenerateFriendList(SteamLobby lobby, List<List<SteamUserRecord>> steamFriends)

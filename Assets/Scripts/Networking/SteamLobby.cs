@@ -8,24 +8,36 @@ public struct SteamUserRecord
 {
     public SteamUserRecord(CSteamID id, string name, string status, int avatar)
     {
-        ID = id;
-        Name = name;
-        Status = status;
-        Avatar = avatar;
+        this.id = id;
+        this.name = name;
+        this.status = status;
+        this.avatar = avatar;
     }
 
-    public CSteamID ID { get; }
-    public string Name { get; }
-    public string Status { get; }
-    public int Avatar { get; }
+    public CSteamID id { get; }
+    public string name { get; }
+    public string status { get; }
+    public int avatar { get; }
+}
+
+public struct SteamInvite
+{
+    public SteamInvite(SteamUserRecord sender)
+    {
+        this.sender = sender;
+        this.amount = 1;
+        this.seen = false;
+    }
+
+    public SteamUserRecord sender;
+    public int amount;
+    public bool seen;
 }
 
 public class SteamLobby : MonoBehaviour
 {
     // UI
     [SerializeField] private UIManager UIManager;
-    [SerializeField] private SteamFriendListCreator steamFriendListCreator;
-    [SerializeField] private SteamFriendLobbyCreator steamFriendLobbyCreator;
 
     // Callbacks
     protected Callback<LobbyCreated_t> lobbyCreated;
@@ -35,9 +47,8 @@ public class SteamLobby : MonoBehaviour
     protected Callback<LobbyChatUpdate_t> lobbyChatUpdate;
 
     // Steam IDs
-    [HideInInspector] public string SteamAppID;
+    [HideInInspector] public CGameID SteamAppID;
     private CSteamID h_lobbyID; // HOST ONLY - Lobby ID
-    private CSteamID c_lobbyID; // CLIENT ONLY - Lobby joined ID
 
     // Networking
     private const string HostAddressKey = "Host Address Key";
@@ -46,7 +57,7 @@ public class SteamLobby : MonoBehaviour
     private void Start()
     {
         networkManager = GetComponent<MyNetworkManager>();
-        SteamAppID = GetComponent<FizzySteamworks>().SteamAppID;
+        SteamAppID = new CGameID(uint.Parse(GetComponent<FizzySteamworks>().SteamAppID));
 
         if (!SteamManager.Initialized) { return; }
 
@@ -68,7 +79,6 @@ public class SteamLobby : MonoBehaviour
         if (callback.m_eResult != EResult.k_EResultOK)
         {
             Debug.Log("Error creating steam lobby.");
-            UIManager.HostGameFailed();
             return;
         }
 
@@ -81,7 +91,8 @@ public class SteamLobby : MonoBehaviour
             SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey, SteamUser.GetSteamID().ToString());
 
             // Adds Host UI to Host Lobby
-            steamFriendLobbyCreator.AddLobbyFriend(GetSteamFriend(SteamUser.GetSteamID()), true);
+            UIManager.GenerateLobbyFriend(GetSteamFriend(SteamUser.GetSteamID()), true);
+            UIManager.GenerateLobbyEmpty(this);
         }
     }
 
@@ -104,7 +115,7 @@ public class SteamLobby : MonoBehaviour
             networkManager.StartClient();
 
             // Adds Host UI to Client Lobby
-            steamFriendLobbyCreator.AddLobbyFriend(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(c_lobbyID)), true);
+            UIManager.GenerateLobbyFriend(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(new CSteamID(callback.m_ulSteamIDLobby))), true);
         }
     }
 
@@ -112,13 +123,13 @@ public class SteamLobby : MonoBehaviour
     private void OnLobbyInvited(LobbyInvite_t callback)
     {
         Debug.Log("Invite Received.");
-        c_lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
+        if (callback.m_ulGameID == SteamAppID.m_GameID)
+        {
+            UIManager.GenerateInvite(this, new CSteamID(callback.m_ulSteamIDLobby), GetSteamFriend(new CSteamID(callback.m_ulSteamIDUser)));
+        }
         
         // Will be used to notify CLIENT who invited them
         CSteamID hostID = new CSteamID(callback.m_ulSteamIDUser);
-
-        // TODO: Pass SteamRecord
-        UIManager.InviteReceived();
     }
 
     // CLIENT attemps to join via steam or invite
@@ -133,7 +144,7 @@ public class SteamLobby : MonoBehaviour
         // Entered
         if (callback.m_rgfChatMemberStateChange == (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered) 
         {
-            steamFriendLobbyCreator.AddLobbyFriend(GetSteamFriend(new CSteamID(callback.m_ulSteamIDMakingChange)), false);
+            UIManager.GenerateLobbyFriend(GetSteamFriend(new CSteamID(callback.m_ulSteamIDMakingChange)), false);
         }
         // Left
         else if (callback.m_rgfChatMemberStateChange == (uint)EChatMemberStateChange.k_EChatMemberStateChangeLeft)
@@ -170,9 +181,9 @@ public class SteamLobby : MonoBehaviour
     }
 
     // CLIENT joins HOST via invite
-    public void JoinSteamLobby()
+    public void JoinSteamLobby(CSteamID lobbyID)
     {
-        SteamMatchmaking.JoinLobby(c_lobbyID);
+        SteamMatchmaking.JoinLobby(lobbyID);
     }
 
     /*  --------------------------
@@ -196,7 +207,7 @@ public class SteamLobby : MonoBehaviour
         string friendName = SteamFriends.GetFriendPersonaName(steamID);
         string friendStatus = steamStatus[SteamFriends.GetFriendPersonaState(steamID)];
         bool friendPlaying = SteamFriends.GetFriendGamePlayed(steamID, out FriendGameInfo_t gameInfo_T);
-        bool playingIllu = friendPlaying ? gameInfo_T.m_gameID.ToString() == SteamAppID : false;
+        bool playingIllu = friendPlaying ? (gameInfo_T.m_gameID.m_GameID == SteamAppID.m_GameID) : false;
         if (playingIllu) friendStatus = "Playing Illu";
 
         return new SteamUserRecord(steamID, friendName, friendStatus, friendAvatar);
@@ -216,26 +227,26 @@ public class SteamLobby : MonoBehaviour
             CSteamID friendSteamID = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagImmediate);
             SteamUserRecord steamFriend = GetSteamFriend(friendSteamID);
 
-            if (steamFriend.Status == "Playing Illu") playingFriends.Add(steamFriend);
-            else if (steamFriend.Status == "Online") onlineFriends.Add(steamFriend);
+            if (steamFriend.status == "Playing Illu") playingFriends.Add(steamFriend);
+            else if (steamFriend.status == "Online") onlineFriends.Add(steamFriend);
             else offlineFriends.Add(steamFriend);
         }
 
         // Sort Alphabetically
-        offlineFriends.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
-        onlineFriends.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
-        playingFriends.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
+        offlineFriends.Sort((f1, f2) => f1.name.CompareTo(f2.name));
+        onlineFriends.Sort((f1, f2) => f1.name.CompareTo(f2.name));
+        playingFriends.Sort((f1, f2) => f1.name.CompareTo(f2.name));
 
         // Sort by Playing, Online, Offline
         steamFriends.Add(playingFriends);
         steamFriends.Add(onlineFriends);
         steamFriends.Add(offlineFriends);
 
-        steamFriendListCreator.GenerateList(steamFriends, this);
+        UIManager.GenerateFriendList(this, steamFriends);
     }
 
     public void ClearSteamFriends()
     {
-        steamFriendListCreator.DeleteList();
+        UIManager.DestroyFriendList();
     }
 }
