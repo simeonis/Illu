@@ -2,6 +2,7 @@ using UnityEngine;
 using Mirror;
 using System.Collections.Generic;
 using System;
+using System.Collections;
 
 ///////////////////////////////////////////////////////////////////////////
 /// in equimpent if released from player
@@ -80,11 +81,23 @@ public class SyncEquipment : NetworkBehaviour
         }
     }
 
+    private bool isDisabled = false;
     void Update()
     {
-        if (!hasAuthority)
+        
+        if (!hasAuthority && simulation)
         {
-            HandleRemotePositionUpdates();
+            if(!isDisabled && receivedPositions.Count > 0)
+            {
+                equipmentBody.isKinematic = true;
+                equipmentBody.interpolation = RigidbodyInterpolation.None;
+                isDisabled = true;
+            }
+            if(isDisabled)
+            {
+                HandleRemotePositionUpdates();
+            }
+                
             //HandleRemoteRotationUpdates();
         }
     }
@@ -109,8 +122,6 @@ public class SyncEquipment : NetworkBehaviour
         if (!hasAuthority) 
         {
             percent = 0;
-            equipmentBody.isKinematic = true;
-            equipmentBody.interpolation = RigidbodyInterpolation.None;
         }
         triggerTimeStamp = now;
 
@@ -134,6 +145,7 @@ public class SyncEquipment : NetworkBehaviour
         {
             index = 0;
             equipmentBody.isKinematic = false;
+            isDisabled = false;
             receivedPositions.Clear();
             equipmentBody.interpolation = RigidbodyInterpolation.Interpolate;
             equipmentBody.velocity = new Vector3();
@@ -183,9 +195,17 @@ public class SyncEquipment : NetworkBehaviour
             //get difference 
             //fixedDeltaTime
 
+            Vector3 forward = transform.TransformDirection(Vector3.forward);
+            Vector3 toOther = receivedPositions[index].position - transform.position;
+        
+            if(Vector3.Dot(forward, toOther) < 0)
+            {
+               StartCoroutine(FindIndexAhead());
+            }
+
             double timeDiff = 0;
 
-            if(count > 1)
+            if(count > 1 && index > 0)
             {
                 timeDiff = new TimeSpan(receivedPositions[index].timeSent - receivedPositions[index - 1].timeSent).TotalSeconds;
             }
@@ -214,6 +234,18 @@ public class SyncEquipment : NetworkBehaviour
                 percent = 0;
                 index++;
             }
+        }
+    }
+
+    IEnumerator FindIndexAhead() 
+    {
+        Vector3 forward = transform.TransformDirection(Vector3.forward);
+        Vector3 toOther = receivedPositions[index].position - transform.position;
+
+        while(Vector3.Dot(forward, toOther) < 0)
+        {
+            index++;
+            yield return null;
         }
     }
 
