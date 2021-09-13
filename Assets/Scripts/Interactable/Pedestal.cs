@@ -13,7 +13,7 @@ public class Pedestal : Interactable
 
     [Header("Spin Options")]
     [SerializeField] private float rotationPerSecond = 15.0f;
-    
+
     [Header("Hover Options")]
     [SerializeField] private float frequency = 1f;
     private float amplitude = 0.05f;
@@ -82,6 +82,8 @@ public class Pedestal : Interactable
             equipmentSlot.TransferFrom(interactor.equipmentSlot);
             equipmentScale = equipmentSlot.GetEquipment().transform.localScale;
 
+            audioManager.Play("Cube_In");
+
             // Scale equipment then render glass
             if (coroutine != null) StopCoroutine(coroutine);
             StartCoroutine(coroutine = Scale());
@@ -91,11 +93,14 @@ public class Pedestal : Interactable
         {
             // Dissolve glass
             if (coroutine != null) StopCoroutine(coroutine);
+
+            audioManager.Play("Cube_Out");
+
             StartCoroutine(coroutine = Dissolve(interactor));
         }
     }
 
-    public override void InteractionCancelled(Interactor interactor){}
+    public override void InteractionCancelled(Interactor interactor) { }
 
     private IEnumerator Dissolve(Interactor interactor)
     {

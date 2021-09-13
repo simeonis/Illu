@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.22038329, g: 0.14790377, b: 0.2596193, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3438,7 +3438,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &241436925
 GameObject:
@@ -5343,7 +5343,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &341239260
 GameObject:
@@ -5748,6 +5748,7 @@ MonoBehaviour:
   syncInterval: 0.1
   interactMessage: Lever
   enabled: 1
+  audioManager: {fileID: 800845152}
   animationSpeed: 1
   target: {fileID: 385146888}
 --- !u!65 &385146890
@@ -7331,7 +7332,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &432432459
 GameObject:
@@ -7379,7 +7380,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &444499099
 PrefabInstance:
@@ -7398,6 +7399,11 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 272128939}
+    - target: {fileID: 1762538094345367045, guid: b93c28eb0917a084ab389b0469d38e3b,
+        type: 3}
+      propertyPath: audioManager
+      value: 
+      objectReference: {fileID: 800845152}
     - target: {fileID: 8688348162710041378, guid: b93c28eb0917a084ab389b0469d38e3b,
         type: 3}
       propertyPath: m_RootOrder
@@ -11934,7 +11940,7 @@ RectTransform:
   m_Children:
   - {fileID: 341239261}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -11955,6 +11961,78 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7321689659478177453, guid: e6cd57cf166d08440af7839d318ba3d9, type: 3}
+--- !u!1 &800845150
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 800845151}
+  - component: {fileID: 800845152}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &800845151
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800845150}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 36.33, y: 3.656, z: -25.14}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &800845152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800845150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68fb46619ccf47f8880895cf22782e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundList:
+  - clip: {fileID: 8300000, guid: da12ab0a7935b4284b302db99409626a, type: 3}
+    name: Lever
+    tag: 1
+    volume: 0.518
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - clip: {fileID: 8300000, guid: d8fefdec136c1487f812dcb86194e425, type: 3}
+    name: Button
+    tag: 1
+    volume: 0.475
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - clip: {fileID: 8300000, guid: 6f3c503bf3b03483084b9dd0d5cb6b66, type: 3}
+    name: Cube_In
+    tag: 1
+    volume: 0.475
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - clip: {fileID: 8300000, guid: 97d1d29e9bace4e23b909a1906dfda7a, type: 3}
+    name: Cube_Out
+    tag: 1
+    volume: 0.475
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
 --- !u!1 &830044144
 GameObject:
   m_ObjectHideFlags: 0
@@ -16188,7 +16266,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1173567876
 GameObject:
@@ -17451,7 +17529,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1339642463
 GameObject:
@@ -17509,6 +17587,7 @@ MonoBehaviour:
   syncInterval: 0.1
   interactMessage: Cube
   enabled: 1
+  audioManager: {fileID: 0}
   equipmentBody: {fileID: 0}
 --- !u!65 &1339642466
 BoxCollider:
@@ -23399,7 +23478,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!43 &1688568673
 Mesh:
@@ -25848,7 +25927,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &2037605231
 Mesh:
@@ -27129,7 +27208,7 @@ Transform:
   - {fileID: 31307715}
   - {fileID: 924735092}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2143366729
 GameObject:
@@ -27370,6 +27449,11 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 1410234198}
+    - target: {fileID: 1762538094345367045, guid: b93c28eb0917a084ab389b0469d38e3b,
+        type: 3}
+      propertyPath: audioManager
+      value: 
+      objectReference: {fileID: 800845152}
     - target: {fileID: 8688348162710041378, guid: b93c28eb0917a084ab389b0469d38e3b,
         type: 3}
       propertyPath: m_RootOrder
@@ -27555,6 +27639,7 @@ MonoBehaviour:
   syncInterval: 0.1
   interactMessage: Pedestal
   enabled: 1
+  audioManager: {fileID: 800845152}
   displayEquipment: {fileID: 1339642465}
   glassDissolveDuration: 1
   scaleDuration: 0.5

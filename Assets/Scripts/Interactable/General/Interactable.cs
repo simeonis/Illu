@@ -10,6 +10,8 @@ public abstract class Interactable : NetworkBehaviour
     [HideInInspector] public new bool enabled = true;
     private TextMeshProUGUI interactUI;
 
+    public AudioManager audioManager;
+
     protected virtual void Awake()
     {
         interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
