@@ -43,10 +43,18 @@ public class MyNetworkManager : NetworkManager
     public override void OnStartServer()
     {
         base.OnStartServer();
+        numConnections = 0;
         spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
         NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
 
         Debug.Log("Server Started");
+    }
+
+    // SERVER stopped by HOST   
+    public override void OnStopServer()
+    {
+        base.OnStopServer();
+        Debug.Log("Server Stopped");
     }
 
     // SERVER detects new connection
