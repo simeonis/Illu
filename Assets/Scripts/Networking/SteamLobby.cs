@@ -36,6 +36,9 @@ public struct SteamInvite
 
 public class SteamLobby : MonoBehaviour
 {
+    // UI
+    [SerializeField] private UIManager UIManager;
+
     // Callbacks
     protected Callback<LobbyCreated_t> lobbyCreated;
     protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
