@@ -10,7 +10,8 @@ public abstract class Interactable : NetworkBehaviour
     [HideInInspector] public new bool enabled = true;
     private TextMeshProUGUI interactUI;
 
-    public AudioManager audioManager;
+    [SerializeField] protected AudioSource audioSource;
+    [SerializeField] protected AudioEvent[] audioEvent;
 
     protected virtual void Awake()
     {

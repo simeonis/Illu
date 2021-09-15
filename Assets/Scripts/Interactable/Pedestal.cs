@@ -82,7 +82,7 @@ public class Pedestal : Interactable
             equipmentSlot.TransferFrom(interactor.equipmentSlot);
             equipmentScale = equipmentSlot.GetEquipment().transform.localScale;
 
-            audioManager.Play("Cube_In");
+            audioEvent[0].Play(audioSource);
 
             // Scale equipment then render glass
             if (coroutine != null) StopCoroutine(coroutine);
@@ -94,7 +94,7 @@ public class Pedestal : Interactable
             // Dissolve glass
             if (coroutine != null) StopCoroutine(coroutine);
 
-            audioManager.Play("Cube_Out");
+            audioEvent[1].Play(audioSource);
 
             StartCoroutine(coroutine = Dissolve(interactor));
         }

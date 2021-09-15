@@ -84,20 +84,20 @@ public class SyncEquipment : NetworkBehaviour
     private bool isDisabled = false;
     void Update()
     {
-        
+
         if (!hasAuthority && simulation)
         {
-            if(!isDisabled && receivedPositions.Count > 0)
+            if (!isDisabled && receivedPositions.Count > 0)
             {
                 equipmentBody.isKinematic = true;
                 equipmentBody.interpolation = RigidbodyInterpolation.None;
                 isDisabled = true;
             }
-            if(isDisabled)
+            if (isDisabled)
             {
                 HandleRemotePositionUpdates();
             }
-                
+
             //HandleRemoteRotationUpdates();
         }
     }
@@ -119,7 +119,7 @@ public class SyncEquipment : NetworkBehaviour
     private void RPCTrigger(long now)
     {
         Debug.Log("Trigger called!");
-        if (!hasAuthority) 
+        if (!hasAuthority)
         {
             percent = 0;
         }
@@ -140,7 +140,7 @@ public class SyncEquipment : NetworkBehaviour
     protected void RpcOnStopped()
     {
         simulation = false;
-        
+
         if (!hasAuthority)
         {
             index = 0;
@@ -170,7 +170,7 @@ public class SyncEquipment : NetworkBehaviour
     [ClientRpc]
     public void RPCSyncPosition(MyNetworkData position, Quaternion rotation)
     {
-        if(!hasAuthority)
+        if (!hasAuthority)
         {
             receivedPositions.Add(position);
             //RemoteObjPosition = position;
@@ -189,23 +189,23 @@ public class SyncEquipment : NetworkBehaviour
     private void HandleRemotePositionUpdates()
     {
         int count = receivedPositions.Count;
-      
-        if(count > 0 && index <= count - 1)
+
+        if (count > 0 && index <= count - 1)
         {
             //get difference 
             //fixedDeltaTime
 
             Vector3 forward = transform.TransformDirection(Vector3.forward);
             Vector3 toOther = receivedPositions[index].position - transform.position;
-        
-            if(Vector3.Dot(forward, toOther) < 0)
+
+            if (Vector3.Dot(forward, toOther) < 0)
             {
-               StartCoroutine(FindIndexAhead());
+                StartCoroutine(FindIndexAhead());
             }
 
             double timeDiff = 0;
 
-            if(count > 1 && index > 0)
+            if (count > 1 && index > 0)
             {
                 timeDiff = new TimeSpan(receivedPositions[index].timeSent - receivedPositions[index - 1].timeSent).TotalSeconds;
             }
@@ -213,10 +213,10 @@ public class SyncEquipment : NetworkBehaviour
             {
                 timeDiff = new TimeSpan(receivedPositions[index].timeSent - triggerTimeStamp).TotalSeconds;
             }
-           
+
             percent += Time.deltaTime / (float)timeDiff;
             var currentTarget = receivedPositions[index].position;
-            var LagDistance = currentTarget- transform.position;
+            var LagDistance = currentTarget - transform.position;
 
             // High distance => sync is to much off => send to position
             // if (LagDistance.magnitude > allowedLagDistance)
@@ -226,10 +226,10 @@ public class SyncEquipment : NetworkBehaviour
             //     LagDistance = Vector3.zero;
             // }
 
-            
+
             transform.position = Vector3.Lerp(transform.position, currentTarget, percent);
-            
-            if(percent >= 1)
+
+            if (percent >= 1)
             {
                 percent = 0;
                 index++;
@@ -237,12 +237,12 @@ public class SyncEquipment : NetworkBehaviour
         }
     }
 
-    IEnumerator FindIndexAhead() 
+    IEnumerator FindIndexAhead()
     {
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 toOther = receivedPositions[index].position - transform.position;
 
-        while(Vector3.Dot(forward, toOther) < 0)
+        while (Vector3.Dot(forward, toOther) < 0)
         {
             index++;
             yield return null;
@@ -253,7 +253,7 @@ public class SyncEquipment : NetworkBehaviour
     // private void HandleRemoteRotationUpdates()
     // {
     //     var LagRotation = Quaternion.Angle(RemoteObjRotation, transform.rotation);
-  
+
     //     if (LagRotation > allowedRotationAngle)
     //     {
     //         if (debug) Debug.LogWarning("Sync Rotation too Great! Snapping equipment rotation.");
@@ -270,39 +270,39 @@ public class SyncEquipment : NetworkBehaviour
     //Gizmo stuff for testing 
     //---------------------------------------------------------------------------------------------
 
-    static void DrawDataPointGizmo(Vector3 pos, Color color)
-    {
-        // use a little offset because transform.localPosition might be in
-        // the ground in many cases
-        Vector3 offset = Vector3.up * 0.01f;
+    // static void DrawDataPointGizmo(Vector3 pos, Color color)
+    // {
+    //     // use a little offset because transform.localPosition might be in
+    //     // the ground in many cases
+    //     Vector3 offset = Vector3.up * 0.01f;
 
-        // draw position
-        Gizmos.color = color;
-        Gizmos.DrawSphere(pos + offset, 0.05f);
+    //     // draw position
+    //     Gizmos.color = color;
+    //     Gizmos.DrawSphere(pos + offset, 0.05f);
 
-    }
+    // }
 
-    static void DrawLineBetweenDataPoints(Vector3 start, Vector3 end, Color color)
-    {
-        Gizmos.color = color;
-        Gizmos.DrawLine(start, end);
-    }
+    // static void DrawLineBetweenDataPoints(Vector3 start, Vector3 end, Color color)
+    // {
+    //     Gizmos.color = color;
+    //     Gizmos.DrawLine(start, end);
+    // }
 
-    // draw the data points for easier debugging
-    void OnDrawGizmos()
-    {
-        // if (simulation)
-        // {
-            foreach(MyNetworkData data in receivedPositions)
-            {
-                // draw start and goal points
-                DrawDataPointGizmo(data.position, Color.yellow);
-                // draw line between them
-                //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
-            }
-            
-       // }
-    }
+    // // draw the data points for easier debugging
+    // void OnDrawGizmos()
+    // {
+    //     // if (simulation)
+    //     // {
+    //  foreach ach(MyNetworkData data in receivedPositions)
+    //  {
+    // draw start and goal points
+    //             DrawDataPointGizmo(data.position, Color.yellow);
+    //      // draw line between them
+    //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
+    //  }
+
+    //    // }
+    // }
 }
 
 public struct MyNetworkData
@@ -317,7 +317,7 @@ public struct MyNetworkData
     }
 }
 
-public static class CustomReadWriteFunctions 
+public static class CustomReadWriteFunctions
 {
     public static void WriteMyNetworkData(this NetworkWriter writer, MyNetworkData MyNetworkData)
     {

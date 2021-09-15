@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64859069878484fb19f46e9b027cd0a0, type: 3}
+  m_Name: Lever
+  m_EditorClassIdentifier: 
+  clips:
+  - {fileID: 8300000, guid: 792552635d50648b0bc5b497fa338eb8, type: 3}
+  volume:
+    minValue: 0.3621288
+    maxValue: 0.3983957
+  pitch:
+    minValue: 0.76203203
+    maxValue: 1.021599

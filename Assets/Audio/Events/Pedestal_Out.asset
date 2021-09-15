@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64859069878484fb19f46e9b027cd0a0, type: 3}
+  m_Name: Pedestal_Out
+  m_EditorClassIdentifier: 
+  clips:
+  - {fileID: 8300000, guid: 793ed28c775d74924a7dc4be4b666032, type: 3}
+  volume:
+    minValue: 0.5626705
+    maxValue: 0.61725795
+  pitch:
+    minValue: 1.0917488
+    maxValue: 1.1757295

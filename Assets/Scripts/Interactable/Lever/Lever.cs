@@ -20,7 +20,8 @@ public class Lever : AnimatedInteractable
         onState = !onState;
         if (enumerator != null) StopCoroutine(enumerator);
         StartCoroutine(enumerator = Switch());
-        audioManager.Play("Lever");
+
+        audioEvent[0].Play(audioSource);
     }
 
     public override void InteractionCancelled(Interactor interactor) { }
