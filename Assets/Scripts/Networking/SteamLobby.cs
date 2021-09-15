@@ -59,6 +59,11 @@ public class SteamLobby : MonoBehaviour
     {
         networkManager = GetComponent<MyNetworkManager>();
         SteamAppID = new CGameID(uint.Parse(GetComponent<FizzySteamworks>().SteamAppID));
+    }
+
+    void OnEnable()
+    {
+        MyNetworkManager.OnClientDisconnected += LobbyDisconnected;
 
         if (!SteamManager.Initialized) { return; }
 
@@ -68,6 +73,20 @@ public class SteamLobby : MonoBehaviour
         lobbyInvited = Callback<LobbyInvite_t>.Create(OnLobbyInvited);
         lobbyChatMessage = Callback<LobbyChatMsg_t>.Create(OnLobbyChatMessage);
         lobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+    }
+
+    void OnDisable()
+    {
+        MyNetworkManager.OnClientDisconnected -= LobbyDisconnected;
+
+        if (!SteamManager.Initialized) { return; }
+
+        lobbyCreated.Dispose();
+        gameLobbyJoinRequested.Dispose();
+        lobbyEntered.Dispose();
+        lobbyInvited.Dispose();
+        lobbyChatMessage.Dispose();
+        lobbyChatUpdate.Dispose();
     }
 
     /*  --------------------------
@@ -156,15 +175,15 @@ public class SteamLobby : MonoBehaviour
         byte[] msgBuffer = new byte[4000];
         EChatEntryType chatType;
 
-        //Debug.Log("You have been kicked.");
-        if (SteamMatchmaking.GetLobbyChatEntry(lobbyID, (int)callback.m_iChatID, out sentByUser, msgBuffer, 4000, out chatType) > 0)
+        int numBytes = SteamMatchmaking.GetLobbyChatEntry(lobbyID, (int)callback.m_iChatID, out sentByUser, msgBuffer, 4000, out chatType);
+        if (numBytes > 0)
         {
-            string message = System.Text.Encoding.UTF8.GetString(msgBuffer);
+            string message = System.Text.Encoding.ASCII.GetString(msgBuffer).TrimEnd('\0');
 
             // You have been kicked!
             if (message == SteamUser.GetSteamID().ToString())
             {
-                LeaveLobby();
+                LobbyKicked();
             }
         }
     }
@@ -212,18 +231,41 @@ public class SteamLobby : MonoBehaviour
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
     }
 
+    private enum LobbyExitReason { Left, Kicked, Disconnected };
+    public void LobbyLeft() => LeaveLobby(LobbyExitReason.Left);
+    private void LobbyDisconnected() => LeaveLobby(LobbyExitReason.Disconnected);
+    private void LobbyKicked() => LeaveLobby(LobbyExitReason.Kicked);
+
     // USER leaves lobby
-    public void LeaveLobby()
+    private void LeaveLobby(LobbyExitReason lobbyExitReason)
     {
+        // Check if User is in a lobby
+        if (lobbyID.m_SteamID == 0) return;
+
         bool lobbyOwner = SteamUser.GetSteamID() == SteamMatchmaking.GetLobbyOwner(lobbyID);
+
+        switch (lobbyExitReason)
+        {
+            case LobbyExitReason.Left:
+                Debug.Log("You have left the lobby");
+                break;
+            case LobbyExitReason.Kicked:
+                Debug.Log("You have been kicked from the lobby");
+                break;
+            case LobbyExitReason.Disconnected:
+                Debug.Log("You have disconnected from the lobby");
+                break;
+            default:
+                Debug.Log("You somehow left the lobby");
+                break;
+        }
         
         SteamMatchmaking.LeaveLobby(lobbyID);
-        UIManager.DestroyLobby();
+        UIManager.LobbyExited();
+        lobbyID.Clear();
 
         if (lobbyOwner) networkManager.StopHost();
         else networkManager.StopClient();
-
-        Debug.Log("Left Lobby");
     }
 
     // HOST invites CLIENT
@@ -241,7 +283,7 @@ public class SteamLobby : MonoBehaviour
     // HOST kicks CLIENT
     public static void KickUser(CSteamID steamID)
     {
-        byte[] bytes = System.Text.Encoding.UTF8.GetBytes(steamID.ToString());
+        byte[] bytes = System.Text.Encoding.ASCII.GetBytes(steamID.ToString());
         if (!SteamMatchmaking.SendLobbyChatMsg(lobbyID, bytes, bytes.Length))
         {
             Debug.Log("Kick command was unable to send.");

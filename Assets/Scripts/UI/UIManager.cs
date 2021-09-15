@@ -43,10 +43,9 @@ public class UIManager : MonoBehaviour
         DontDestroyOnLoad(this);
 
         MyNetworkManager.OnClientReadied += Play;
-        MyNetworkManager.OnClientDisconnected += LobbyClosed;
     }
 
-    public static void Quit()
+    public void Quit()
     {
         Application.Quit();
     }
@@ -57,7 +56,7 @@ public class UIManager : MonoBehaviour
         screens.Play.SetActive(true);
     }
 
-    private void LobbyClosed()
+    public void LobbyExited()
     {
         screens.Host.SetActive(false);
         screens.Root.SetActive(true);
@@ -183,14 +182,17 @@ public class UIManager : MonoBehaviour
         lobbyFriendDetails.name.text = steamFriend.name;
 
         // Kick Button
-        bool canKick = serverside && !hostSlot;
-        lobbyFriendDetails.removeButton.gameObject.SetActive(canKick);
-        if (!hostSlot)
-        {
-            lobbyFriendDetails.removeButton.onClick.AddListener(delegate {
+        lobbyFriendDetails.removeButton.onClick.AddListener(delegate {
                 SteamLobby.KickUser(steamFriend.id);
             });
-        }
+        // bool canKick = serverside && !hostSlot;
+        // lobbyFriendDetails.removeButton.gameObject.SetActive(canKick);
+        // if (!hostSlot)
+        // {
+        //     lobbyFriendDetails.removeButton.onClick.AddListener(delegate {
+        //         SteamLobby.KickUser(steamFriend.id);
+        //     });
+        // }
     }
 
     public void GenerateLobbyEmpty()
