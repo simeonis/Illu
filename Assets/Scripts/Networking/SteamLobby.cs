@@ -36,15 +36,13 @@ public struct SteamInvite
 
 public class SteamLobby : MonoBehaviour
 {
-    // UI
-    [SerializeField] private UIManager UIManager;
-
     // Callbacks
     protected Callback<LobbyCreated_t> lobbyCreated;
     protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
     protected Callback<LobbyEnter_t> lobbyEntered;
     protected Callback<LobbyInvite_t> lobbyInvited;
     protected Callback<LobbyChatUpdate_t> lobbyChatUpdate;
+    protected Callback<LobbyChatMsg_t> lobbyChatMessage;
 
     // Steam IDs
     [HideInInspector] static public CGameID SteamAppID;
@@ -65,6 +63,7 @@ public class SteamLobby : MonoBehaviour
         gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
         lobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyJoinAttempt);
         lobbyInvited = Callback<LobbyInvite_t>.Create(OnLobbyInvited);
+        lobbyChatMessage = Callback<LobbyChatMsg_t>.Create(OnLobbyChatMessage);
         lobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
     }
 
@@ -91,7 +90,7 @@ public class SteamLobby : MonoBehaviour
             SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey, SteamUser.GetSteamID().ToString());
 
             // Adds Host UI to Host Lobby
-            UIManager.GenerateLobbyFriend(GetSteamFriend(SteamUser.GetSteamID()), true);
+            UIManager.GenerateLobbyHost(GetSteamFriend(SteamUser.GetSteamID()), true);
             UIManager.GenerateLobbyEmpty();
         }
     }
@@ -118,14 +117,14 @@ public class SteamLobby : MonoBehaviour
             lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
 
             // Adds Host UI to Client Lobby
-            UIManager.GenerateLobbyFriend(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID)), true);
+            UIManager.GenerateLobbyHost(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID)), false);
 
             // Adds Clients UI to Client Lobby
             int lobbyCount = SteamMatchmaking.GetNumLobbyMembers(lobbyID);
             for (int i=0; i<lobbyCount; i++)
             {
                 CSteamID lobbyMember = SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, i);
-                UIManager.GenerateLobbyFriend(GetSteamFriend(lobbyMember), false);
+                UIManager.GenerateLobbyClient(GetSteamFriend(lobbyMember), false);
             }
         }
     }
@@ -147,29 +146,52 @@ public class SteamLobby : MonoBehaviour
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
 
+    private void OnLobbyChatMessage(LobbyChatMsg_t callback)
+    {
+        CSteamID lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
+        CSteamID sentByUser;
+        byte[] msgBuffer = new byte[4000];
+        EChatEntryType chatType;
+
+        //Debug.Log("You have been kicked.");
+        if (SteamMatchmaking.GetLobbyChatEntry(lobbyID, (int)callback.m_iChatID, out sentByUser, msgBuffer, 4000, out chatType) > 0)
+        {
+            string message = System.Text.Encoding.UTF8.GetString(msgBuffer);
+
+            // You have been kicked!
+            if (message == SteamUser.GetSteamID().ToString())
+            {
+                LeaveLobby();
+            }
+        }
+    }
+
     private void OnLobbyChatUpdate(LobbyChatUpdate_t callback)
     {
+        SteamUserRecord steamUserMakingChange = GetSteamFriend(new CSteamID(callback.m_ulSteamIDMakingChange));
+        SteamUserRecord steamUserChanged = GetSteamFriend(new CSteamID(callback.m_ulSteamIDUserChanged));
+        
         switch (callback.m_rgfChatMemberStateChange)
         {
             // Entered
             case (uint) EChatMemberStateChange.k_EChatMemberStateChangeEntered:
-                Debug.Log("[Lobby]: " + SteamFriends.GetFriendPersonaName(new CSteamID(callback.m_ulSteamIDMakingChange)) + " has joined.");
-                UIManager.GenerateLobbyFriend(GetSteamFriend(new CSteamID(callback.m_ulSteamIDMakingChange)), false);
+                Debug.LogFormat("[Lobby]: {0} has joined.", steamUserChanged.name);
+                UIManager.GenerateLobbyClient(steamUserChanged, true);
                 break;
             // Left
             case (uint) EChatMemberStateChange.k_EChatMemberStateChangeLeft:
-                Debug.Log("[Lobby]: " + SteamFriends.GetFriendPersonaName(new CSteamID(callback.m_ulSteamIDMakingChange)) + " has left.");
-                UIManager.DestroyLobbyFriend(false);
+                Debug.LogFormat("[Lobby]: {0} has left.", steamUserChanged.name);
+                UIManager.DestroyLobbyClient();
                 break;
             // Kicked
             case (uint) EChatMemberStateChange.k_EChatMemberStateChangeKicked:
-            Debug.Log("[Lobby]: " + SteamFriends.GetFriendPersonaName(new CSteamID(callback.m_ulSteamIDMakingChange)) + " was kicked.");
-                UIManager.DestroyLobbyFriend(false);
+                Debug.LogFormat("[Lobby]: {0} was kicked by {1}.", steamUserChanged.name, steamUserMakingChange.name);
+                UIManager.DestroyLobbyClient();
                 break;
             // Disconnected
             case (uint) EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
-                Debug.Log("[Lobby]: " + SteamFriends.GetFriendPersonaName(new CSteamID(callback.m_ulSteamIDMakingChange)) + " disconnected.");
-                UIManager.DestroyLobbyFriend(false);
+                Debug.LogFormat("[Lobby]: {0} disconnected.", steamUserChanged.name);
+                UIManager.DestroyLobbyClient();
                 break;
             default:
                 break;
@@ -187,16 +209,18 @@ public class SteamLobby : MonoBehaviour
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
     }
 
+    // USER leaves lobby
     public void LeaveLobby()
     {
         bool lobbyOwner = SteamUser.GetSteamID() == SteamMatchmaking.GetLobbyOwner(lobbyID);
+        
         SteamMatchmaking.LeaveLobby(lobbyID);
+        UIManager.DestroyLobby();
 
-        UIManager.DestroyLobbyFriend(true);
-        UIManager.DestroyLobbyFriend(false);
-
-        // Lobby left, stop server
         if (lobbyOwner) networkManager.StopHost();
+        else networkManager.StopClient();
+
+        Debug.Log("Left Lobby");
     }
 
     // HOST invites CLIENT
@@ -209,6 +233,16 @@ public class SteamLobby : MonoBehaviour
     public static void JoinSteamLobby(CSteamID lobbyID)
     {
         SteamMatchmaking.JoinLobby(lobbyID);
+    }
+
+    // HOST kicks CLIENT
+    public static void KickUser(CSteamID steamID)
+    {
+        byte[] bytes = System.Text.Encoding.UTF8.GetBytes(steamID.ToString());
+        if (!SteamMatchmaking.SendLobbyChatMsg(lobbyID, bytes, bytes.Length))
+        {
+            Debug.Log("Kick command was unable to send.");
+        }
     }
 
     /*  --------------------------
@@ -231,6 +265,7 @@ public class SteamLobby : MonoBehaviour
         int friendAvatar = SteamFriends.GetMediumFriendAvatar(steamID);
         string friendName = SteamFriends.GetFriendPersonaName(steamID);
         string friendStatus = steamStatus[SteamFriends.GetFriendPersonaState(steamID)];
+        
         bool friendPlaying = SteamFriends.GetFriendGamePlayed(steamID, out FriendGameInfo_t gameInfo_T);
         bool playingIllu = friendPlaying ? (gameInfo_T.m_gameID.m_GameID == SteamAppID.m_GameID) : false;
         if (playingIllu) friendStatus = "Playing Illu";
@@ -261,7 +296,7 @@ public class SteamLobby : MonoBehaviour
         onlineFriends.Sort((f1, f2) => f1.name.CompareTo(f2.name));
         playingFriends.Sort((f1, f2) => f1.name.CompareTo(f2.name));
 
-        // Sort by Playing, Online, Offline
+        // Sort by: Playing, Online, Offline
         steamFriends.Add(playingFriends);
         steamFriends.Add(onlineFriends);
         steamFriends.Add(offlineFriends);

@@ -12,10 +12,6 @@ public struct CreateCharacterMessage : NetworkMessage
 
 public class MyNetworkManager : NetworkManager
 {
-    // UI
-    [Header("UI")]
-    [SerializeField] private UIManager UIManager;
-
     // Prefabs
     [Header("Room")]
     [SerializeField] private NetworkRoomPlayer roomPlayerPrefab = null;
@@ -32,8 +28,8 @@ public class MyNetworkManager : NetworkManager
 
     public static event Action OnClientConnected;
     public static event Action OnClientDisconnected;
+    public static event Action OnClientReadied;
     public static event Action<NetworkConnection> OnServerReadied;
-    public static event Action OnServerStopped;
 
     /*  --------------------------
     *       Callback functions
@@ -48,13 +44,6 @@ public class MyNetworkManager : NetworkManager
         NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
 
         Debug.Log("Server Started");
-    }
-
-    // SERVER stopped by HOST   
-    public override void OnStopServer()
-    {
-        base.OnStopServer();
-        Debug.Log("Server Stopped");
     }
 
     // SERVER detects new connection
@@ -153,7 +142,6 @@ public class MyNetworkManager : NetworkManager
                 var conn = RoomPlayers[i].connectionToClient;
                 var gameplayerInstance = Instantiate(gamePlayerPrefab);
 
-
                 //if(conn.identity.gameObject)
                 NetworkServer.Destroy(conn.identity.gameObject);
 
@@ -173,7 +161,8 @@ public class MyNetworkManager : NetworkManager
     {
         base.OnClientSceneChanged(conn);
         Debug.Log("[Client]: Scene successfully changed.");
-        UIManager.HideUI();
+        OnClientReadied?.Invoke();
+        //UIManager.HideUI();
     }
 
     // SERVER notified that CLIENT is ready

@@ -10,52 +10,65 @@ public class UIManager : MonoBehaviour
         public GameObject Host;
         public GameObject Friend;
         public GameObject Join;
+        public GameObject Play;
         public GameObject Settings;
+        public GameObject Error;
     }
 
-    [SerializeField] private SCREENS screens;
+    [SerializeField] static private SCREENS screens;
 
     [Header("Target Parent")]
-    [SerializeField] private RectTransform friendList;
-    [SerializeField] private RectTransform inviteList;
-    [SerializeField] private RectTransform lobbyHost;
-    [SerializeField] private RectTransform lobbyClient;
+    [SerializeField] private static RectTransform friendList;
+    [SerializeField] private static RectTransform inviteList;
+    [SerializeField] private static RectTransform lobbyHost;
+    [SerializeField] private static RectTransform lobbyClient;
 
     [Header("Prefabs")]
-    [SerializeField] private GameObject steamStatusTitlePrefab;
-    [SerializeField] private GameObject steamFriendListPrefab;
-    [SerializeField] private GameObject steamLobbyPrefab;
-    [SerializeField] private GameObject steamEmptyLobbyPrefab;
-    [SerializeField] private GameObject steamInvitePrefab;
+    [SerializeField] private static GameObject steamStatusTitlePrefab;
+    [SerializeField] private static GameObject steamFriendListPrefab;
+    [SerializeField] private static GameObject steamLobbyPrefab;
+    [SerializeField] private static GameObject steamEmptyLobbyPrefab;
+    [SerializeField] private static GameObject steamInvitePrefab;
 
     [Header("Color")]
-    [SerializeField] private Color statusPlaying;
-    [SerializeField] private Color statusOnline;
-    [SerializeField] private Color statusOffline;
+    [SerializeField] private static Color statusPlaying;
+    [SerializeField] private static Color statusOnline;
+    [SerializeField] private static Color statusOffline;
 
-    private List<string> status = new List<string>() { "Playing Illu", "Online", "Offline" };
-    private Dictionary<string, GameObject> invites = new Dictionary<string, GameObject>();
+    private static List<string> status = new List<string>() { "Playing Illu", "Online", "Offline" };
+    private static Dictionary<string, GameObject> invites = new Dictionary<string, GameObject>();
 
     void Awake()
     {
         DontDestroyOnLoad(this);
+
+        MyNetworkManager.OnClientReadied += Play;
+        MyNetworkManager.OnClientDisconnected += LobbyClosed;
     }
 
-    public void Quit()
+    public static void Quit()
     {
         Application.Quit();
     }
 
-    public void HideUI()
+    private void Play()
     {
-        gameObject.SetActive(false);
+        screens.Host.SetActive(false);
+        screens.Play.SetActive(true);
+    }
+
+    private void LobbyClosed()
+    {
+        screens.Host.SetActive(false);
+        screens.Root.SetActive(true);
+        DestroyLobby();
     }
 
     /*  --------------------------
     *       Steam UI functions
     *   -------------------------- */
 
-    public void GenerateInvite(CSteamID lobbyID, SteamUserRecord steamFriend)
+    public static void GenerateInvite(CSteamID lobbyID, SteamUserRecord steamFriend)
     {
         string steamID_s = steamFriend.id.ToString();
 
@@ -119,7 +132,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void DestroyInvite(GameObject invite)
+    private static void DestroyInvite(GameObject invite)
     {
         // Remove from dictionary
         invites.Remove(invite.name);
@@ -131,10 +144,20 @@ public class UIManager : MonoBehaviour
         inviteList.sizeDelta = new Vector2(inviteList.sizeDelta.x, inviteList.sizeDelta.y - 80);
     }
 
-    public void GenerateLobbyFriend(SteamUserRecord steamFriend, bool isHost)
+    public static void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside)
+    {
+        GenerateLobbyFriend(steamFriend, serverside, true);
+    }
+
+    public static void GenerateLobbyClient(SteamUserRecord steamFriend, bool serverside)
+    {
+        GenerateLobbyFriend(steamFriend, serverside, false);
+    }
+
+    private static void GenerateLobbyFriend(SteamUserRecord steamFriend, bool serverside, bool hostSlot)
     {
         GameObject friendUI = Instantiate(steamLobbyPrefab);
-        if (isHost) friendUI.transform.SetParent(lobbyHost, false);
+        if (hostSlot) friendUI.transform.SetParent(lobbyHost, false);
         else
         {
             // Delete Empty Lobby Prefab for Host
@@ -160,22 +183,17 @@ public class UIManager : MonoBehaviour
         lobbyFriendDetails.name.text = steamFriend.name;
 
         // Kick Button
-        lobbyFriendDetails.removeButton.gameObject.SetActive(!isHost);
-        if (!isHost)
+        bool canKick = serverside && !hostSlot;
+        lobbyFriendDetails.removeButton.gameObject.SetActive(!canKick);
+        if (!hostSlot)
         {
             lobbyFriendDetails.removeButton.onClick.AddListener(delegate {
-                Debug.Log("Kicked!");
+                SteamLobby.KickUser(steamFriend.id);
             });
         }
     }
 
-    public void DestroyLobbyFriend(bool isHost)
-    {
-        if (isHost && lobbyHost.childCount > 0) Destroy(lobbyHost.GetChild(0).gameObject);
-        else if (!isHost && lobbyClient.childCount > 0) Destroy(lobbyClient.GetChild(0).gameObject);
-    }
-
-    public void GenerateLobbyEmpty()
+    public static void GenerateLobbyEmpty()
     {
         GameObject friendUI = Instantiate(steamEmptyLobbyPrefab);
         friendUI.transform.SetParent(lobbyClient, false);
@@ -189,7 +207,30 @@ public class UIManager : MonoBehaviour
         });
     }
 
-    private void GenerateFriendList(List<List<SteamUserRecord>> steamFriends)
+    public static void DestroyLobby()
+    {
+        DestroyLobbyHost();
+        DestroyLobbyClient();
+    }
+
+    public static void DestroyLobbyHost()
+    {
+        if (lobbyHost.childCount > 0)
+        {
+            foreach (Transform child in lobbyHost) Destroy(child.gameObject);
+        }
+    }
+
+    public static void DestroyLobbyClient()
+    {
+        if (lobbyClient.childCount > 0)
+        {
+            foreach (Transform child in lobbyClient) Destroy(child.gameObject);
+            GenerateLobbyEmpty();
+        }
+    }
+
+    private static void GenerateFriendList(List<List<SteamUserRecord>> steamFriends)
     {
         float totalHeight = 0;
         float itemWidth = 500;
@@ -256,7 +297,7 @@ public class UIManager : MonoBehaviour
         friendList.sizeDelta = new Vector2(0, totalHeight);
     }
 
-    public void DestroyFriendList()
+    public static void DestroyFriendList()
     {
         foreach (Transform child in friendList.transform)
         {
@@ -268,7 +309,7 @@ public class UIManager : MonoBehaviour
     *        Helper functions
     *   -------------------------- */
 
-    private Texture2D GetSteamImageAsTexture2D(int iImage)
+    private static Texture2D GetSteamImageAsTexture2D(int iImage)
     {
         Texture2D ret = null;
         uint ImageWidth;
