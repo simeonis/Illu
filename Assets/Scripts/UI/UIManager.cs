@@ -12,6 +12,7 @@ public class UIManager : MonoBehaviour
         public GameObject Join;
         public GameObject Play;
         public GameObject Settings;
+        public GameObject Console;
         public GameObject Error;
     }
 
@@ -182,17 +183,14 @@ public class UIManager : MonoBehaviour
         lobbyFriendDetails.name.text = steamFriend.name;
 
         // Kick Button
-        lobbyFriendDetails.removeButton.onClick.AddListener(delegate {
+        bool canKick = serverside && !hostSlot;
+        lobbyFriendDetails.removeButton.gameObject.SetActive(canKick);
+        if (!hostSlot)
+        {
+            lobbyFriendDetails.removeButton.onClick.AddListener(delegate {
                 SteamLobby.KickUser(steamFriend.id);
             });
-        // bool canKick = serverside && !hostSlot;
-        // lobbyFriendDetails.removeButton.gameObject.SetActive(canKick);
-        // if (!hostSlot)
-        // {
-        //     lobbyFriendDetails.removeButton.onClick.AddListener(delegate {
-        //         SteamLobby.KickUser(steamFriend.id);
-        //     });
-        // }
+        }
     }
 
     public void GenerateLobbyEmpty()
@@ -228,8 +226,13 @@ public class UIManager : MonoBehaviour
         if (lobbyClient.childCount > 0)
         {
             foreach (Transform child in lobbyClient) Destroy(child.gameObject);
-            GenerateLobbyEmpty();
         }
+    }
+
+    public void RemoveLobbyClient()
+    {
+        DestroyLobbyClient();
+        GenerateLobbyEmpty();
     }
 
     private void GenerateFriendList(List<List<SteamUserRecord>> steamFriends)

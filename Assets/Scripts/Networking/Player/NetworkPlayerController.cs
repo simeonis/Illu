@@ -105,7 +105,6 @@ public class NetworkPlayerController : NetworkBehaviour
     public void PerformWalk() => Walk();
     public void PerformSprint() => Sprint();
 
-
     public void Awake()
     {
         playerControls = new PlayerControls();
@@ -118,6 +117,17 @@ public class NetworkPlayerController : NetworkBehaviour
 
     void OnDisable()
     {
+        // Jump
+        playerControls.Land.Jump.performed -= context => Jump();
+
+        // Sprint
+        playerControls.Land.Sprint.performed -= context => Sprint();
+        playerControls.Land.Sprint.canceled -= context => Walk();
+
+        // Crouch
+        playerControls.Land.Crouch.performed -= context => Crouch();
+        playerControls.Land.Crouch.canceled -= context => UnCrouch();
+
         playerControls.Disable();
     }
 

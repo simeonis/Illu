@@ -23,7 +23,7 @@ public abstract class Machine : Interactable
         playerControls = playerController.playerControls;
 
         // Assign interaction exit key
-        playerControls.Lever.Interact.performed += context => Exit();
+        //playerControls.Lever.Interact.performed += context => Exit();
 
         // Target position for the player's camera
         targetTransform = transform.Find("Camera POV");
@@ -42,8 +42,8 @@ public abstract class Machine : Interactable
 
         // Lock player
         playerController.visionLocked = true;
-        playerControls.Land.Disable();
-        playerControls.Lever.Enable();
+        //playerControls.Land.Disable();
+        //playerControls.Lever.Enable();
 
         // Save camera transform properties
         originalParent = playerCamera.transform.parent;
@@ -65,8 +65,8 @@ public abstract class Machine : Interactable
 
         // Release player
         playerController.visionLocked = false;
-        playerControls.Land.Enable();
-        playerControls.Lever.Disable();
+        // playerControls.Land.Enable();
+        // playerControls.Lever.Disable();
 
         // Reset camera to player body
         playerCamera.transform.SetParent(originalParent);

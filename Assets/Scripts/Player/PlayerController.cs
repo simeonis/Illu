@@ -91,6 +91,10 @@ public class PlayerController : MonoBehaviour
 
     void Awake() {
         playerControls = new PlayerControls();
+    }
+
+    void OnEnable() {
+        playerControls.Land.Enable();
 
         // Jump
         playerControls.Land.Jump.performed += context => Jump();
@@ -104,12 +108,19 @@ public class PlayerController : MonoBehaviour
         playerControls.Land.Crouch.canceled += context => UnCrouch();
     }
 
-    void OnEnable() {
-        playerControls.Land.Enable();
-    }
-
     void OnDisable() {
         playerControls.Land.Disable();
+
+        // Jump
+        playerControls.Land.Jump.performed -= context => Jump();
+
+        // Sprint
+        playerControls.Land.Sprint.performed -= context => Sprint();
+        playerControls.Land.Sprint.canceled -= context => Walk();
+
+        // Crouch
+        playerControls.Land.Crouch.performed -= context => Crouch();
+        playerControls.Land.Crouch.canceled -= context => UnCrouch();
     }
 
     void Start()

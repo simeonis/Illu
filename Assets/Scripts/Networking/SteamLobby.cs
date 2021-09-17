@@ -79,8 +79,6 @@ public class SteamLobby : MonoBehaviour
     {
         MyNetworkManager.OnClientDisconnected -= LobbyDisconnected;
 
-        if (!SteamManager.Initialized) { return; }
-
         lobbyCreated.Dispose();
         gameLobbyJoinRequested.Dispose();
         lobbyEntered.Dispose();
@@ -99,14 +97,14 @@ public class SteamLobby : MonoBehaviour
         // Error creating lobby
         if (callback.m_eResult != EResult.k_EResultOK)
         {
-            Debug.Log("Error creating steam lobby.");
+            UIConsole.Log("Error creating steam lobby.");
             return;
         }
 
         // Successfully created lobby
         if (callback.m_eResult == EResult.k_EResultOK)
         {
-            Debug.Log("Steam lobby created successfully.\nAttempting to host...");
+            UIConsole.Log("Steam lobby created successfully.\nAttempting to host...");
             networkManager.StartHost();
             lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
             SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey, SteamUser.GetSteamID().ToString());
@@ -126,7 +124,7 @@ public class SteamLobby : MonoBehaviour
             // Checks if server has started
             if (NetworkServer.active) 
             { 
-                Debug.Log("Failed to join lobby.\nReason: Game already started.");
+                UIConsole.Log("Failed to join lobby.\nReason: Game already started.");
                 return;
             }
 
@@ -154,7 +152,7 @@ public class SteamLobby : MonoBehaviour
     // CLIENT invited by HOST
     private void OnLobbyInvited(LobbyInvite_t callback)
     {
-        Debug.Log("Invite Received.");
+        UIConsole.Log("Invite Received.");
         if (callback.m_ulGameID == SteamAppID.m_GameID)
         {
             UIManager.GenerateInvite(new CSteamID(callback.m_ulSteamIDLobby), GetSteamFriend(new CSteamID(callback.m_ulSteamIDUser)));
@@ -164,7 +162,7 @@ public class SteamLobby : MonoBehaviour
     // CLIENT attemps to join via steam or invite
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t callback)
     {
-        Debug.Log("Attempting to join...");
+        UIConsole.Log("Attempting to join...");
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
 
@@ -197,23 +195,23 @@ public class SteamLobby : MonoBehaviour
         {
             // Entered
             case (uint) EChatMemberStateChange.k_EChatMemberStateChangeEntered:
-                Debug.LogFormat("[Lobby]: {0} has joined.", steamUserChanged.name);
+                UIConsole.Log(string.Format("[Lobby]: {0} has joined.", steamUserChanged.name));
                 UIManager.GenerateLobbyClient(steamUserChanged, true);
                 break;
             // Left
             case (uint) EChatMemberStateChange.k_EChatMemberStateChangeLeft:
-                Debug.LogFormat("[Lobby]: {0} has left.", steamUserChanged.name);
-                UIManager.DestroyLobbyClient();
+                UIConsole.Log(string.Format("[Lobby]: {0} has left.", steamUserChanged.name));
+                UIManager.RemoveLobbyClient();
                 break;
             // Kicked
             case (uint) EChatMemberStateChange.k_EChatMemberStateChangeKicked:
-                Debug.LogFormat("[Lobby]: {0} was kicked by {1}.", steamUserChanged.name, steamUserMakingChange.name);
-                UIManager.DestroyLobbyClient();
+                UIConsole.Log(string.Format("[Lobby]: {0} was kicked by {1}.", steamUserChanged.name, steamUserMakingChange.name));
+                UIManager.RemoveLobbyClient();
                 break;
             // Disconnected
             case (uint) EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
-                Debug.LogFormat("[Lobby]: {0} disconnected.", steamUserChanged.name);
-                UIManager.DestroyLobbyClient();
+                UIConsole.Log(string.Format("[Lobby]: {0} disconnected.", steamUserChanged.name));
+                UIManager.RemoveLobbyClient();
                 break;
             default:
                 break;
@@ -227,7 +225,7 @@ public class SteamLobby : MonoBehaviour
     // USER becomes HOST
     public void HostLobby()
     {
-        Debug.Log("Attempting to create steam lobby...");
+        UIConsole.Log("Attempting to create steam lobby...");
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
     }
 
@@ -247,16 +245,16 @@ public class SteamLobby : MonoBehaviour
         switch (lobbyExitReason)
         {
             case LobbyExitReason.Left:
-                Debug.Log("You have left the lobby");
+                UIConsole.Log("You have left the lobby");
                 break;
             case LobbyExitReason.Kicked:
-                Debug.Log("You have been kicked from the lobby");
+                UIConsole.Log("You have been kicked from the lobby");
                 break;
             case LobbyExitReason.Disconnected:
-                Debug.Log("You have disconnected from the lobby");
+                UIConsole.Log("You have disconnected from the lobby");
                 break;
             default:
-                Debug.Log("You somehow left the lobby");
+                UIConsole.Log("You somehow left the lobby");
                 break;
         }
         
@@ -286,7 +284,7 @@ public class SteamLobby : MonoBehaviour
         byte[] bytes = System.Text.Encoding.ASCII.GetBytes(steamID.ToString());
         if (!SteamMatchmaking.SendLobbyChatMsg(lobbyID, bytes, bytes.Length))
         {
-            Debug.Log("Kick command was unable to send.");
+            UIConsole.Log("Kick command was unable to send.");
         }
     }
 
