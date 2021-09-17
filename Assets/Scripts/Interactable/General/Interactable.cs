@@ -1,7 +1,8 @@
 using UnityEngine;
 using TMPro;
+using Mirror;
 
-public abstract class Interactable : MonoBehaviour
+public abstract class Interactable : NetworkBehaviour
 {
     [Header("Interactable")]
     public string interactMessage;

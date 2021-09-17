@@ -20,7 +20,7 @@ public abstract class Machine : Interactable
     protected virtual void Start()
     {
         // Load input system
-        playerControls = playerController.playerControls;
+        playerControls = playerController.LocalPlayerControls;
 
         // Assign interaction exit key
         //playerControls.Lever.Interact.performed += context => Exit();

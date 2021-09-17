@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Illu_Interactable
+namespace IlluInteractable
 {
     public class Button : AnimatedInteractable
     {

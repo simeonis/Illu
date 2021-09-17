@@ -15,11 +15,14 @@ public abstract class Interactor : NetworkBehaviour
     // Protected
     protected PlayerControls playerControls;
     protected bool canInteract;
+    protected bool interaction = false;
 
     // Private
     private Interactable interactable;
 
     // Network
+    [SyncVar]
+    [HideInInspector] public GameObject networkInteractable;
     protected NetworkSimpleData networkSimpleData;
 
     protected virtual void Awake()
@@ -58,35 +61,41 @@ public abstract class Interactor : NetworkBehaviour
     {
         if (e.key == "INTERACTION")
         {
-            if (canInteract)
+            // Interact
+            if (networkInteractable != null)
             {
-                interactable.Interaction(this);
+                networkInteractable.GetComponent<Interactable>().Interaction(this);
             }
+            // Drop
             else if (equipmentSlot.HasEquipment())
             {
                 equipmentSlot.GetEquipment().Interaction(this);
             }
         }
+        else if (e.key == "INTERACTION_CANCELLED")
+        {
+            if (networkInteractable != null)
+            {
+                networkInteractable.GetComponent<Interactable>().InteractionCancelled(this);
+            }
+        }
     }
 
     protected virtual void Interact()
-    {
-        networkSimpleData.SendData("INTERACTION");
-        if (canInteract)
+    {   
+        if (!interaction)
         {
-            interactable.Interaction(this);
-        }
-        else if (equipmentSlot.HasEquipment())
-        {
-            equipmentSlot.GetEquipment().Interaction(this);
+            interaction = true;
+            networkSimpleData.SendData("INTERACTION");
         }
     }
 
     protected virtual void InteractCanceled()
     {
-        if (canInteract)
+        if (interaction)
         {
-            interactable.InteractionCancelled(this);
+            interaction = false;
+            networkSimpleData.SendData("INTERACTION_CANCELLED");
         }
     }
 
@@ -95,12 +104,49 @@ public abstract class Interactor : NetworkBehaviour
         if (Physics.Raycast(source.position, source.forward, out RaycastHit hit, interactionRange)) 
         {
             interactable = hit.collider.GetComponent<Interactable>();
+
+            // Possible interaction
+            if (interactable != null)
+            {
+                // Server [SyncVar]
+                if (hasAuthority) SetNetworkInteractable(hit.collider.gameObject);
+            }
+            // No possible interaction
+            else
+            {
+                // Cancel any ongoing interaction (no longer looking at them)
+                if (interaction)
+                {
+                    interaction = false;
+                    networkSimpleData.SendData("INTERACTION_CANCELLED");
+                }
+
+                // -------------------------- WARNING --------------------------
+                // Below code might be necessary to ensure that players 
+                // can only interact with object they themselves are looking at. 
+                //
+                // Currently disabled because it clears the networkInteractable 
+                // before the above code can finish.
+                // -------------------------------------------------------------
+
+                // Server [SyncVar]
+                // if (hasAuthority) SetNetworkInteractable(null);
+            }
+
             return interactable != null;
         }
         else
         {
             interactable = null;
+            // Server [SyncVar]
+            if (hasAuthority) SetNetworkInteractable(null);
             return false;
         }
+    }
+
+    [Command]
+    private void SetNetworkInteractable(GameObject gameObject) 
+    {
+        networkInteractable = gameObject;
     }
 }

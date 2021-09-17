@@ -3,5 +3,5 @@ using UnityEngine;
 public abstract class Trigger : MonoBehaviour
 {
     public virtual void Activate() { }
-    public virtual void Activate(Illu_Interactable.Button button) { }
+    public virtual void Activate(IlluInteractable.Button button) { }
 }

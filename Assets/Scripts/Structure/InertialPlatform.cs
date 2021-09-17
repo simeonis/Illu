@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InertialPlatform : MonoBehaviour
@@ -9,7 +7,7 @@ public class InertialPlatform : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             Debug.Log(collision.gameObject.name + " got on a rotating bridge.");
-            collision.gameObject.GetComponent<PlayerController>().transform.SetParent(transform);
+            collision.transform.SetParent(transform);
         }
     }
 
@@ -18,7 +16,7 @@ public class InertialPlatform : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             Debug.Log(collision.gameObject.name + " got off a rotating bridge.");
-            collision.gameObject.GetComponent<PlayerController>().transform.SetParent(null);
+            collision.transform.SetParent(null);
         }
     }
     
