@@ -9,7 +9,7 @@ public class Equipment : Interactable
     protected bool isEquipped = false;
     private Transform defaultParent;
 
-    protected override void Awake()
+    protected void Awake()
     {
         equipmentBody = GetComponent<Rigidbody>();
         equipmentCollider = GetComponent<Collider>();

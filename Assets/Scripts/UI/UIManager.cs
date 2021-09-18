@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
+using System;
 
 public class UIManager : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class UIManager : MonoBehaviour
     }
 
     [SerializeField] private SCREENS screens;
+
+    [Header("UI Components")]
+    [SerializeField] private PlayerHUD playerHUD;
 
     [Header("Target Parent")]
     [SerializeField] private RectTransform friendList;
@@ -39,11 +43,21 @@ public class UIManager : MonoBehaviour
     private static List<string> status = new List<string>() { "Playing Illu", "Online", "Offline" };
     private static Dictionary<string, GameObject> invites = new Dictionary<string, GameObject>();
 
+    public static event Action<PlayerHUD> OnPlayScreen;
+
     void Awake()
     {
         DontDestroyOnLoad(this);
+    }
 
+    void OnEnable()
+    {
         MyNetworkManager.OnClientReadied += Play;
+    }
+
+    void OnDisable()
+    {
+        MyNetworkManager.OnClientReadied -= Play;
     }
 
     public void Quit()
@@ -55,6 +69,7 @@ public class UIManager : MonoBehaviour
     {
         screens.Host.SetActive(false);
         screens.Play.SetActive(true);
+        OnPlayScreen?.Invoke(playerHUD);
     }
 
     public void LobbyExited()

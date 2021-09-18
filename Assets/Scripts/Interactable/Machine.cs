@@ -20,7 +20,7 @@ public abstract class Machine : Interactable
     protected virtual void Start()
     {
         // Load input system
-        playerControls = playerController.LocalPlayerControls;
+        // playerControls = playerController.LocalPlayerControls;
 
         // Assign interaction exit key
         //playerControls.Lever.Interact.performed += context => Exit();
@@ -29,11 +29,11 @@ public abstract class Machine : Interactable
         targetTransform = transform.Find("Camera POV");
     }
 
-    public override void Seen()
-    {
-        if (!isInteracting) base.Seen();
-        else interactMessage = "";
-    }
+    // public override void Seen()
+    // {
+    //     if (!isInteracting) base.Seen();
+    //     else interactMessage = "";
+    // }
 
     public override void Interaction(Interactor interactor)
     {

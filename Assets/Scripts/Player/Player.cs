@@ -20,11 +20,28 @@ public class Player : Interactor
         playerControls.Land.AlternateFire.canceled += context => AlternateFireReleased();
     }
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        UIManager.OnPlayScreen += playerHUD => LoadInteractUI(playerHUD);
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        UIManager.OnPlayScreen -= playerHUD => LoadInteractUI(playerHUD);
+        interactUI = null;
+    }
+
+    private void LoadInteractUI(PlayerHUD playerHUD)
+    {
+        interactUI = playerHUD.interactUI;
+    }
+
     protected override void Start()
     {
         base.Start();
         rigidbody = GetComponent<Rigidbody>();
-        interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
         equipmentSlot.SetLocation(equipmentParent);
     }
 
@@ -32,9 +49,9 @@ public class Player : Interactor
     {
         base.Update();
 
-        if (!canInteract && interactUI && interactUI.text != "")
+        if (interactUI)
         {
-            interactUI.text = "";
+            interactUI.text = canInteract ? interactable.interactMessage : "";
         }
     }
 
