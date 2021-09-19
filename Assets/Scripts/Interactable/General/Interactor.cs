@@ -13,7 +13,6 @@ public abstract class Interactor : NetworkBehaviour
     public EquipmentSlot equipmentSlot;
 
     // Protected
-    protected PlayerControls playerControls;
     protected bool canInteract;
     protected bool interaction = false;
 
@@ -27,7 +26,6 @@ public abstract class Interactor : NetworkBehaviour
 
     protected virtual void Awake()
     {
-        playerControls = new PlayerControls();
         networkSimpleData = GetComponent<NetworkSimpleData>();
     }
 
@@ -37,9 +35,8 @@ public abstract class Interactor : NetworkBehaviour
         networkSimpleData.DataChanged += InteractEventHandler;
 
         // Input
-        playerControls.Enable();
-        playerControls.Land.Interact.performed += context => Interact();
-        playerControls.Land.Interact.canceled += context => InteractCanceled();
+        InputManager.playerControls.Land.Interact.performed += context => Interact();
+        InputManager.playerControls.Land.Interact.canceled += context => InteractCanceled();
     }
 
     protected virtual void Start()
@@ -53,9 +50,8 @@ public abstract class Interactor : NetworkBehaviour
         networkSimpleData.DataChanged -= InteractEventHandler;
 
         // Input
-        playerControls.Disable();
-        playerControls.Land.Interact.performed -= context => Interact();
-        playerControls.Land.Interact.canceled -= context => InteractCanceled();
+        InputManager.playerControls.Land.Interact.performed -= context => Interact();
+        InputManager.playerControls.Land.Interact.canceled -= context => InteractCanceled();
     }
 
     protected virtual void Update()
@@ -103,7 +99,6 @@ public abstract class Interactor : NetworkBehaviour
     protected virtual void Interact()
     {   
         // Note: Only send over network if looking at interactable or holding equipment
-
         // Interact
         if (!interaction && canInteract)
         {

@@ -6,7 +6,6 @@ public class PlayerController : MonoBehaviour
 {
     // UserInput variables
     [HideInInspector]
-    public PlayerControls playerControls;
     private Vector2 movementInput;
     private Vector2 lookInput;
     private bool isSprinting, isCrouching;
@@ -89,38 +88,30 @@ public class PlayerController : MonoBehaviour
     private Rigidbody playerBody;
     private CapsuleCollider playerCollider;
 
-    void Awake() {
-        playerControls = new PlayerControls();
-    }
-
     void OnEnable() {
-        playerControls.Land.Enable();
-
         // Jump
-        playerControls.Land.Jump.performed += context => Jump();
+        InputManager.playerControls.Land.Jump.performed += context => Jump();
 
         // Sprint
-        playerControls.Land.Sprint.performed += context => Sprint();
-        playerControls.Land.Sprint.canceled += context => Walk();
+        InputManager.playerControls.Land.Sprint.performed += context => Sprint();
+        InputManager.playerControls.Land.Sprint.canceled += context => Walk();
 
         // Crouch
-        playerControls.Land.Crouch.performed += context => Crouch();
-        playerControls.Land.Crouch.canceled += context => UnCrouch();
+        InputManager.playerControls.Land.Crouch.performed += context => Crouch();
+        InputManager.playerControls.Land.Crouch.canceled += context => UnCrouch();
     }
 
     void OnDisable() {
-        playerControls.Land.Disable();
-
         // Jump
-        playerControls.Land.Jump.performed -= context => Jump();
+        InputManager.playerControls.Land.Jump.performed -= context => Jump();
 
         // Sprint
-        playerControls.Land.Sprint.performed -= context => Sprint();
-        playerControls.Land.Sprint.canceled -= context => Walk();
+        InputManager.playerControls.Land.Sprint.performed -= context => Sprint();
+        InputManager.playerControls.Land.Sprint.canceled -= context => Walk();
 
         // Crouch
-        playerControls.Land.Crouch.performed -= context => Crouch();
-        playerControls.Land.Crouch.canceled -= context => UnCrouch();
+        InputManager.playerControls.Land.Crouch.performed -= context => Crouch();
+        InputManager.playerControls.Land.Crouch.canceled -= context => UnCrouch();
     }
 
     void Start()
@@ -190,11 +181,11 @@ public class PlayerController : MonoBehaviour
 
     private void UserInput()
     {
-        lookInput = playerControls.Land.Look.ReadValue<Vector2>();
+        lookInput = InputManager.playerControls.Land.Look.ReadValue<Vector2>();
         lookInput.x *= horizontalSensitivity * 0.01f;
         lookInput.y *= verticalSensitivity * 0.01f;
         
-        movementInput = playerControls.Land.Movement.ReadValue<Vector2>();
+        movementInput = InputManager.playerControls.Land.Movement.ReadValue<Vector2>();
     }
 
     private void LookDirection()

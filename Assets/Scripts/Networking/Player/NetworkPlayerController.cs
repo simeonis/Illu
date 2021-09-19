@@ -5,13 +5,9 @@ using Mirror;
 public class NetworkPlayerController : NetworkBehaviour
 {
     // User Input variables
-    private PlayerControls playerControls;
     private Vector2 movementInput;
     private Vector2 lookInput;
     private bool isSprinting, isCrouching;
-
-    // Public access to player controls
-    public PlayerControls LocalPlayerControls => playerControls;
 
     // Transform variables
     [Header("Transforms")]
@@ -98,38 +94,6 @@ public class NetworkPlayerController : NetworkBehaviour
     public void NetworkWalk() => Walk();
     public void NetworkSprint() => Sprint();
 
-    public void Awake()
-    {
-        playerControls = new PlayerControls();
-    }
-
-    void OnEnable()
-    {
-        playerControls.Enable();
-    }
-
-    void OnDisable()
-    {
-        playerControls.Disable();
-    }
-
-    public override void OnStartAuthority()
-    {
-        base.OnStartAuthority();
-        enabled = true;
-
-        // Jump
-        playerControls.Land.Jump.performed += context => Jump();
-
-        // Sprint
-        playerControls.Land.Sprint.performed += context => Sprint();
-        playerControls.Land.Sprint.canceled += context => Walk();
-
-        // Crouch
-        playerControls.Land.Crouch.performed += context => Crouch();
-        playerControls.Land.Crouch.canceled += context => UnCrouch();
-    }
-
     void Start()
     {
         // Transform
@@ -151,6 +115,37 @@ public class NetworkPlayerController : NetworkBehaviour
         // Cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+
+    public override void OnStartAuthority()
+    {
+        base.OnStartAuthority();
+        enabled = true;
+
+        // Jump
+        InputManager.playerControls.Land.Jump.performed += context => Jump();
+
+        // Sprint
+        InputManager.playerControls.Land.Sprint.performed += context => Sprint();
+        InputManager.playerControls.Land.Sprint.canceled += context => Walk();
+
+        // Crouch
+        InputManager.playerControls.Land.Crouch.performed += context => Crouch();
+        InputManager.playerControls.Land.Crouch.canceled += context => UnCrouch();
+    }
+
+    void OnDisable()
+    {
+        // Jump
+        InputManager.playerControls.Land.Jump.performed -= context => Jump();
+
+        // Sprint
+        InputManager.playerControls.Land.Sprint.performed -= context => Sprint();
+        InputManager.playerControls.Land.Sprint.canceled -= context => Walk();
+
+        // Crouch
+        InputManager.playerControls.Land.Crouch.performed -= context => Crouch();
+        InputManager.playerControls.Land.Crouch.canceled -= context => UnCrouch();
     }
 
     void Update()
@@ -176,11 +171,11 @@ public class NetworkPlayerController : NetworkBehaviour
 
     private void UserInput()
     {
-        lookInput = playerControls.Land.Look.ReadValue<Vector2>();
+        lookInput = InputManager.playerControls.Land.Look.ReadValue<Vector2>();
         lookInput.x *= horizontalSensitivity * 0.01f;
         lookInput.y *= verticalSensitivity * 0.01f;
 
-        movementInput = playerControls.Land.Movement.ReadValue<Vector2>();
+        movementInput = InputManager.playerControls.Land.Movement.ReadValue<Vector2>();
     }
 
     public void LookDirection()

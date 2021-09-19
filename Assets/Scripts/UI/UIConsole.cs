@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
@@ -11,6 +12,11 @@ public class UIConsole : MonoBehaviour
     [Header("Prefabs")]
     [SerializeField] private GameObject consoleLogPrefab;
 
+    [Header("Scroll Settings")]
+    [SerializeField] private ScrollRect scrollRect;
+    [SerializeField] private int logCapacity = 100;
+    [SerializeField] private bool addNewToTop = false;
+
     private static Queue<String> consoleLogs = new Queue<string>();
     private static event Action OnLogQueued;
     private static event Action OnLogCleared;
@@ -19,6 +25,9 @@ public class UIConsole : MonoBehaviour
     {
         UIConsole.OnLogQueued += GenerateConsoleLog;
         UIConsole.OnLogCleared += ClearConsoleLogs;
+
+        // Auto-Scroll
+        scrollRect.verticalNormalizedPosition = addNewToTop ? 1 : 0;
         
         // Generate any logs still in the queue
         int logAmount = consoleLogs.Count;
@@ -33,20 +42,32 @@ public class UIConsole : MonoBehaviour
 
     private void GenerateConsoleLog()
     {
+        // Max Capacity → Destroy Oldest Log
+        if (consoleLogContainer.childCount >= logCapacity)
+        {
+            int index = addNewToTop ? consoleLogContainer.childCount - 1 : 0;
+            DestroyImmediate(consoleLogContainer.GetChild(index).gameObject);
+        }
+
         // Instantiate and place the console log
-        float offsetY = consoleLogContainer.sizeDelta.y;
-        GameObject consoleLog = Instantiate(consoleLogPrefab, new Vector3(0, -offsetY, 0), Quaternion.identity);
-        consoleLog.transform.SetParent(consoleLogContainer, false);
+        GameObject consoleLog = Instantiate(consoleLogPrefab, consoleLogContainer);
+        if (addNewToTop) consoleLog.transform.SetAsFirstSibling();
         
         // Console log data (timestamp + message)
         ConsoleLog consoleLogDetails = consoleLog.GetComponent<ConsoleLog>();
         consoleLogDetails.timestamp.text = DateTime.Now.ToString("[hh:mm:ss]:");
         consoleLogDetails.message.text = consoleLogs.Dequeue();
 
-        // Adjust container's height
-        RectTransform rectTransform = consoleLog.GetComponent<RectTransform>();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
-        consoleLogContainer.sizeDelta += new Vector2(0, rectTransform.sizeDelta.y);
+        // Auto-Scroll
+        StartCoroutine(AutoScroll());
+    }
+
+    private IEnumerator AutoScroll()
+    {
+        LayoutRebuilder.ForceRebuildLayoutImmediate(consoleLogContainer);
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
+        scrollRect.verticalNormalizedPosition = addNewToTop ? 1 : 0;
     }
 
     private void ClearConsoleLogs()
