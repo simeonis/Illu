@@ -9,9 +9,14 @@ public class InputManager : MonoBehaviour
 
     void Awake()
     {
-        DontDestroyOnLoad(this);
         playerControls = new PlayerControls();
-        ToggleActionMap(playerControls.Land);
+        Debug.Log("InputManager Awake ID: " + this.GetInstanceID());
+    }
+
+    void OnDestroy()
+    {
+        playerControls = null;
+        Debug.Log("InputManager Destroyed ID: " + this.GetInstanceID());
     }
 
     public static void ToggleActionMap(InputActionMap actionMap)

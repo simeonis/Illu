@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
         public GameObject Friend;
         public GameObject Join;
         public GameObject Play;
+        public GameObject Pause;
         public GameObject Settings;
         public GameObject Console;
         public GameObject Error;
@@ -35,6 +36,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject steamLobbyPrefab;
     [SerializeField] private GameObject steamEmptyLobbyPrefab;
     [SerializeField] private GameObject steamInvitePrefab;
+    [SerializeField] private GameObject errorPopupPrefab;
 
     [Header("Color")]
     [SerializeField] private Color statusPlaying;
@@ -46,29 +48,78 @@ public class UIManager : MonoBehaviour
     private static List<string> status = new List<string>() { "Playing Illu", "Online", "Offline" };
     private static Dictionary<string, GameObject> invites = new Dictionary<string, GameObject>();
 
+    // Screen callbacks
+    public static event Action OnRootScreen;
+    public static event Action OnHostScreen;
+    public static event Action OnFriendScreen;
+    public static event Action OnJoinScreen;
     public static event Action<PlayerHUD> OnPlayScreen;
+    public static event Action OnSettingsScreen;
+    public static event Action OnConsoleScreen;
+    public static event Action OnErrorScreen;
+
+    // Game callbacks
+    public static event Action OnStartLobby;
+    public static event Action OnLeaveLobby;
+    public static event Action OnStartGame;
+    public static event Action OnLeaveGame;
+    public static event Action OnResumeGame;
+    public static event Action OnPauseGame;
 
     void Awake()
     {
-        DontDestroyOnLoad(this);
-    }
-
-    void OnEnable()
-    {
-        MyNetworkManager.OnClientReadied += Play;
+        MyNetworkManager.OnGameStarted += GameStarted;
         InputManager.playerControls.Land.Menu.performed += context => ShowMenu();
         InputManager.playerControls.Menu.Menu.performed += context => HideMenu();
         InputManager.playerControls.Land.Console.performed += context => ShowConsole();
         InputManager.playerControls.Menu.Console.performed += context => HideConsole();
     }
 
-    void OnDisable()
+    void OnDestroy()
     {
-        MyNetworkManager.OnClientReadied -= Play;
+        MyNetworkManager.OnGameStarted -= GameStarted;
         InputManager.playerControls.Land.Menu.performed -= context => ShowMenu();
         InputManager.playerControls.Menu.Menu.performed -= context => HideMenu();
         InputManager.playerControls.Land.Console.performed -= context => ShowConsole();
         InputManager.playerControls.Menu.Console.performed -= context => HideConsole();
+    }
+
+    /*  --------------------------
+    *          Root Screen
+    *   -------------------------- */
+
+    public void HostLobby()
+    {
+        screens.Root.SetActive(false);
+        screens.Host.SetActive(true);
+        OnHostScreen?.Invoke();
+        OnStartLobby?.Invoke();
+    }
+
+    public void JoinLobby()
+    {
+        screens.Root.SetActive(false);
+        screens.Join.SetActive(true);
+        OnJoinScreen?.Invoke();
+    }
+
+    public void Settings()
+    {
+        screens.Root.SetActive(false);
+        screens.Settings.SetActive(true);
+        OnSettingsScreen?.Invoke();
+    }
+
+    public void BackToRoot()
+    {
+        screens.Host.SetActive(false);
+        screens.Join.SetActive(false);
+        screens.Settings.SetActive(false);
+        screens.Play.SetActive(false);
+        screens.Pause.SetActive(false);
+        screens.Console.SetActive(false);
+        screens.Root.SetActive(true);
+        OnRootScreen?.Invoke();
     }
 
     public void Quit()
@@ -76,59 +127,141 @@ public class UIManager : MonoBehaviour
         Application.Quit();
     }
 
-    private void Play()
+    /*  --------------------------
+    *          Host Screen
+    *   -------------------------- */
+
+    public void StartGame()
+    {
+        OnStartGame?.Invoke();
+    }
+
+    public void LeaveLobby()
+    {
+        BackToRoot();
+        DestroyLobby();
+        OnLeaveLobby?.Invoke();
+    }
+
+    /*  --------------------------
+    *          Friend Screen
+    *   -------------------------- */
+
+    private void ShowFriendList()
+    {
+        screens.Host.SetActive(false);
+        screens.Friend.SetActive(true);
+        OnFriendScreen?.Invoke();
+    }
+
+    public void CloseFriendList()
+    {
+        screens.Friend.SetActive(false);
+        screens.Host.SetActive(true);
+        DestroyFriendList();
+        OnHostScreen?.Invoke();
+    }
+
+    /*  --------------------------
+    *          Join Screen
+    *   -------------------------- */
+
+    public void FindLobby()
+    {
+
+    }
+
+    /*  --------------------------
+    *          Play Screen
+    *   -------------------------- */
+
+    private void GameStarted()
     {
         screens.Host.SetActive(false);
         screens.Play.SetActive(true);
         OnPlayScreen?.Invoke(playerHUD);
+        GameResumed();
     }
 
-    public void LobbyExited()
-    {
-        screens.Host.SetActive(false);
-        screens.Root.SetActive(true);
-        DestroyLobby();
-    }
-
-    private void ShowMenu()
-    {
-        PauseGame();
-        screens.Play.SetActive(false);
-        screens.Host.SetActive(true);
-
-    }
-
-    private void HideMenu()
-    {
-        ResumeGame();
-        screens.Host.SetActive(false);
-        screens.Play.SetActive(true);
-    }
-
-    private void ShowConsole()
-    {
-        PauseGame();
-        screens.Console.SetActive(true);
-    }
-
-    private void HideConsole()
-    {
-        ResumeGame();
-        screens.Console.SetActive(false);
-    }
-
-    private void PauseGame()
-    {
-        InputManager.ToggleActionMap(InputManager.playerControls.Menu);
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-    }
-
-    private void ResumeGame()
+    private void GameResumed()
     {
         InputManager.ToggleActionMap(InputManager.playerControls.Land);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        OnResumeGame?.Invoke();
+    }
+
+    /*  --------------------------
+    *          Pause Screen
+    *   -------------------------- */
+
+    public void ShowMenu()
+    {
+        GamePaused();
+        screens.Pause.SetActive(true);
+    }
+
+    public void HideMenu()
+    {
+        GameResumed();
+        screens.Pause.SetActive(false);
+    }
+
+    public void LeaveGame()
+    {
+        BackToRoot();
+        OnLeaveGame?.Invoke();
+    }
+
+    private void GamePaused()
+    {
+        InputManager.ToggleActionMap(InputManager.playerControls.Menu);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        OnPauseGame?.Invoke();
+    }
+
+    /*  --------------------------
+    *          Settings Screen
+    *   -------------------------- */
+
+    /*  --------------------------
+    *          Console Screen
+    *   -------------------------- */
+
+    private void ShowConsole()
+    {
+        GamePaused();
+        screens.Console.SetActive(true);
+        OnConsoleScreen?.Invoke();
+    }
+
+    private void HideConsole()
+    {
+        GameResumed();
+        screens.Console.SetActive(false);
+    }
+
+    /*  --------------------------
+    *          Error Screen
+    *   -------------------------- */
+
+    public void Error(string title, string message)
+    {
+        GameObject popup = Instantiate(errorPopupPrefab, screens.Error.transform);
+
+        ErrorPopup popupDetails = popup.GetComponent<ErrorPopup>();
+
+        popupDetails.title.text = title;
+        popupDetails.message.text = message;
+        popupDetails.dismissButton.onClick.AddListener(delegate {
+            screens.Error.SetActive(false);
+            Destroy(popup.gameObject);
+        });
+
+        BackToRoot();
+        screens.Error.SetActive(true);
+        OnErrorScreen?.Invoke();
     }
 
     /*  --------------------------
@@ -233,8 +366,7 @@ public class UIManager : MonoBehaviour
 
         lobbyEmptyDetails.addButton.onClick.AddListener(delegate { 
             GenerateFriendList(SteamLobby.GetSteamFriends());
-            screens.Friend.SetActive(true);
-            screens.Host.SetActive(false);
+            ShowFriendList();
         });
     }
 
@@ -324,7 +456,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void DestroyFriendList()
+    private void DestroyFriendList()
     {
         foreach (Transform child in friendList.transform)
         {

@@ -64,6 +64,9 @@ public class SteamLobby : MonoBehaviour
     void OnEnable()
     {
         MyNetworkManager.OnClientDisconnected += LobbyDisconnected;
+        UIManager.OnStartLobby += HostLobby;
+        UIManager.OnLeaveLobby += LobbyLeft;
+        UIManager.OnLeaveGame += LobbyLeft;
 
         if (!SteamManager.Initialized) { return; }
 
@@ -78,6 +81,9 @@ public class SteamLobby : MonoBehaviour
     void OnDisable()
     {
         MyNetworkManager.OnClientDisconnected -= LobbyDisconnected;
+        UIManager.OnStartLobby -= HostLobby;
+        UIManager.OnLeaveLobby -= LobbyLeft;
+        UIManager.OnLeaveGame -= LobbyLeft;
 
         lobbyCreated.Dispose();
         gameLobbyJoinRequested.Dispose();
@@ -223,14 +229,14 @@ public class SteamLobby : MonoBehaviour
     *   -------------------------- */
 
     // USER becomes HOST
-    public void HostLobby()
+    public static void HostLobby()
     {
         UIConsole.Log("Attempting to create steam lobby...");
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
+        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 2);
     }
 
     private enum LobbyExitReason { Left, Kicked, Disconnected };
-    public void LobbyLeft() => LeaveLobby(LobbyExitReason.Left);
+    private void LobbyLeft() => LeaveLobby(LobbyExitReason.Left);
     private void LobbyDisconnected() => LeaveLobby(LobbyExitReason.Disconnected);
     private void LobbyKicked() => LeaveLobby(LobbyExitReason.Kicked);
 
@@ -249,21 +255,29 @@ public class SteamLobby : MonoBehaviour
                 break;
             case LobbyExitReason.Kicked:
                 UIConsole.Log("You have been kicked from the lobby");
+                UIManager.Error("Lobby Left", "You have been kicked from the lobby");
                 break;
             case LobbyExitReason.Disconnected:
                 UIConsole.Log("You have disconnected from the lobby");
+                UIManager.Error("Lobby Left", "You have disconnected from the lobby");
                 break;
             default:
                 UIConsole.Log("You somehow left the lobby");
+                UIManager.Error("Lobby Left", "You somehow left the lobby");
                 break;
         }
         
         SteamMatchmaking.LeaveLobby(lobbyID);
-        UIManager.LobbyExited();
         lobbyID.Clear();
 
-        if (lobbyOwner) networkManager.StopHost();
-        else networkManager.StopClient();
+        if (lobbyOwner) {
+            Debug.Log("Host Left");
+            networkManager.StopHost();
+        }
+        else {
+            Debug.Log("Client Left.");
+            networkManager.StopClient();
+        }
     }
 
     // HOST invites CLIENT

@@ -29,7 +29,20 @@ public class MyNetworkManager : NetworkManager
     public static event Action OnClientConnected;
     public static event Action OnClientDisconnected;
     public static event Action OnClientReadied;
+    public static event Action OnGameStarted;
     public static event Action<NetworkConnection> OnServerReadied;
+
+    public override void Awake()
+    {
+        base.Awake();
+        UIManager.OnStartGame += () => ServerChangeScene("Testing Range");
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        UIManager.OnStartGame -= () => ServerChangeScene("Testing Range");
+    }
 
     /*  --------------------------
     *       Callback functions
@@ -107,8 +120,12 @@ public class MyNetworkManager : NetworkManager
     public override void OnClientDisconnect(NetworkConnection conn)
     {
         base.OnClientDisconnect(conn);
-
         OnClientDisconnected?.Invoke();
+
+        if (SceneManager.GetActiveScene().name != menuScene)
+        {
+            SceneManager.LoadScene(menuScene);
+        }
 
         UIConsole.Log("[Client]: Disconnected from server.");
     }
@@ -134,8 +151,8 @@ public class MyNetworkManager : NetworkManager
     {
         UIConsole.Log("[Server]: Setting up new scene.");
 
-        // From menu to game
-        if (SceneManager.GetActiveScene().name == menuScene && newSceneName == "Testing Range")
+        // Game Started
+        if (SceneManager.GetActiveScene().name == menuScene && newSceneName != menuScene)
         {
             for (int i = RoomPlayers.Count - 1; i >= 0; i--)
             {
@@ -156,24 +173,39 @@ public class MyNetworkManager : NetworkManager
         UIConsole.Log("[Server]: Changing scene for all.");
     }
 
+    // CLIENT is changing scene
+    private string previousScene;
+    public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
+    {
+        previousScene = SceneManager.GetActiveScene().name;
+        base.OnClientChangeScene(newSceneName, sceneOperation, customHandling);
+    }
+
     // CLIENT fully loaded next scene
     public override void OnClientSceneChanged(NetworkConnection conn)
     {
         base.OnClientSceneChanged(conn);
-        UIConsole.Log("[Client]: Scene successfully changed.");
+
+        string sceneName = SceneManager.GetActiveScene().name;
+
+        // Game Started
+        if (previousScene == menuScene && sceneName != menuScene)
+        {
+            UIConsole.Log("[Client]: Server has started the game");
+            OnGameStarted?.Invoke();
+        }
+
+        UIConsole.Log("[Client]: Sucessfully loaded " + sceneName + ".");
         OnClientReadied?.Invoke();
-        //UIManager.HideUI();
     }
 
     // SERVER notified that CLIENT is ready
     public override void OnServerReady(NetworkConnection conn)
     {
         base.OnServerReady(conn);
-
-        OnServerReadied?.Invoke(conn);
-
         UIConsole.Log("[Server]: Client" + "[" + conn.connectionId + "]"
         + " has successfully loaded scene: " + SceneManager.GetActiveScene().name + ".");
+        OnServerReadied?.Invoke(conn);
     }
 
     // SERVER finished loading scene
@@ -185,17 +217,7 @@ public class MyNetworkManager : NetworkManager
             NetworkServer.Spawn(playerSpawnSystemInstance);
         }
 
-
         UIConsole.Log("[Server]: Scene successfully changed.");
-    }
-
-    /*  --------------------------
-    *   Button activated functions
-    *   -------------------------- */
-
-    public void StartGame()
-    {
-        ServerChangeScene("Testing Range");
     }
 
     /*  --------------------------

@@ -21,33 +21,33 @@ public class PlayerSpawnSystem : NetworkBehaviour
 
     public static void RemoveSpawnPoint(Transform transform) => spawnPoints.Remove(transform);
 
-    public override void OnStartServer() => MyNetworkManager.OnServerReadied += SpawnPlayer;
+    public override void OnStartServer() 
+    {
+        base.OnStartServer();
+        MyNetworkManager.OnServerReadied += SpawnPlayer;
+    }
 
-    [ServerCallback]
-    private void OnDestroy() => MyNetworkManager.OnServerReadied -= SpawnPlayer;
+    public override void OnStopServer()
+    {
+        base.OnStopServer();
+        MyNetworkManager.OnServerReadied -= SpawnPlayer;
+        nextIndex = 0;
+    }
 
     [Server]
     public void SpawnPlayer(NetworkConnection conn)
     {
         Transform spawnPoint = spawnPoints.ElementAtOrDefault(nextIndex);
-        Debug.Log("[Server]: Spawning player " + "at position: " + spawnPoint.position + " for Client[" + conn.connectionId + "].");
 
         if (spawnPoint == null)
         {
-            Debug.LogError($"Missing spawn point for player {nextIndex}");
+            Debug.LogError($"Missing spawn point for player #{nextIndex + 1}");
             return;
         }
 
-        GameObject playerPrefab = null; 
-        if(nextIndex % 2 == 0)
-        {
-            playerPrefab = playerPrefab1;
-        } 
-        else
-        {
-            playerPrefab =  playerPrefab2;
-        };  
+        Debug.Log("[Server]: Spawning player " + "at position: " + spawnPoint.position + " for Client[" + conn.connectionId + "].");
 
+        GameObject playerPrefab = (nextIndex % 2 == 0) ? playerPrefab1 : playerPrefab2; 
         GameObject playerInstance = Instantiate(playerPrefab, spawnPoints[nextIndex].position, spawnPoints[nextIndex].rotation);
         NetworkServer.Spawn(playerInstance, conn);
 
