@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e96162f04b394888849270f3d9303ff, type: 3}
+  m_Name: CubeImpact
+  m_EditorClassIdentifier: 
+  clips_low:
+  - {fileID: 8300000, guid: d6407ad14161d4e7d98dfab003a62233, type: 3}
+  - {fileID: 8300000, guid: 4da110193e74342359c6f40c5d28b1b6, type: 3}
+  - {fileID: 8300000, guid: ecd9849cb58244a358ac9aafc6e71514, type: 3}
+  clips_med:
+  - {fileID: 8300000, guid: 700cd2d23c1534b9abd2d1646aa9acc1, type: 3}
+  - {fileID: 8300000, guid: f7cee4ddd298e4130bab560940c26656, type: 3}
+  - {fileID: 8300000, guid: 1ae47b86d5f3d46679e30678d2550766, type: 3}
+  clips_high:
+  - {fileID: 8300000, guid: 0c826488ad9424858ab118a5bf4726e5, type: 3}
+  - {fileID: 8300000, guid: b7c0753f1ee36444e9cef40d02a06133, type: 3}
+  - {fileID: 8300000, guid: 7c5cd3d1f72dd452b9d84210255fa340, type: 3}
+  volume_1:
+    minValue: 0.2047876
+    maxValue: 0.4206448
+  volume_2:
+    minValue: 0.304414
+    maxValue: 0.5507126
+  volume_3:
+    minValue: 0.5008994
+    maxValue: 0.6669434
+  pitch:
+    minValue: 0.9404778
+    maxValue: 1.017199

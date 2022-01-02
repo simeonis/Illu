@@ -104,6 +104,9 @@ public class NetworkPlayerController : NetworkBehaviour
     private Rigidbody playerBody;
     private CapsuleCollider playerCollider;
 
+    // private Animator animator;
+
+
     public void PerformJump() => Jump();
     public void PerformCrouch() => Crouch();
     public void PerformUnCrouch() => UnCrouch();
@@ -113,6 +116,7 @@ public class NetworkPlayerController : NetworkBehaviour
     public void Awake()
     {
         playerControls = new PlayerControls();
+        // animator = GetComponent<Animator>();
     }
 
     void OnEnable()
@@ -173,6 +177,8 @@ public class NetworkPlayerController : NetworkBehaviour
         UserInfo();
         LookDirection();
         MovementModifiers();
+
+        // animator.SetFloat("Horizontal", xRotation);
     }
 
     void FixedUpdate()

@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64859069878484fb19f46e9b027cd0a0, type: 3}
-  m_Name: Lever
+  m_Name: WaterSplash
   m_EditorClassIdentifier: 
   clips:
-  - {fileID: 8300000, guid: 792552635d50648b0bc5b497fa338eb8, type: 3}
+  - {fileID: 8300000, guid: 4386c7bc1790c44ff8be48e72117f5e7, type: 3}
+  - {fileID: 8300000, guid: 641e31d5ac0df4ffc89e354792af226c, type: 3}
   volume:
-    minValue: 0.3621288
-    maxValue: 0.3983957
+    minValue: 0.4417275
+    maxValue: 0.54032737
   pitch:
-    minValue: 0.57727456
-    maxValue: 0.8368416
+    minValue: 0.35753214
+    maxValue: 0.48373976
