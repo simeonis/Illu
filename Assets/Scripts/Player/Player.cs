@@ -1,11 +1,15 @@
 using UnityEngine;
 using TMPro;
+using Mirror;
 
 public class Player : Interactor
 {
     [Range(1f, 50f)] public float dropForce = 5f;
     [HideInInspector] public new Rigidbody rigidbody;
     private TextMeshProUGUI interactUI;
+
+    public bool Authority;
+    public NetworkConnection networkConnection;
 
     protected override void Awake()
     {
@@ -96,5 +100,12 @@ public class Player : Interactor
         {
             equipmentSlot.GetEquipment().EquipmentSecondaryReleased();
         }
+    }
+
+    //Sync Equipment
+    [Command]
+    public void GiveAuthority(NetworkIdentity equipNI)
+    {
+        equipNI.AssignClientAuthority(connectionToClient);
     }
 }

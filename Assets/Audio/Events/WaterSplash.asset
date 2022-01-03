@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64859069878484fb19f46e9b027cd0a0, type: 3}
+  m_Name: WaterSplash
+  m_EditorClassIdentifier: 
+  clips:
+  - {fileID: 8300000, guid: 4386c7bc1790c44ff8be48e72117f5e7, type: 3}
+  - {fileID: 8300000, guid: 641e31d5ac0df4ffc89e354792af226c, type: 3}
+  volume:
+    minValue: 0.4417275
+    maxValue: 0.54032737
+  pitch:
+    minValue: 0.35753214
+    maxValue: 0.48373976

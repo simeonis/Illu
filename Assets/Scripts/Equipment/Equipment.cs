@@ -1,19 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
+using System;
 
 public class Equipment : Interactable
 {
-    protected Rigidbody equipmentBody;
+    [HideInInspector] public Rigidbody equipmentBody;
     protected Collider equipmentCollider;
     protected bool isEquipped = false;
     private Transform defaultParent;
+    private SyncEquipment syncEquipment;
 
     protected void Awake()
     {
         equipmentBody = GetComponent<Rigidbody>();
         equipmentCollider = GetComponent<Collider>();
-        defaultParent = transform.parent;
+        syncEquipment = GetComponent<SyncEquipment>();
     }
 
     public override void Interaction(Interactor interactor)
@@ -29,20 +30,31 @@ public class Equipment : Interactable
             Enable();
 
             if (interactor.TryGetComponent(out Player player))
-            {
+            {   
+                
+                if(player.hasAuthority)
+                {
+                    Debug.Log("Giving Authority to Cube");
+                    player.GiveAuthority(GetComponent<NetworkIdentity>());
+                }
                 AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
             }
         }
     }
 
-    public override void InteractionCancelled(Interactor interactor) {}
+    public override void OnStartAuthority()
+    {
+        syncEquipment.Trigger(DateTime.Now.Ticks);
+    }
+
+    public override void InteractionCancelled(Interactor interactor) { }
 
     public void Disable()
     {
         if (isEquipped) return;
 
         isEquipped = true;
-        
+
         // Disable rigidbody
         equipmentBody.isKinematic = true;
         equipmentBody.interpolation = RigidbodyInterpolation.None;
@@ -78,17 +90,28 @@ public class Equipment : Interactable
 
     public void AddForce(Vector3 direction, float force, Vector3 currVel = new Vector3())
     {
-        float random = Random.Range(-1f, 1f) * force * 2.0f;
+        float random = force * 2.0f;
+        // float random = Random.Range(-1f, 1f) * force * 2.0f;
         equipmentBody.velocity = currVel;
         equipmentBody.AddForce(direction * force, ForceMode.Impulse); // Movement force
         equipmentBody.AddTorque(new Vector3(random, random, random)); // Rotation throw force
     }
 
+    public void AddCorrectionalForce(Vector3 direction)
+    {
+        //float random = force * 2.0f;
+        // float random = Random.Range(-1f, 1f) * force * 2.0f;
+        //equipmentBody.velocity = currVel;
+        equipmentBody.AddForce(direction, ForceMode.Force); // Movement force
+        //equipmentBody.AddTorque(new Vector3(random, random, random)); // Rotation throw force
+    }
+
+
     /* 
      * Modifies layer of each child inside of parent.
      * If inclusive is true, parent's layer is also modified.
      * Useful for Camera Culling Mask.
-     */ 
+     */
     protected void ChangeChildrenLayerMask(Transform parent, string layer, bool inclusive)
     {
         if (inclusive) ChangeLayerMask(parent, layer);
@@ -111,4 +134,5 @@ public class Equipment : Interactable
     public void EquipmentPrimaryReleased() { Debug.Log("Equipment Primary Released"); }
     public void EquipmentSecondaryPressed() { Debug.Log("Equipment Secondary Pressed"); }
     public void EquipmentSecondaryReleased() { Debug.Log("Equipment Secondary Released"); }
+
 }

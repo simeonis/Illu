@@ -8,6 +8,10 @@ public class RippledGlass : MonoBehaviour
     private IEnumerator ripple;
     private Material material;
 
+    [SerializeField] private AudioSource glassAudioSource;
+    [SerializeField] private AudioEvent glassAudioEvent;
+
+
     void Start()
     {
         material = transform.GetComponent<Renderer>().material;
@@ -23,7 +27,9 @@ public class RippledGlass : MonoBehaviour
 
         if (ripple != null) StopCoroutine(ripple);
         StartCoroutine(ripple = Ripple());
- 
+
+        glassAudioEvent.Play(glassAudioSource);
+
     }
 
     private IEnumerator Ripple()

@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Audio.meta
+guid: 6b293be9e3023497681a8a99c5d0b3bd
+=======
 guid: 457568661fdf6cb4eacdebbea2bb7d4e
+>>>>>>> main:Assets/Animations/UI/Menu/Button.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

@@ -7,7 +7,8 @@ using System;
 public class UIManager : MonoBehaviour
 {
     [System.Serializable]
-    public struct SCREENS {
+    public struct SCREENS
+    {
         public GameObject Root;
         public GameObject Host;
         public GameObject Friend;
@@ -279,7 +280,7 @@ public class UIManager : MonoBehaviour
             invites[steamIDstring].transform.SetAsFirstSibling();
         }
         // New invite
-        else 
+        else
         {
             // Create GameObject
             GameObject invite = Instantiate(steamInvitePrefab, inviteList);
@@ -299,7 +300,8 @@ public class UIManager : MonoBehaviour
             inviteDetails.name.text = steamFriend.name;
 
             // Accept Button
-            inviteDetails.acceptButton.onClick.AddListener(delegate { 
+            inviteDetails.acceptButton.onClick.AddListener(delegate
+            {
                 SteamLobby.JoinSteamLobby(lobbyID);
                 screens.Join.SetActive(false);
                 screens.Host.SetActive(true);
@@ -307,7 +309,8 @@ public class UIManager : MonoBehaviour
             });
 
             // Decline Button
-            inviteDetails.declineButton.onClick.AddListener(delegate { 
+            inviteDetails.declineButton.onClick.AddListener(delegate
+            {
                 DestroyInvite(invite);
             });
         }
@@ -352,7 +355,8 @@ public class UIManager : MonoBehaviour
         lobbyUserDetails.removeButton.gameObject.SetActive(canKick);
         if (!hostSlot)
         {
-            lobbyUserDetails.removeButton.onClick.AddListener(delegate {
+            lobbyUserDetails.removeButton.onClick.AddListener(delegate
+            {
                 SteamLobby.KickUser(steamFriend.id);
             });
         }
@@ -364,7 +368,8 @@ public class UIManager : MonoBehaviour
 
         SteamEmptyLobby lobbyEmptyDetails = lobbyEmpty.GetComponent<SteamEmptyLobby>();
 
-        lobbyEmptyDetails.addButton.onClick.AddListener(delegate { 
+        lobbyEmptyDetails.addButton.onClick.AddListener(delegate
+        {
             GenerateFriendList(SteamLobby.GetSteamFriends());
             ShowFriendList();
         });
@@ -409,7 +414,7 @@ public class UIManager : MonoBehaviour
 
             // Set Title text
             titleUI.GetComponent<SteamStatusTitle>().status.text = status[i];
-            
+
             float numberOfItems = steamFriends[i].Count;
             for (int j = 0; j < numberOfItems; j++)
             {
@@ -418,14 +423,14 @@ public class UIManager : MonoBehaviour
                 {
                     subList = new GameObject("Horizontal Group #" + (j + 1));
                     subList.transform.SetParent(friendList, false);
-                    HorizontalLayoutGroup horizontalGroup  = subList.gameObject.AddComponent<HorizontalLayoutGroup>();
+                    HorizontalLayoutGroup horizontalGroup = subList.gameObject.AddComponent<HorizontalLayoutGroup>();
                     horizontalGroup.childForceExpandWidth = false;
                     horizontalGroup.childControlWidth = false;
                     horizontalGroup.childControlHeight = true;
                 }
 
                 GameObject friendUI = Instantiate(steamFriendListPrefab, subList.transform);
-                
+
                 SteamUserRecord steamFriend = steamFriends[i][j];
                 SteamFriendList steamFriendDetails = friendUI.GetComponent<SteamFriendList>();
 
@@ -449,7 +454,8 @@ public class UIManager : MonoBehaviour
 
                 // Steam Invite Button
                 CSteamID id = steamFriend.id;
-                steamFriendDetails.inviteButton.onClick.AddListener(delegate { 
+                steamFriendDetails.inviteButton.onClick.AddListener(delegate
+                {
                     SteamLobby.InviteToLobby(id);
                 });
             }

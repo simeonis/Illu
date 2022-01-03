@@ -6,6 +6,8 @@ using Mirror;
 ///Handles sending data over the network and smoothing the recieved values
 //////////////////////////////////////////////////////////////////////////
 
+///To Do: Top level transform send the rotation for death in player its (player -> )
+
 public class SyncPlayer : NetworkBehaviour
 {
 
@@ -26,7 +28,7 @@ public class SyncPlayer : NetworkBehaviour
     [Tooltip("How fast a remote player corrects its look")]
     [SerializeField] private float allowRotLagAmount = 0.25f;
 
-     [Tooltip("Apply Rotation Smoothing")]
+    [Tooltip("Apply Rotation Smoothing")]
     [SerializeField] private bool smoothRot = false;
 
     [Header("Debug Position")]
@@ -43,13 +45,15 @@ public class SyncPlayer : NetworkBehaviour
     [Tooltip("Pass in Orientation")]
     public Transform orientation;
 
-    protected Vector3 RemotePlayerPosition;
-    protected Quaternion RemotePlayerRotation;
-    protected Quaternion RemotePlayerBodyRotation;
+    private Vector3 RemotePlayerPosition;
+    private Quaternion RemotePlayerRotation;
+    private Quaternion RemotePlayerBodyRotation;
+    private Quaternion RemotePlayerRootRotation;
 
     Vector3 lastPosition;
     Quaternion lastRotation;
     Quaternion lastBodyRotation;
+    Quaternion lastRootRotation;
     Vector3 transPosition;
 
     // local authority send time
@@ -104,15 +108,14 @@ public class SyncPlayer : NetworkBehaviour
         // send to server if we are local player and have authority
         if (isClient)
         {
-            if(hasAuthority){
+            if (hasAuthority)
+            {
                 // check only each 'syncInterval'
                 if (Time.time - lastClientSendTime >= syncInterval)
                 {
                     if (HasEitherMovedRotated())
-                    {
-                        // send to position to clients
-                        CMDSendPosAndRot(transform.position, playerCamera.rotation, orientation.rotation );
-                    }
+                        CMDSendPosAndRot(transform.position, playerCamera.rotation, orientation.rotation, networkPlayerController.GetRotation());
+
                     lastClientSendTime = Time.time;
                 }
             }
@@ -121,7 +124,7 @@ public class SyncPlayer : NetworkBehaviour
                 HandleRemotePositionUpdates();
                 HandleRemoteRotationUpdates();
             }
-            
+
             transPosition = transform.position;
         }
     }
@@ -130,12 +133,14 @@ public class SyncPlayer : NetworkBehaviour
     //to prevent spamming the network when not moving 
     bool HasEitherMovedRotated()
     {
+        Quaternion RootRotation = networkPlayerController.GetRotation();
         // moved or rotated?
         bool moved = Vector3.Distance(lastPosition, transform.position) > moveTriggerSensitivity;
         bool headRotated = Quaternion.Angle(lastRotation, playerCamera.rotation) > moveTriggerSensitivity;
-        bool bodyRotated = Quaternion.Angle(lastRotation, orientation.rotation) > moveTriggerSensitivity;
+        bool bodyRotated = Quaternion.Angle(lastBodyRotation, orientation.rotation) > moveTriggerSensitivity;
+        bool rootRotated = Quaternion.Angle(lastRootRotation, RootRotation) > moveTriggerSensitivity;
 
-        bool change = moved || headRotated || bodyRotated;
+        bool change = moved || headRotated || bodyRotated || rootRotated;
 
         if (change)
         {
@@ -143,6 +148,7 @@ public class SyncPlayer : NetworkBehaviour
             lastPosition = transform.position;
             lastRotation = playerCamera.rotation;
             lastBodyRotation = orientation.rotation;
+            lastRootRotation = RootRotation;
         }
 
         return change;
@@ -150,24 +156,24 @@ public class SyncPlayer : NetworkBehaviour
 
     // local authority client sends sync message to server for broadcasting
     [Command(channel = Channels.Unreliable)]
-    void CMDSendPosAndRot(Vector3 position, Quaternion headRot, Quaternion bodyRot)
+    void CMDSendPosAndRot(Vector3 position, Quaternion headRot, Quaternion bodyRot, Quaternion rootRot)
     {
         // Ignore messages from client if notCmdClientToServerSync in client authority mode
         if (!clientAuthority)
             return;
 
-        RPCSyncPosition(position, headRot, bodyRot);
+        RPCSyncPosition(position, headRot, bodyRot, rootRot);
     }
 
     [ClientRpc]
-    public void RPCSyncPosition(Vector3 position, Quaternion headRot, Quaternion bodyRot)
+    public void RPCSyncPosition(Vector3 position, Quaternion headRot, Quaternion bodyRot, Quaternion rootRot)
     {
-        
         if (debug)
             Debug.Log("RPC Position: " + position + "HeadRot " + headRot + "bodyRot " + bodyRot);
         RemotePlayerPosition = position;
         RemotePlayerRotation = headRot;
         RemotePlayerBodyRotation = bodyRot;
+        RemotePlayerRootRotation = rootRot;
     }
 
     [Client]
@@ -178,23 +184,27 @@ public class SyncPlayer : NetworkBehaviour
         //High distance => sync is to much off => send to position
         if (LagDistance.magnitude > networkPlayerController.moveSpeed / 3)
         {
-            if (debug) 
+            if (debug)
                 Debug.LogWarning("Sync Position to Great");
             controller.position = RemotePlayerPosition;
             LagDistance = Vector3.zero;
         }
 
         //ignore the y distance
-        LagDistance.y = 0;
+        // LagDistance -= LagDistance.up;
+
+        Vector3 unwantedUp = Vector3.Dot(LagDistance, orientation.up) * orientation.up;
+        Vector3 FinalLagDistance = LagDistance - unwantedUp;
+
+        
 
         if (LagDistance.magnitude < 0.025f)
         {   //Player is nearly at the point
             networkPlayerController.moveDirection = Vector3.zero;
         }
-        else
+        else //Player has to go to the point
         {
-            //Player has to go to the point
-            networkPlayerController.moveDirection = new Vector3(LagDistance.x, 0, LagDistance.z);
+            networkPlayerController.moveDirection = FinalLagDistance;
         }
     }
 
@@ -205,31 +215,46 @@ public class SyncPlayer : NetworkBehaviour
         // The step size is equal to speed times frame time.
         var step = correntRotSpeed * Time.deltaTime;
 
-        float camDiff = Quaternion.Dot(playerCamera.rotation,RemotePlayerRotation);
-        float bodyDiff = Quaternion.Dot(orientation.rotation,RemotePlayerBodyRotation);
+        float camDiff = Quaternion.Dot(playerCamera.rotation, RemotePlayerRotation);
+        float bodyDiff = Quaternion.Dot(orientation.rotation, RemotePlayerBodyRotation);
+        float rootDiff = Quaternion.Dot(networkPlayerController.GetRotation(), RemotePlayerRootRotation);
 
         if (debug)
             Debug.Log("camDiff " + camDiff + " bodyDiff" + bodyDiff);
 
-        if(smoothRot && camDiff <= allowRotLagAmount){
+        if (smoothRot && camDiff <= allowRotLagAmount)
+        {
             // Rotate our playerCamera a step closer to the target's.
-            playerCamera.rotation = Quaternion.RotateTowards(playerCamera.rotation, RemotePlayerRotation, step);  
+            playerCamera.rotation = Quaternion.RotateTowards(playerCamera.rotation, RemotePlayerRotation, step);
         }
-        else{
+        else
+        {
             playerCamera.rotation = RemotePlayerRotation;
         }
 
-        if(smoothRot && bodyDiff <= allowRotLagAmount){
+        if (smoothRot && bodyDiff <= allowRotLagAmount)
+        {
             // Rotate our orientation a step closer to the target's.
             orientation.rotation = Quaternion.RotateTowards(orientation.rotation, RemotePlayerBodyRotation, step);
         }
-        else{
+        else
+        {
             orientation.rotation = RemotePlayerBodyRotation;
         }
-        
+
+        if (smoothRot && rootDiff <= allowRotLagAmount)
+        {
+            // Rotate our orientation a step closer to the target's.
+            networkPlayerController.SetRotation(Quaternion.RotateTowards(networkPlayerController.GetRotation(), RemotePlayerRootRotation, step));
+        }
+        else
+        {
+            networkPlayerController.SetRotation(RemotePlayerRootRotation);
+
+        }
     }
 
-    
+
     //Handle Sending Crouch, Jump, Sprint
     //--------------------------------------------------------------
     [Command(channel = Channels.Unreliable)]
