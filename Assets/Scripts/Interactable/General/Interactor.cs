@@ -13,101 +13,112 @@ public abstract class Interactor : NetworkBehaviour
     public EquipmentSlot equipmentSlot;
 
     // Protected
-    protected PlayerControls playerControls;
     protected bool canInteract;
+    protected bool interaction = false;
 
     // Private
-    private Interactable interactable;
+    protected Interactable interactable;
 
     // Network
     [SyncVar]
-    public GameObject networkInteractable;
+    [HideInInspector] public GameObject networkInteractable;
     protected NetworkSimpleData networkSimpleData;
 
     protected virtual void Awake()
     {
-        playerControls = new PlayerControls();
-        playerControls.Land.Interact.performed += context => Interact();
-        playerControls.Land.Interact.canceled += context => InteractCanceled();
+        networkSimpleData = GetComponent<NetworkSimpleData>();
+    }
+
+    protected virtual void OnEnable() 
+    {
+        // Network
+        networkSimpleData.DataChanged += InteractEventHandler;
+
+        // Input
+        InputManager.playerControls.Land.Interact.performed += context => Interact();
+        InputManager.playerControls.Land.Interact.canceled += context => InteractCanceled();
     }
 
     protected virtual void Start()
     {
         equipmentSlot = new EquipmentSlot(transform);
-        networkSimpleData = GetComponent<NetworkSimpleData>();
-        networkSimpleData.DataChanged += InteractEventHandler;
     }
 
-    void OnEnable() 
+    protected virtual void OnDisable() 
     {
-        playerControls.Enable();
-    }
+        // Network
+        networkSimpleData.DataChanged -= InteractEventHandler;
 
-    void OnDisable() 
-    {
-        playerControls.Disable();
+        // Input
+        InputManager.playerControls.Land.Interact.performed -= context => Interact();
+        InputManager.playerControls.Land.Interact.canceled -= context => InteractCanceled();
     }
 
     protected virtual void Update()
     {
-        if (canInteract = CheckInteraction(out interactable))
-        {
-            interactable.Seen();
-        }
+        canInteract = CheckInteraction(out interactable);
     }
 
     private void InteractEventHandler(object sender, DataChangedEventArgs e)
     {
-        if (e.key == "INTERACTION")
+        switch(e.key)
         {
-            // Interact
-            if (networkInteractable != null)
-            {
-                
-                networkInteractable.GetComponent<Interactable>().Interaction(this);
-            }
-            // Drop
-            else if (equipmentSlot.HasEquipment())
-            {
-                equipmentSlot.GetEquipment().Interaction(this);
-            }
-        }
-        else if (e.key == "INTERACTION_CANCELLED")
-        {
-            if (networkInteractable != null)
-            {
-                networkInteractable.GetComponent<Interactable>().InteractionCancelled(this);
-            }
+            case "INTERACTION_INTERACT":
+                if (networkInteractable != null) 
+                {
+                    networkInteractable.GetComponent<Interactable>().Interaction(this);
+                }
+                break;
+            case "INTERACTION_DROPPED":
+                if (equipmentSlot.HasEquipment()) 
+                {
+                    equipmentSlot.GetEquipment().Interaction(this);
+                }
+                break;
+            case "INTERACTION_CANCELLED":
+                if (networkInteractable != null)
+                {
+                    networkInteractable.GetComponent<Interactable>().InteractionCancelled(this);
+                }
+                break;
+            case "INTERACTION_ABORTED":
+                if (networkInteractable != null)
+                {
+                    networkInteractable.GetComponent<Interactable>().InteractionCancelled(this);
+                    interactable = null;
 
-
+                    // Server [SyncVar]
+                    if (hasAuthority) SetNetworkInteractable(null);
+                }
+                break;
+            default:
+                break;
         }
     }
 
     protected virtual void Interact()
     {   
-        networkSimpleData.SendData("INTERACTION");
-        
-        // if (canInteract)
-        // {
-        //     interactable.Interaction(this);
-        //     if (hasAuthority) { SetNetworkInteractable(interactable.gameObject); }
-        // }
-        // else if (equipmentSlot.HasEquipment())
-        // {
-        //     equipmentSlot.GetEquipment().Interaction(this);
-        // }
+        // Note: Only send over network if looking at interactable or holding equipment
+        // Interact
+        if (!interaction && canInteract)
+        {
+            interaction = true;
+            networkSimpleData.SendData("INTERACTION_INTERACT");
+        }
+        // Drop
+        else if (!canInteract && equipmentSlot.HasEquipment())
+        {
+            networkSimpleData.SendData("INTERACTION_DROPPED");
+        }
     }
 
     protected virtual void InteractCanceled()
     {
-
-        networkSimpleData.SendData("INTERACTION_CANCELLED");
-        
-        // if (canInteract)
-        // {
-        //     interactable.InteractionCancelled(this);
-        //     if (hasAuthority) { SetNetworkInteractable(null); }
-        // }
+        if (interaction)
+        {
+            interaction = false;
+            networkSimpleData.SendData("INTERACTION_CANCELLED");
+        }
     }
 
     private bool CheckInteraction(out Interactable interactable)
@@ -115,14 +126,29 @@ public abstract class Interactor : NetworkBehaviour
         if (Physics.Raycast(source.position, source.forward, out RaycastHit hit, interactionRange)) 
         {
             interactable = hit.collider.GetComponent<Interactable>();
-            if(hasAuthority &&interactable != null) SetNetworkInteractable(hit.collider.gameObject);
+
+            // Possible interaction
+            if (interactable != null)
+            {
+                // Server [SyncVar]
+                if (hasAuthority) SetNetworkInteractable(hit.collider.gameObject);
+            }
+            // No possible interaction
+            else
+            {
+                // Cancel any ongoing interaction (no longer looking at them)
+                if (interaction && !equipmentSlot.HasEquipment())
+                {
+                    interaction = false;
+                    networkSimpleData.SendData("INTERACTION_ABORTED");
+                }
+            }
+
             return interactable != null;
         }
-        // TODO: Make sure InteractionCancelled is called if player is no longer looking at interactable
         else
         {
             interactable = null;
-            if(hasAuthority) SetNetworkInteractable(null);
             return false;
         }
     }

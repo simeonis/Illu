@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Slide Button
+  m_Controller: {fileID: 9100000, guid: 9b178a2d576020247a13b38c98f7faaf, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 7f7b354e755857348bf51115175db6f4, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 521a739a3e308d140b86edb81d0cc0bd, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: e78da4a5011489341880366e6b02d43d, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 3ee05c8e1e9045f4b829563764f5be93, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 7f0cfaeae9a657f4f9a6857bd9a4d5b8, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: df79c28cafb6f8846bf8d5f8348041a5, type: 2}

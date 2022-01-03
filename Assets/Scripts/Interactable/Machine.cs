@@ -20,20 +20,20 @@ public abstract class Machine : Interactable
     protected virtual void Start()
     {
         // Load input system
-        playerControls = playerController.playerControls;
+        // playerControls = playerController.LocalPlayerControls;
 
         // Assign interaction exit key
-        playerControls.Lever.Interact.performed += context => Exit();
+        //playerControls.Lever.Interact.performed += context => Exit();
 
         // Target position for the player's camera
         targetTransform = transform.Find("Camera POV");
     }
 
-    public override void Seen()
-    {
-        if (!isInteracting) base.Seen();
-        else interactMessage = "";
-    }
+    // public override void Seen()
+    // {
+    //     if (!isInteracting) base.Seen();
+    //     else interactMessage = "";
+    // }
 
     public override void Interaction(Interactor interactor)
     {
@@ -42,8 +42,8 @@ public abstract class Machine : Interactable
 
         // Lock player
         playerController.visionLocked = true;
-        playerControls.Land.Disable();
-        playerControls.Lever.Enable();
+        //playerControls.Land.Disable();
+        //playerControls.Lever.Enable();
 
         // Save camera transform properties
         originalParent = playerCamera.transform.parent;
@@ -65,8 +65,8 @@ public abstract class Machine : Interactable
 
         // Release player
         playerController.visionLocked = false;
-        playerControls.Land.Enable();
-        playerControls.Lever.Disable();
+        // playerControls.Land.Enable();
+        // playerControls.Lever.Disable();
 
         // Reset camera to player body
         playerCamera.transform.SetParent(originalParent);

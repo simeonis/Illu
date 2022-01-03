@@ -20,19 +20,16 @@ public class MyNetworkManager : NetworkManager
     [SerializeField] private NetworkGamePlayer gamePlayerPrefab = null;
     [SerializeField] private GameObject playerSpawnSystem = null;
 
-    // UI
-    [SerializeField] private UIManager UIManager;
-
     private int numConnections = 0;
-    private readonly string menuScene = "LaunchScreen";
+    private readonly string menuScene = "MainMenu";
 
     public List<NetworkRoomPlayer> RoomPlayers { get; } = new List<NetworkRoomPlayer>();
     public List<NetworkGamePlayer> GamePlayers { get; } = new List<NetworkGamePlayer>();
 
     public static event Action OnClientConnected;
     public static event Action OnClientDisconnected;
+    public static event Action OnClientReadied;
     public static event Action<NetworkConnection> OnServerReadied;
-    public static event Action OnServerStopped;
 
     /*  --------------------------
     *       Callback functions
@@ -42,28 +39,25 @@ public class MyNetworkManager : NetworkManager
     public override void OnStartServer()
     {
         base.OnStartServer();
+        numConnections = 0;
         spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
         NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
 
-        Debug.Log("Server Started");
+        UIConsole.Log("Server Started");
     }
 
     // SERVER detects new connection
     public override void OnServerConnect(NetworkConnection conn)
     {
-        Debug.Log("[Server]: New connection detected.");
+        UIConsole.Log("[Server]: New connection detected.");
         numConnections++;
-        Debug.Log("Number of players: " + numConnections);
+        UIConsole.Log("Number of players: " + numConnections);
 
-        if (numConnections == maxConnections)
-        {
-            UIManager.ClientJoinedHost();
-        }
-        else if (numConnections > maxConnections)
+        if (numConnections > maxConnections)
         {
             conn.Disconnect();
             numConnections--;
-            Debug.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
+            UIConsole.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
             return;
         }
 
@@ -71,7 +65,7 @@ public class MyNetworkManager : NetworkManager
         {
             conn.Disconnect();
             numConnections--;
-            Debug.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
+            UIConsole.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
             return;
         }
     }
@@ -88,7 +82,7 @@ public class MyNetworkManager : NetworkManager
             NetworkClient.RegisterPrefab(prefab);
         }
 
-        Debug.Log("Client Started");
+        UIConsole.Log("Client Started");
     }
 
     // CLIENT connected to SERVER
@@ -106,7 +100,7 @@ public class MyNetworkManager : NetworkManager
 
         conn.Send(characterMessage);
 
-        Debug.Log("[Client]: Connected to server.");
+        UIConsole.Log("[Client]: Connected to server.");
     }
 
     // CLIENT disconnects from SERVER
@@ -116,17 +110,17 @@ public class MyNetworkManager : NetworkManager
 
         OnClientDisconnected?.Invoke();
 
-        Debug.Log("[Client]: Disconnected from server.");
+        UIConsole.Log("[Client]: Disconnected from server.");
     }
 
     // SERVER gets "Add Player" request from CLIENT
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
-        Debug.Log("[Server]: \"Add Player\" request received.");
+        UIConsole.Log("[Server]: \"Add Player\" request received.");
 
         if (SceneManager.GetActiveScene().name == menuScene)
         {
-            Debug.Log("[Server]: Adding room player.");
+            UIConsole.Log("[Server]: Adding room player.");
 
             NetworkRoomPlayer roomPlayerInstance = Instantiate(roomPlayerPrefab);
 
@@ -138,7 +132,7 @@ public class MyNetworkManager : NetworkManager
     [Server]
     public override void ServerChangeScene(string newSceneName)
     {
-        Debug.Log("[Server]: Setting up new scene.");
+        UIConsole.Log("[Server]: Setting up new scene.");
 
         // From menu to game
         if (SceneManager.GetActiveScene().name == menuScene && newSceneName == "Testing Range")
@@ -148,7 +142,6 @@ public class MyNetworkManager : NetworkManager
                 var conn = RoomPlayers[i].connectionToClient;
                 var gameplayerInstance = Instantiate(gamePlayerPrefab);
 
-
                 //if(conn.identity.gameObject)
                 NetworkServer.Destroy(conn.identity.gameObject);
 
@@ -156,19 +149,20 @@ public class MyNetworkManager : NetworkManager
             }
         }
 
-        Debug.Log("[Server]: Scene setup completed.");
+        UIConsole.Log("[Server]: Scene setup completed.");
 
         base.ServerChangeScene(newSceneName);
 
-        Debug.Log("[Server]: Changing scene for all.");
+        UIConsole.Log("[Server]: Changing scene for all.");
     }
 
     // CLIENT fully loaded next scene
     public override void OnClientSceneChanged(NetworkConnection conn)
     {
         base.OnClientSceneChanged(conn);
-        UIManager.GameStarted();
-        Debug.Log("[Client]: Scene successfully changed.");
+        UIConsole.Log("[Client]: Scene successfully changed.");
+        OnClientReadied?.Invoke();
+        //UIManager.HideUI();
     }
 
     // SERVER notified that CLIENT is ready
@@ -178,7 +172,7 @@ public class MyNetworkManager : NetworkManager
 
         OnServerReadied?.Invoke(conn);
 
-        Debug.Log("[Server]: Client" + "[" + conn.connectionId + "]"
+        UIConsole.Log("[Server]: Client" + "[" + conn.connectionId + "]"
         + " has successfully loaded scene: " + SceneManager.GetActiveScene().name + ".");
     }
 
@@ -192,7 +186,7 @@ public class MyNetworkManager : NetworkManager
         }
 
 
-        Debug.Log("[Server]: Scene successfully changed.");
+        UIConsole.Log("[Server]: Scene successfully changed.");
     }
 
     /*  --------------------------
@@ -210,7 +204,7 @@ public class MyNetworkManager : NetworkManager
 
     private void OnCreateCharacter(NetworkConnection conn, CreateCharacterMessage characterMessage)
     {
-        Debug.Log("[Server]: Created character " + characterMessage.name +
+        UIConsole.Log("[Server]: Created character " + characterMessage.name +
         " for Client" + "[" + conn.connectionId + "].");
 
         // playerPrefab is the one assigned in the inspector in Network

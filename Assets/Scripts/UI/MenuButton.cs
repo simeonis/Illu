@@ -1,14 +1,14 @@
 using UnityEngine;
-using System.Collections;
 using System;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public class MenuButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    [SerializeField] Animator animator;
+    [SerializeField] private Animator animator;
+    [SerializeField] private GameObject VFX;
 
-    #region IPointerDownHandler, IPointerUpHandler,  IPointerEnterHandler, IPointerExitHandler implementations
+    #region IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler implementations
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -19,21 +19,24 @@ public class MenuButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
     {
         MyOnClicktriggered();
         animator.SetBool("pressed", false);
+        if (VFX) VFX.SetActive(false);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         animator.SetBool("hovered", true);
+        if (VFX) VFX.SetActive(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         animator.SetBool("hovered", false);
+        if (VFX) VFX.SetActive(false);
     }
 
     #endregion
 
-    //my own event
+    // Custom Event
     [Serializable]
     public class MyOwnEvent : UnityEvent { }
 

@@ -61,23 +61,43 @@ public class SyncPlayer : NetworkBehaviour
 
     private NetworkPlayerController networkPlayerController;
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        networkPlayerController = GetComponentInChildren<NetworkPlayerController>();
+        networkPlayerController = GetComponent<NetworkPlayerController>();
+    }
 
+    void OnEnable()
+    {
+        if (isClient)
+        {
+            // Send to server if we are local player
+            if (hasAuthority)
+            {
+                InputManager.playerControls.Land.Crouch.performed += context => CmdHandleCrouch(true);
+                InputManager.playerControls.Land.Crouch.canceled += context => CmdHandleCrouch(false);
+
+                InputManager.playerControls.Land.Sprint.performed += context => CmdHandleSprint(true);
+                InputManager.playerControls.Land.Sprint.canceled += context => CmdHandleSprint(false);
+
+                InputManager.playerControls.Land.Jump.performed += context => CmdSendJump();
+            }
+        }
+    }
+
+    void OnDisable()
+    {
         if (isClient)
         {
             // send to server if we are local player
             if (hasAuthority)
             {
-                networkPlayerController.LocalPlayerControls.Land.Crouch.performed += context => CmdHandleCrouch(true);
-                networkPlayerController.LocalPlayerControls.Land.Crouch.canceled += context => CmdHandleCrouch(false);
+                InputManager.playerControls.Land.Crouch.performed -= context => CmdHandleCrouch(true);
+                InputManager.playerControls.Land.Crouch.canceled -= context => CmdHandleCrouch(false);
 
-                networkPlayerController.LocalPlayerControls.Land.Sprint.performed += context => CmdHandleSprint(true);
-                networkPlayerController.LocalPlayerControls.Land.Sprint.canceled += context => CmdHandleSprint(false);
+                InputManager.playerControls.Land.Sprint.performed -= context => CmdHandleSprint(true);
+                InputManager.playerControls.Land.Sprint.canceled -= context => CmdHandleSprint(false);
 
-                networkPlayerController.LocalPlayerControls.Land.Jump.performed += context => CmdSendJump();
+                InputManager.playerControls.Land.Jump.performed -= context => CmdSendJump();
             }
         }
     }
@@ -248,11 +268,11 @@ public class SyncPlayer : NetworkBehaviour
     {
         if (CrouchState)
         {
-            networkPlayerController.PerformCrouch();
+            networkPlayerController.NetworkCrouch();
         }
         else
         {
-            networkPlayerController.PerformUnCrouch();
+            networkPlayerController.NetworkUnCrouch();
         }
     }
 
@@ -267,11 +287,11 @@ public class SyncPlayer : NetworkBehaviour
     {
         if (SprintState)
         {
-            networkPlayerController.PerformSprint();
+            networkPlayerController.NetworkSprint();
         }
         else
         {
-            networkPlayerController.PerformWalk();
+            networkPlayerController.NetworkWalk();
         }
     }
 
@@ -284,7 +304,7 @@ public class SyncPlayer : NetworkBehaviour
     [ClientRpc]
     private void RpcSendJump()
     {
-        networkPlayerController.PerformJump();
+        networkPlayerController.NetworkJump();
     }
 
     //Static Draw Methods

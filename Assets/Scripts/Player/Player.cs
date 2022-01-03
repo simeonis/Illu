@@ -4,7 +4,6 @@ using Mirror;
 
 public class Player : Interactor
 {
-    [SerializeField] private Transform eyes;
     [Range(1f, 50f)] public float dropForce = 5f;
     [HideInInspector] public new Rigidbody rigidbody;
     private TextMeshProUGUI interactUI;
@@ -15,36 +14,59 @@ public class Player : Interactor
     protected override void Awake()
     {
         base.Awake();
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
 
         // Fire
-        playerControls.Land.Fire.performed += context => FirePressed();
-        playerControls.Land.Fire.canceled += context => FireReleased();
+        InputManager.playerControls.Land.Fire.performed += context => FirePressed();
+        InputManager.playerControls.Land.Fire.canceled += context => FireReleased();
 
         // Alternate Fire
-        playerControls.Land.AlternateFire.performed += context => AlternateFirePressed();
-        playerControls.Land.AlternateFire.canceled += context => AlternateFireReleased();
+        InputManager.playerControls.Land.AlternateFire.performed += context => AlternateFirePressed();
+        InputManager.playerControls.Land.AlternateFire.canceled += context => AlternateFireReleased();
+
+        // UI
+        UIManager.OnPlayScreen += playerHUD => LoadInteractUI(playerHUD);
     }
 
     protected override void Start()
     {
         base.Start();
         rigidbody = GetComponent<Rigidbody>();
-        interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
         equipmentSlot.SetLocation(equipmentParent);
+    }
 
-        if (hasAuthority)
-        {
-            eyes.gameObject.layer = LayerMask.NameToLayer("Invisible");
-        }
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+
+        // Fire
+        InputManager.playerControls.Land.Fire.performed -= context => FirePressed();
+        InputManager.playerControls.Land.Fire.canceled -= context => FireReleased();
+
+        // Alternate Fire
+        InputManager.playerControls.Land.AlternateFire.performed -= context => AlternateFirePressed();
+        InputManager.playerControls.Land.AlternateFire.canceled -= context => AlternateFireReleased();
+
+        UIManager.OnPlayScreen -= playerHUD => LoadInteractUI(playerHUD);
+        interactUI = null;
+    }
+
+    private void LoadInteractUI(PlayerHUD playerHUD)
+    {
+        interactUI = playerHUD.interactUI;
     }
 
     protected override void Update()
     {
         base.Update();
 
-        if (!canInteract && interactUI && interactUI.text != "")
+        if (interactUI)
         {
-            interactUI.text = "";
+            interactUI.text = canInteract ? interactable.interactMessage : "";
         }
     }
 

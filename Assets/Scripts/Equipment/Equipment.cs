@@ -10,7 +10,7 @@ public class Equipment : Interactable
     private Transform defaultParent;
     private SyncEquipment syncEquipment;
 
-    protected override void Awake()
+    protected void Awake()
     {
         equipmentBody = GetComponent<Rigidbody>();
         equipmentCollider = GetComponent<Collider>();

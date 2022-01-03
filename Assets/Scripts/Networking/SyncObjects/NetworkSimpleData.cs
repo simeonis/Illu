@@ -61,35 +61,35 @@ public class NetworkSimpleData : NetworkBehaviour
     [Command(channel = Channels.Unreliable)]
     private void CmdSendNull(string key)
     {
-        Debug.Log("[Server]: Received NSD_Null(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        UIConsole.Log("[Server]: Received NSD_Null(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
         RpcNull(key);
     }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdSendBool(string key, bool data)
     {
-        Debug.Log("[Server]: Received NSD_Bool(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        UIConsole.Log("[Server]: Received NSD_Bool(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
         RpcBool(key, data);
     }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdSendInt(string key, int data)
     {
-        Debug.Log("[Server]: Received NSD_Int(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        UIConsole.Log("[Server]: Received NSD_Int(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
         RpcInt(key, data);
     }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdSendFloat(string key, float data)
     {
-        Debug.Log("[Server]: Received NSD_Float(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        UIConsole.Log("[Server]: Received NSD_Float(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
         RpcFloat(key, data);
     }
 
     [Command(channel = Channels.Unreliable)]
     private void CmdSendString(string key, string data)
     {
-        Debug.Log("[Server]: Received NSD_String(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
+        UIConsole.Log("[Server]: Received NSD_String(\"" + key + "\") from Client[" + connectionToClient.connectionId + "].");
         RpcString(key, data);
     }
 
