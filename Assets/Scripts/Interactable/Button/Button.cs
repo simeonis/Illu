@@ -17,7 +17,7 @@ namespace IlluInteractable
             locked = true;
             animator.SetBool("Pressed", true);
             target.Activate(this);
-            audioEvent[0].Play(audioSource);
+            //audioEvent[0].Play(audioSource);
         }
 
         public override void InteractionCancelled(Interactor interactor)

@@ -9,7 +9,7 @@ public class NetworkPlayerController : NetworkBehaviour
     private Vector2 lookInput;
     private bool isSprinting, isCrouching;
 
-    public PlayerControls LocalPlayerControls => playerControls;
+    //public PlayerControls LocalPlayerControls => playerControls;
     public Quaternion GetRotation() => transform.rotation; // here 
     public void SetRotation(Quaternion rotation)
     {
@@ -103,9 +103,9 @@ public class NetworkPlayerController : NetworkBehaviour
 
     void Start()
     {
-        playerControls = new PlayerControls();
+        //playerControls = new PlayerControls();
         // animator = GetComponent<Animator>();
-    
+
         // Transform
         orientation = transform.Find("Orientation");
 
@@ -205,12 +205,12 @@ public class NetworkPlayerController : NetworkBehaviour
         // Rotates camera on both axis'
         // World Rotation = Target Rotation * Rotation
         playerCamera.rotation = transform.rotation * Quaternion.Euler(xRotation, yRotation, 0f);
-        
+
         // Rotate "head" or "eyes" with camera (Aesthetic only)
         head.rotation = playerCamera.rotation;
 
         // Rotate orientation so that movement matches the look direction
-        orientation.RotateAround(orientation.position, transform.up, lookInput.x); 
+        orientation.RotateAround(orientation.position, transform.up, lookInput.x);
     }
 
     private void UserInfo()
@@ -418,13 +418,13 @@ public class NetworkPlayerController : NetworkBehaviour
         float colliderDiameter = playerCollider.radius * 2.0f;
         float targetColliderHeight = Mathf.Max(targetHeight, colliderDiameter);
         crouchFactor = Mathf.Max(crouchFactor, colliderDiameter / defaultHeight);
-        
+
         // Capsule collider's target local position
         // Bring "feet" to "head" if crouching in the air, otherwise bring "head" to "feet" if grounded
         // Uses collider's radius as the center offset
         float colliderOffset = crouching ? targetColliderHeight / 2.0f : defaultHeight / 2.0f;
         Vector3 targetColliderCenter = new Vector3(0f, isGrounded ? colliderOffset : defaultHeight - colliderOffset, 0f);
-        
+
         // Player camera's target local position
         float cameraOffset = isGrounded ? defaultHeight - targetColliderHeight : 0f;
         Vector3 targetCamPos = new Vector3(0f, -cameraOffset, 0f);
@@ -432,7 +432,7 @@ public class NetworkPlayerController : NetworkBehaviour
         // Player's feet target local position
         Vector3 targetFeetPos = currentFeetPos;
         targetFeetPos.y = (crouching && !isGrounded) ? defaultHeight - targetColliderHeight : 0f;
-        
+
         float percent = 0.0f;
         while (percent < 1.0f)
         {

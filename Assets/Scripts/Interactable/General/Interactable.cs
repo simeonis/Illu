@@ -8,23 +8,23 @@ public abstract class Interactable : NetworkBehaviour
     public string interactMessage;
 
     [HideInInspector] public new bool enabled = true;
-    private TextMeshProUGUI interactUI;
+    // private TextMeshProUGUI interactUI;
 
     [SerializeField] protected AudioSource audioSource;
     [SerializeField] protected AudioEvent[] audioEvent;
 
-    protected virtual void Awake()
-    {
-        interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
-    }
+    // protected virtual void Awake()
+    // {
+    //     interactUI = GameObject.Find("Interact Message").GetComponent<TextMeshProUGUI>();
+    // }
 
-    public virtual void Seen()
-    {
-        if (interactUI)
-        {
-            interactUI.text = interactMessage;
-        }
-    }
+    // public virtual void Seen()
+    // {
+    //     if (interactUI)
+    //     {
+    //         interactUI.text = interactMessage;
+    //     }
+    // }
 
     public abstract void Interaction(Interactor interactor);
 
