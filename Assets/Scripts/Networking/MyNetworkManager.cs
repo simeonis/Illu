@@ -20,6 +20,8 @@ public class MyNetworkManager : NetworkManager
     [SerializeField] private NetworkGamePlayer gamePlayerPrefab = null;
     [SerializeField] private GameObject playerSpawnSystem = null;
 
+    private SwitchTransport switchTransport;
+    private bool isLanConnection = false;
     private int numConnections = 0;
     private readonly string menuScene = "MainMenu";
 
@@ -30,6 +32,26 @@ public class MyNetworkManager : NetworkManager
     public static event Action OnClientDisconnected;
     public static event Action OnClientReadied;
     public static event Action<NetworkConnection> OnServerReadied;
+
+
+    public void playOnLan()
+    {
+        switchTransport = (SwitchTransport)transport;
+        switchTransport.PickTransport(1);
+        Debug.Log("Switch transport Name " + switchTransport.ToString());
+        isLanConnection = true;
+        StartHost();
+    }
+
+    public void JoinOnLan()
+    {
+        switchTransport = (SwitchTransport)transport;
+        switchTransport.PickTransport(1);
+        Debug.Log("Switch transport Name " + switchTransport.ToString());
+        isLanConnection = true;
+        StartClient();
+    }
+
 
     /*  --------------------------
     *       Callback functions
@@ -43,7 +65,14 @@ public class MyNetworkManager : NetworkManager
         spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
         NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
 
-        UIConsole.Log("Server Started");
+        if (isLanConnection)
+        {
+            UIConsole.Log("Lan Server Started");
+        }
+        else
+        {
+            UIConsole.Log("Server Started");
+        }
     }
 
     // SERVER detects new connection
@@ -139,6 +168,7 @@ public class MyNetworkManager : NetworkManager
         {
             for (int i = RoomPlayers.Count - 1; i >= 0; i--)
             {
+                Debug.Log("Room Players " + RoomPlayers.Count);
                 var conn = RoomPlayers[i].connectionToClient;
                 var gameplayerInstance = Instantiate(gamePlayerPrefab);
 
