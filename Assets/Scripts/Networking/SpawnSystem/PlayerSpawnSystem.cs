@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
@@ -24,13 +23,13 @@ public class PlayerSpawnSystem : NetworkBehaviour
     public override void OnStartServer() 
     {
         base.OnStartServer();
-        MyNetworkManager.OnServerReadied += SpawnPlayer;
+        Illu.Networking.NetworkManager.OnServerReadied += SpawnPlayer;
     }
 
     public override void OnStopServer()
     {
         base.OnStopServer();
-        MyNetworkManager.OnServerReadied -= SpawnPlayer;
+        Illu.Networking.NetworkManager.OnServerReadied -= SpawnPlayer;
         nextIndex = 0;
     }
 
