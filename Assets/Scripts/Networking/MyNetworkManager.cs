@@ -52,7 +52,6 @@ public class MyNetworkManager : NetworkManager
         StartClient();
     }
 
-
     /*  --------------------------
     *       Callback functions
     *   -------------------------- */

@@ -30,14 +30,15 @@ public class Equipment : Interactable
             Enable();
 
             if (interactor.TryGetComponent(out Player player))
-            {   
-                
-                if(player.hasAuthority)
+            {
+
+                if (player.hasAuthority)
                 {
                     Debug.Log("Giving Authority to Cube");
                     player.GiveAuthority(GetComponent<NetworkIdentity>());
+                    AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
                 }
-                AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
+
             }
         }
     }

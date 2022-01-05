@@ -31,7 +31,7 @@ public class SyncEquipment : NetworkBehaviour
     [SerializeField] private bool debug;
 
     //Store the Remote Obj data on the client it was sent too
-    private Vector3 RemoteObjPosition;
+    //private Vector3 RemoteObjPosition;
     private Quaternion RemoteObjRotation;
 
     private Equipment _equipment;
@@ -40,19 +40,42 @@ public class SyncEquipment : NetworkBehaviour
     //local (Not Synced)
     private float lastClientSendTime;
 
+    /*
+    *   Means the cube is still following positional updates
+    *   Stays true until procceded all data received 
+    *   Even after the client is finished 
+    */
     private bool simulation = false;
-    private float oldMagnitude = 0f;
 
+    /*
+    *   Index into the list of positions
+    *   Only moves forward when the position is reached    
+    */
+    private int simStep = 0;
+
+    /*
+    *   Set to true when the client is done setting
+    *   Note: may still be simulating when true
+    */
+    private bool initiatorDoneSending = false;
+
+
+    //List of Positions and time sent from the initiating cube 
+    //List of reached positions on the reciving client for debugging 
     private List<MyNetworkData> receivedPositions;
+    private List<Vector3> vistedPositions;
+
+
+    private float oldMagnitude = 0f;
     private long triggerTimeStamp;
 
-    private int index = 0;
 
     void Start()
     {
         _equipment = GetComponent<Equipment>();
         equipmentBody = _equipment.equipmentBody;
         receivedPositions = new List<MyNetworkData>();
+        vistedPositions = new List<Vector3>();
     }
 
     //Update loop called on both Authority and other Clients 
@@ -81,57 +104,71 @@ public class SyncEquipment : NetworkBehaviour
         }
     }
 
-    private bool isDisabled = false;
+    private int numPositions = 0;
+
     void Update()
     {
+        numPositions = receivedPositions.Count;
 
         if (!hasAuthority && simulation)
         {
-            if (!isDisabled && receivedPositions.Count > 0)
+            int count = receivedPositions.Count;
+            if (count == 3)
             {
                 equipmentBody.isKinematic = true;
                 equipmentBody.interpolation = RigidbodyInterpolation.None;
-                isDisabled = true;
             }
-            if (isDisabled)
+            if (count >= 3 && simStep < numPositions)
             {
                 HandleRemotePositionUpdates();
             }
+            else if (initiatorDoneSending && simStep == numPositions)
+            {
+                simStep = 0;
+                equipmentBody.isKinematic = false;
 
-            //HandleRemoteRotationUpdates();
+                //Probably should clear here .... not for debugging reasons
+                //receivedPositions.Clear();
+                equipmentBody.interpolation = RigidbodyInterpolation.Interpolate;
+                equipmentBody.velocity = new Vector3();
+                simulation = false;
+                Debug.Log("REACHED THE END OF THE SENDDDDDDD");
+                initiatorDoneSending = false;
+
+            }
         }
     }
 
     //Trigger the action being sent
     //Entry point for Syncing 
-    public void Trigger(long now)
-    {
-        CmdTrigger(now);
-    }
+    public void Trigger(long now) { CmdTrigger(now); }
 
+    //Tell server to execute position trigger on everyone
     [Command(channel = Channels.Unreliable)]
-    private void CmdTrigger(long now)
-    {
-        RPCTrigger(now);
-    }
+    private void CmdTrigger(long now) { RPCTrigger(now); }
 
+    //Server says run on client
     [ClientRpc]
     private void RPCTrigger(long now)
     {
-        Debug.Log("Trigger called!");
         if (!hasAuthority)
         {
             percent = 0;
         }
         triggerTimeStamp = now;
 
+        //Temp clear of lists move later
+        receivedPositions.Clear();
+        vistedPositions.Clear();
+
         simulation = true;
     }
 
-    //Command
+    //Inform server that we've stopped 
     [Command(channel = Channels.Unreliable)]
     void CmdOnStop()
     {
+        //should just sent a positional check simulation runs until the end of the execution
         RpcOnStopped();
     }
 
@@ -139,25 +176,13 @@ public class SyncEquipment : NetworkBehaviour
     [ClientRpc]
     protected void RpcOnStopped()
     {
-        simulation = false;
-
-        if (!hasAuthority)
-        {
-            index = 0;
-            equipmentBody.isKinematic = false;
-            isDisabled = false;
-            receivedPositions.Clear();
-            equipmentBody.interpolation = RigidbodyInterpolation.Interpolate;
-            equipmentBody.velocity = new Vector3();
-        }
-        else RemoveAuthority();
+        initiatorDoneSending = true;
+        RemoveAuthority();
     }
 
+    //Removes network authority from the Equipment
     [Command]
-    private void RemoveAuthority()
-    {
-        GetComponent<NetworkIdentity>().RemoveClientAuthority();
-    }
+    private void RemoveAuthority() { GetComponent<NetworkIdentity>().RemoveClientAuthority(); }
 
     // Authority sends Pos and Rot 
     [Command(channel = Channels.Unreliable)]
@@ -180,9 +205,8 @@ public class SyncEquipment : NetworkBehaviour
     }
 
 
-    //While moving on the client with authority that triggered the action
     //Handle the received positional updates
-
+    //Runs until the list reaches the end 
     private float percent = 0.0f;
 
     [Client]
@@ -190,32 +214,26 @@ public class SyncEquipment : NetworkBehaviour
     {
         int count = receivedPositions.Count;
 
-        if (count > 0 && index <= count - 1)
+        if (count > 0 && simStep <= count - 1)
         {
             //get difference 
             //fixedDeltaTime
-
             Vector3 forward = transform.TransformDirection(Vector3.forward);
-            Vector3 toOther = receivedPositions[index].position - transform.position;
-
-            if (Vector3.Dot(forward, toOther) < 0)
-            {
-                StartCoroutine(FindIndexAhead());
-            }
+            Vector3 toOther = receivedPositions[simStep].position - transform.position;
 
             double timeDiff = 0;
 
-            if (count > 1 && index > 0)
+            if (count > 1 && simStep > 0)
             {
-                timeDiff = new TimeSpan(receivedPositions[index].timeSent - receivedPositions[index - 1].timeSent).TotalSeconds;
+                timeDiff = new TimeSpan(receivedPositions[simStep].timeSent - receivedPositions[simStep - 1].timeSent).TotalSeconds;
             }
             else //dont have a first value
             {
-                timeDiff = new TimeSpan(receivedPositions[index].timeSent - triggerTimeStamp).TotalSeconds;
+                timeDiff = new TimeSpan(receivedPositions[simStep].timeSent - triggerTimeStamp).TotalSeconds;
             }
 
             percent += Time.deltaTime / (float)timeDiff;
-            var currentTarget = receivedPositions[index].position;
+            var currentTarget = receivedPositions[simStep].position;
             var LagDistance = currentTarget - transform.position;
 
             // High distance => sync is to much off => send to position
@@ -226,26 +244,15 @@ public class SyncEquipment : NetworkBehaviour
             //     LagDistance = Vector3.zero;
             // }
 
+            vistedPositions.Add(currentTarget);
 
             transform.position = Vector3.Lerp(transform.position, currentTarget, percent);
 
             if (percent >= 1)
             {
                 percent = 0;
-                index++;
+                simStep++;
             }
-        }
-    }
-
-    IEnumerator FindIndexAhead()
-    {
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 toOther = receivedPositions[index].position - transform.position;
-
-        while (Vector3.Dot(forward, toOther) < 0)
-        {
-            index++;
-            yield return null;
         }
     }
 
@@ -270,39 +277,43 @@ public class SyncEquipment : NetworkBehaviour
     //Gizmo stuff for testing 
     //---------------------------------------------------------------------------------------------
 
-    // static void DrawDataPointGizmo(Vector3 pos, Color color)
-    // {
-    //     // use a little offset because transform.localPosition might be in
-    //     // the ground in many cases
-    //     Vector3 offset = Vector3.up * 0.01f;
+    static void DrawDataPointGizmo(Vector3 pos, Color color)
+    {
+        // use a little offset because transform.localPosition might be in
+        // the ground in many cases
+        Vector3 offset = Vector3.up * 0.01f;
 
-    //     // draw position
-    //     Gizmos.color = color;
-    //     Gizmos.DrawSphere(pos + offset, 0.05f);
+        // draw position
+        Gizmos.color = color;
+        Gizmos.DrawSphere(pos + offset, 0.05f);
 
-    // }
+    }
 
-    // static void DrawLineBetweenDataPoints(Vector3 start, Vector3 end, Color color)
-    // {
-    //     Gizmos.color = color;
-    //     Gizmos.DrawLine(start, end);
-    // }
+    static void DrawLineBetweenDataPoints(Vector3 start, Vector3 end, Color color)
+    {
+        Gizmos.color = color;
+        Gizmos.DrawLine(start, end);
+    }
 
-    // // draw the data points for easier debugging
-    // void OnDrawGizmos()
-    // {
-    //     // if (simulation)
-    //     // {
-    //  foreach ach(MyNetworkData data in receivedPositions)
-    //  {
-    // draw start and goal points
-    //             DrawDataPointGizmo(data.position, Color.yellow);
-    //      // draw line between them
-    //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
-    //  }
+    // draw the data points for easier debugging
+    void OnDrawGizmos()
+    {
+        foreach (MyNetworkData data in receivedPositions)
+        {
+            //draw start and goal points
+            DrawDataPointGizmo(data.position, Color.yellow);
+            // draw line between them
+            //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
+        }
 
-    //    // }
-    // }
+        foreach (Vector3 pos in vistedPositions)
+        {
+            //draw start and goal points
+            DrawDataPointGizmo(pos, Color.red);
+            // draw line between them
+            //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
+        }
+    }
 }
 
 public struct MyNetworkData
