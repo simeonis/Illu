@@ -15,18 +15,3 @@ public class TriggerEventEditor : Editor
         }
     }
 }
-
-[CustomEditor(typeof(SteamEvent))]
-public class TriggerSteamEventEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-
-        Event gameEvent = (SteamEvent) target;
-        if (GUILayout.Button("Trigger Event"))
-        {
-            gameEvent.Trigger();
-        }
-    }
-}

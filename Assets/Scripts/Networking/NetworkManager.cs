@@ -22,7 +22,7 @@ namespace Illu.Networking {
         [SerializeField] private GameObject playerSpawnSystem = null;
 
         private int numConnections = 0;
-        private readonly string menuScene = "MainMenu";
+        private readonly string menuScene = "Main Menu";
 
         public List<NetworkRoomPlayer> RoomPlayers { get; } = new List<NetworkRoomPlayer>();
         public List<NetworkGamePlayer> GamePlayers { get; } = new List<NetworkGamePlayer>();
