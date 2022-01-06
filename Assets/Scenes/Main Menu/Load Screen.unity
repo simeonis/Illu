@@ -1031,7 +1031,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b3e41fa1f79e6c47985900bf4f0c29c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  E_HostScreen: {fileID: 0}
   E_ShowFriends: {fileID: 11400000, guid: 75ea82b91e54f024195413d5fb14a795, type: 2}
   friendList: {fileID: 1778389132}
   inviteList: {fileID: 1990341445}
@@ -1066,7 +1065,7 @@ MonoBehaviour:
     type: 2}
   E_SteamLobbyEntered: {fileID: 11400000, guid: 7d7eec3cdfb62ab4aa2c9cf03d66b3fb,
     type: 2}
-  E_SteamLobbyKicked: {fileID: 0}
+  E_SteamLobbyKicked: {fileID: 11400000, guid: 9e551dbafb1255141b76eefd53785fb7, type: 2}
   networkManager: {fileID: 432644816}
 --- !u!114 &160168054
 MonoBehaviour:
@@ -8839,6 +8838,18 @@ MonoBehaviour:
       - m_Target: {fileID: 11400000, guid: 92b90f9756ec905479ad3f0c73a46e6e, type: 2}
         m_TargetAssemblyTypeName: Event, Assembly-CSharp
         m_MethodName: Trigger
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 160168052}
+        m_TargetAssemblyTypeName: Illu.Steam.SteamUI, Assembly-CSharp
+        m_MethodName: DestroyFriendList
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

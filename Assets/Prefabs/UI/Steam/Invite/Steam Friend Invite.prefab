@@ -227,7 +227,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   background: {fileID: 2273484595419669975}
   avatar: {fileID: 6615818654619934558}
-  name: {fileID: 1759593607373971566}
+  steamName: {fileID: 1759593607373971566}
   acceptButton: {fileID: 353972534589365995}
   declineButton: {fileID: 5468017065429858956}
 --- !u!1 &3729209571448657810

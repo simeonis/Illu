@@ -8,7 +8,6 @@ namespace Illu.Steam {
     {
         // Events
         [Header("Events")]
-        [SerializeField] private Event E_HostScreen;
         [SerializeField] private Event E_ShowFriends;
 
         [Header("Target Parent")]
@@ -55,7 +54,6 @@ namespace Illu.Steam {
                 // Accept Button
                 inviteDetails.acceptButton.onClick.AddListener(delegate { 
                     SteamManager.JoinSteamLobby(lobbyID);
-                    E_HostScreen.Trigger();
                     DestroyInvite(invite);
                 });
 
@@ -174,7 +172,7 @@ namespace Illu.Steam {
             }
         }
 
-        private void DestroyFriendList()
+        public void DestroyFriendList()
         {
             foreach (Transform child in friendList.transform)
             {

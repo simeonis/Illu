@@ -167,7 +167,7 @@ namespace Illu.Steam {
                 if (message == SteamUser.GetSteamID().ToString())
                 {
                     // The lobby owner has kicked you!
-                    if (SteamMatchmaking.GetLobbyOwner(lobbyID) == SteamUser.GetSteamID())
+                    if (SteamMatchmaking.GetLobbyOwner(lobbyID) == new CSteamID(callback.m_ulSteamIDUser))
                     {
                         E_SteamLobbyKicked.Trigger();
                     }
