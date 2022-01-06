@@ -100,16 +100,9 @@ namespace Illu.Steam {
         // CLIENT ONLY
         private void OnLobbyJoinAttempt(LobbyEnter_t callback)
         {
-            // Hacky way of confirm successful join
+            // Hacky way of confirming successful join
             if (callback.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
             {
-                // Checks if server has started
-                if (NetworkServer.active) 
-                { 
-                    UIConsole.Log("Failed to join lobby.\nReason: Game already started.");
-                    return;
-                }
-
                 // Successfully joined host
                 E_SteamLobbyEntered.Trigger();
 

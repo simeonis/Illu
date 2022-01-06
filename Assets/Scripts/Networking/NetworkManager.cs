@@ -21,7 +21,6 @@ namespace Illu.Networking {
         [SerializeField] private NetworkGamePlayer gamePlayerPrefab = null;
         [SerializeField] private GameObject playerSpawnSystem = null;
 
-        private int numConnections = 0;
         private readonly string menuScene = "Main Menu";
 
         public List<NetworkRoomPlayer> RoomPlayers { get; } = new List<NetworkRoomPlayer>();
@@ -51,7 +50,6 @@ namespace Illu.Networking {
         public override void OnStartServer()
         {
             base.OnStartServer();
-            numConnections = 0;
             spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
             NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
 
@@ -61,14 +59,13 @@ namespace Illu.Networking {
         // SERVER detects new connection
         public override void OnServerConnect(NetworkConnection conn)
         {
+            int numConnections = NetworkServer.connections.Count;
             UIConsole.Log("[Server]: New connection detected.");
-            numConnections++;
             UIConsole.Log("Number of players: " + numConnections);
 
             if (numConnections > maxConnections)
             {
                 conn.Disconnect();
-                numConnections--;
                 UIConsole.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
                 return;
             }
@@ -76,7 +73,6 @@ namespace Illu.Networking {
             if (SceneManager.GetActiveScene().name != menuScene)
             {
                 conn.Disconnect();
-                numConnections--;
                 UIConsole.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
                 return;
             }
