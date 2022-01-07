@@ -122,8 +122,8 @@ public class SteamLobby : MonoBehaviour
         if (callback.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
         {
             // Checks if server has started
-            if (NetworkServer.active) 
-            { 
+            if (NetworkServer.active)
+            {
                 UIConsole.Log("Failed to join lobby.\nReason: Game already started.");
                 return;
             }
@@ -141,7 +141,7 @@ public class SteamLobby : MonoBehaviour
 
             // Adds Clients UI to Client Lobby
             int lobbyCount = SteamMatchmaking.GetNumLobbyMembers(lobbyID);
-            for (int i=0; i<lobbyCount; i++)
+            for (int i = 0; i < lobbyCount; i++)
             {
                 CSteamID lobbyMember = SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, i);
                 UIManager.GenerateLobbyClient(GetSteamFriend(lobbyMember), false);
@@ -190,26 +190,26 @@ public class SteamLobby : MonoBehaviour
     {
         SteamUserRecord steamUserMakingChange = GetSteamFriend(new CSteamID(callback.m_ulSteamIDMakingChange));
         SteamUserRecord steamUserChanged = GetSteamFriend(new CSteamID(callback.m_ulSteamIDUserChanged));
-        
+
         switch (callback.m_rgfChatMemberStateChange)
         {
             // Entered
-            case (uint) EChatMemberStateChange.k_EChatMemberStateChangeEntered:
+            case (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered:
                 UIConsole.Log(string.Format("[Lobby]: {0} has joined.", steamUserChanged.name));
                 UIManager.GenerateLobbyClient(steamUserChanged, true);
                 break;
             // Left
-            case (uint) EChatMemberStateChange.k_EChatMemberStateChangeLeft:
+            case (uint)EChatMemberStateChange.k_EChatMemberStateChangeLeft:
                 UIConsole.Log(string.Format("[Lobby]: {0} has left.", steamUserChanged.name));
                 UIManager.RemoveLobbyClient();
                 break;
             // Kicked
-            case (uint) EChatMemberStateChange.k_EChatMemberStateChangeKicked:
+            case (uint)EChatMemberStateChange.k_EChatMemberStateChangeKicked:
                 UIConsole.Log(string.Format("[Lobby]: {0} was kicked by {1}.", steamUserChanged.name, steamUserMakingChange.name));
                 UIManager.RemoveLobbyClient();
                 break;
             // Disconnected
-            case (uint) EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
+            case (uint)EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
                 UIConsole.Log(string.Format("[Lobby]: {0} disconnected.", steamUserChanged.name));
                 UIManager.RemoveLobbyClient();
                 break;
@@ -218,7 +218,7 @@ public class SteamLobby : MonoBehaviour
         }
     }
 
-    /*  --------------------------
+    /*  --------------------------  
     *   Button activated functions
     *   -------------------------- */
 
@@ -257,7 +257,7 @@ public class SteamLobby : MonoBehaviour
                 UIConsole.Log("You somehow left the lobby");
                 break;
         }
-        
+
         SteamMatchmaking.LeaveLobby(lobbyID);
         UIManager.LobbyExited();
         lobbyID.Clear();
@@ -292,7 +292,7 @@ public class SteamLobby : MonoBehaviour
     *        Helper functions
     *   -------------------------- */
 
-    private static Dictionary<EPersonaState, string> steamStatus = new Dictionary<EPersonaState, string> 
+    private static Dictionary<EPersonaState, string> steamStatus = new Dictionary<EPersonaState, string>
     {
         {EPersonaState.k_EPersonaStateOffline, "Offline"},
         {EPersonaState.k_EPersonaStateOnline, "Online"},
@@ -308,7 +308,7 @@ public class SteamLobby : MonoBehaviour
         int friendAvatar = SteamFriends.GetMediumFriendAvatar(steamID);
         string friendName = SteamFriends.GetFriendPersonaName(steamID);
         string friendStatus = steamStatus[SteamFriends.GetFriendPersonaState(steamID)];
-        
+
         bool friendPlaying = SteamFriends.GetFriendGamePlayed(steamID, out FriendGameInfo_t gameInfo_T);
         bool playingIllu = friendPlaying ? (gameInfo_T.m_gameID.m_GameID == SteamAppID.m_GameID) : false;
         if (playingIllu) friendStatus = "Playing Illu";
