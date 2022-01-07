@@ -87,6 +87,8 @@ public class SyncInteractables : NetworkBehaviour
 
     private NetworkIdentity ni;
 
+    private Vector3 positionToSend = Vector3.zero;
+
     void Start()
     {
         interactables = new List<Interactable>();
@@ -109,35 +111,33 @@ public class SyncInteractables : NetworkBehaviour
         //[Server] has authority send commands to other clients
         if (ni.hasAuthority)
         {
-            if (interactables.Count <= 0)
+            if (positionToSend != Vector3.zero)
                 return;
 
-            Debug.Log(interactables[0].transform.position.x);
+            // var equipmentBody = interactables[0].GetComponent<Rigidbody>();
 
-            var equipmentBody = interactables[0].GetComponent<Rigidbody>();
-
-            bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
+            //bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
 
 
-            if (increasing && Time.time - lastClientSendTime >= syncInterval)
+            if (Time.time - lastClientSendTime >= syncInterval)
             {
-                MyNetworkData currentPos = new MyNetworkData(transform.position, DateTime.Now.Ticks);
-                CmdSendPositionRotation(currentPos, transform.rotation);
+                MyNetworkData currentPos = new MyNetworkData(positionToSend, DateTime.Now.Ticks);
+                CmdSendPositionRotation(currentPos);
 
-                sentPositions.Add(transform.position);
+                sentPositions.Add(positionToSend);
 
                 // Update old data for checking against in the next loop
                 lastClientSendTime = Time.time;
-                oldMagnitude = equipmentBody.velocity.magnitude;
+                //oldMagnitude = equipmentBody.velocity.magnitude;
             }
-            else if (!increasing && equipmentBody.velocity.magnitude <= 0.1)
-            {
-                // Send one more position
-                // CmdSendPosition(transform.position);
-                CmdOnStop();
-            }
+            // else if (!increasing && equipmentBody.velocity.magnitude <= 0.1)
+            // {
+            //     // Send one more position
+            //     // CmdSendPosition(transform.position);
+            //     CmdOnStop();
+            // }
         }
-        //[client]
+        // //[client]
         //Don't have authority listen for position updates and handle 
         else
         {
@@ -174,21 +174,28 @@ public class SyncInteractables : NetworkBehaviour
 
     }
 
-    public void RegisterInteractableToSync(Interactable go)
+    // public void RegisterInteractableToSync(Interactable go)
+    // {
+    //     interactables.Add(go);
+    // }
+
+    public void SendTransform(Vector3 position)
     {
-        interactables.Add(go);
+        Debug.Log("Pos " + position);
+        positionToSend = position;
     }
+
 
     // Server sends Pos and Rot 
     [Command(channel = Channels.Unreliable)]
-    void CmdSendPositionRotation(MyNetworkData position, Quaternion rotation)
+    void CmdSendPositionRotation(MyNetworkData position)
     {
-        RPCSyncPosition(position, rotation);
+        RPCSyncPosition(position);
     }
 
     //Server broadcasts Pos and Rot to all clients  
     [ClientRpc]
-    public void RPCSyncPosition(MyNetworkData position, Quaternion rotation)
+    public void RPCSyncPosition(MyNetworkData position)
     {
         //make sure were not the server
         serverIsSending = true;
@@ -324,15 +331,10 @@ public class SyncInteractables : NetworkBehaviour
             //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
         }
 
-        int j = 0;
         foreach (Vector3 pos in sentPositions)
         {
-            Debug.Log("Sent POS (" + j + ")-> " + pos);
             //draw start and goal points
             DrawDataPointGizmo(pos, Color.red);
-            // draw line between them
-            //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
-            j++;
         }
     }
 }

@@ -70,8 +70,11 @@ public class Player : Interactor
         }
     }
 
+    private bool test = false;
+
     private void FirePressed()
     {
+        test = true;
         if (equipmentSlot.HasEquipment())
         {
             equipmentSlot.GetEquipment().EquipmentPrimaryPressed();

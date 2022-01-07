@@ -9,12 +9,16 @@ public class Equipment : Interactable
     protected bool isEquipped = false;
     private Transform defaultParent;
     private SyncEquipment syncEquipment;
+    private SyncInteractables syncInteractables = null;
+
+    private Transform equipTransform;
 
     protected void Awake()
     {
         equipmentBody = GetComponent<Rigidbody>();
         equipmentCollider = GetComponent<Collider>();
         syncEquipment = GetComponent<SyncEquipment>();
+        equipTransform = GetComponent<Transform>();
     }
 
     public override void Interaction(Interactor interactor)
@@ -39,7 +43,7 @@ public class Equipment : Interactable
                 //     player.GiveAuthority(GetComponent<NetworkIdentity>());
                 // }
 
-                player.syncInteractables.RegisterInteractableToSync(this);
+                //player.syncInteractables.RegisterInteractableToSync(this);
             }
         }
         else
@@ -50,6 +54,10 @@ public class Equipment : Interactable
 
             if (interactor.TryGetComponent(out Player player))
             {
+                Debug.Log("Set the Player");
+
+                syncInteractables = player.GetComponent<SyncInteractables>();
+
                 if (player.hasAuthority)
                 {
                     AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
@@ -58,11 +66,14 @@ public class Equipment : Interactable
                 {
                     Debug.Log("I dont have auth CANT THROW");
                 }
-
-
             }
-
         }
+    }
+
+    void FixedUpdate()
+    {
+        if (syncInteractables != null)
+            syncInteractables.SendTransform(equipTransform.position);
     }
 
     // //right now this is called as soon as it get auth after picking up
