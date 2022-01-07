@@ -105,8 +105,10 @@ public class NetworkPlayerController : NetworkBehaviour
 
     void Start()
     {
-        //playerControls = new PlayerControls();
-        // animator = GetComponent<Animator>();
+        if (hasAuthority)
+        {
+            GameManager.TriggerEvent("PlayerSpawned");
+        }
 
         // Transform
         orientation = transform.Find("Orientation");
