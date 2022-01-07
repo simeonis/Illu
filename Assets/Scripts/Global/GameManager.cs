@@ -46,19 +46,19 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnLevelFinishedLoading;
     }
 
-    public void ExitGame()
+    public void Exit()
     {
         Application.Quit();
     }
 
-    public void UnlockPlayer()
+    public void Resume()
     {
         InputManager.ToggleActionMap(InputManager.playerControls.Land);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    public void LockPlayer()
+    public void Pause()
     {
         InputManager.ToggleActionMap(InputManager.playerControls.Menu);
         Cursor.lockState = CursorLockMode.None;

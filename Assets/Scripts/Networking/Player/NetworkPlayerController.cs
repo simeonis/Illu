@@ -98,6 +98,11 @@ public class NetworkPlayerController : NetworkBehaviour
 
     void Start()
     {
+        if (hasAuthority)
+        {
+            GameManager.TriggerEvent("PlayerSpawned");
+        }
+
         // Transform
         orientation = transform.Find("Orientation");
 

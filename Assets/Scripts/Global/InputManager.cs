@@ -10,10 +10,20 @@ public class InputManager : MonoBehaviour
     void Awake()
     {
         playerControls = new PlayerControls();
+
+        playerControls.Land.Menu.performed += context => GameManager.TriggerEvent("GamePaused");
+        playerControls.Menu.Menu.performed += context => GameManager.TriggerEvent("GameResumed");
+        // playerControls.Land.Console.performed += context => ShowConsole();
+        // playerControls.Menu.Console.performed += context => HideConsole();
     }
 
     void OnDestroy()
     {
+        playerControls.Land.Menu.performed -= context => GameManager.TriggerEvent("GamePaused");
+        playerControls.Menu.Menu.performed -= context => GameManager.TriggerEvent("GameResumed");
+        // playerControls.Land.Console.performed -= context => ShowConsole();
+        // playerControls.Menu.Console.performed -= context => HideConsole();
+
         playerControls = null;
     }
 
