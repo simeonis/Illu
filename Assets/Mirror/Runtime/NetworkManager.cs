@@ -311,7 +311,7 @@ namespace Mirror
         }
 
         /// <summary>Starts the client, connects it to the server with networkAddress.</summary>
-        public void StartClient()
+        public virtual void StartClient()
         {
             if (NetworkClient.active)
             {
