@@ -4,13 +4,13 @@ using UnityEngine;
 public class NetworkRoomPlayer : NetworkBehaviour
 {
 
-    private MyNetworkManager room;
-    private MyNetworkManager Room
+    private Illu.Networking.NetworkManager room;
+    private Illu.Networking.NetworkManager Room
     {
         get
         {
             if (room != null) { return room; }
-            return room = NetworkManager.singleton as MyNetworkManager;
+            return room = NetworkManager.singleton as Illu.Networking.NetworkManager;
         }
     }
 

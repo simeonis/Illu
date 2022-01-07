@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Mirror;
+using UnityEngine.InputSystem;
 
 public class NetworkPlayerController : NetworkBehaviour
 {
@@ -95,16 +96,19 @@ public class NetworkPlayerController : NetworkBehaviour
     private CapsuleCollider playerCollider;
 
     // Needed to smooth movement over a network
-    public void NetworkJump() => Jump();
-    public void NetworkCrouch() => Crouch();
-    public void NetworkUnCrouch() => UnCrouch();
-    public void NetworkWalk() => Walk();
-    public void NetworkSprint() => Sprint();
+    private InputAction.CallbackContext defaultContext = new InputAction.CallbackContext();
+    public void NetworkJump() => Jump(defaultContext);
+    public void NetworkCrouch() => Crouch(defaultContext);
+    public void NetworkUnCrouch() => UnCrouch(defaultContext);
+    public void NetworkWalk() => Walk(defaultContext);
+    public void NetworkSprint() => Sprint(defaultContext);
 
     void Start()
     {
-        //playerControls = new PlayerControls();
-        // animator = GetComponent<Animator>();
+        if (hasAuthority)
+        {
+            GameManager.TriggerEvent("PlayerSpawned");
+        }
 
         // Transform
         orientation = transform.Find("Orientation");
@@ -133,29 +137,29 @@ public class NetworkPlayerController : NetworkBehaviour
         enabled = true;
 
         // Jump
-        InputManager.playerControls.Land.Jump.performed += context => Jump();
+        InputManager.playerControls.Land.Jump.performed += Jump;
 
         // Sprint
-        InputManager.playerControls.Land.Sprint.performed += context => Sprint();
-        InputManager.playerControls.Land.Sprint.canceled += context => Walk();
+        InputManager.playerControls.Land.Sprint.performed += Sprint;
+        InputManager.playerControls.Land.Sprint.canceled += Walk;
 
         // Crouch
-        InputManager.playerControls.Land.Crouch.performed += context => Crouch();
-        InputManager.playerControls.Land.Crouch.canceled += context => UnCrouch();
+        InputManager.playerControls.Land.Crouch.performed += Crouch;
+        InputManager.playerControls.Land.Crouch.canceled += UnCrouch;
     }
 
     void OnDisable()
     {
         // Jump
-        InputManager.playerControls.Land.Jump.performed -= context => Jump();
+        InputManager.playerControls.Land.Jump.performed -= Jump;
 
         // Sprint
-        InputManager.playerControls.Land.Sprint.performed -= context => Sprint();
-        InputManager.playerControls.Land.Sprint.canceled -= context => Walk();
+        InputManager.playerControls.Land.Sprint.performed -= Sprint;
+        InputManager.playerControls.Land.Sprint.canceled -= Walk;
 
         // Crouch
-        InputManager.playerControls.Land.Crouch.performed -= context => Crouch();
-        InputManager.playerControls.Land.Crouch.canceled -= context => UnCrouch();
+        InputManager.playerControls.Land.Crouch.performed -= Crouch;
+        InputManager.playerControls.Land.Crouch.canceled -= UnCrouch;
     }
 
     void Update()
@@ -232,7 +236,7 @@ public class NetworkPlayerController : NetworkBehaviour
         // Crouch
         if (stuckCrouching && !underCeiling)
         {
-            UnCrouch();
+            UnCrouch(new InputAction.CallbackContext());
             stuckCrouching = false;
         }
     }
@@ -277,7 +281,7 @@ public class NetworkPlayerController : NetworkBehaviour
     *       Movement functions
     *   -------------------------- */
 
-    private void Jump()
+    private void Jump(InputAction.CallbackContext _)
     {
         if (canJump && isGrounded)
         {
@@ -298,7 +302,7 @@ public class NetworkPlayerController : NetworkBehaviour
         canJump = true;
     }
 
-    private void Walk()
+    private void Walk(InputAction.CallbackContext _)
     {
         isSprinting = false;
         if (!isCrouching)
@@ -309,7 +313,7 @@ public class NetworkPlayerController : NetworkBehaviour
         }
     }
 
-    private void Sprint()
+    private void Sprint(InputAction.CallbackContext _)
     {
         isSprinting = true;
         if (!isCrouching)
@@ -320,7 +324,7 @@ public class NetworkPlayerController : NetworkBehaviour
         }
     }
 
-    private void Crouch()
+    private void Crouch(InputAction.CallbackContext _)
     {
         isCrouching = true;
 
@@ -333,7 +337,7 @@ public class NetworkPlayerController : NetworkBehaviour
         StartCoroutine(sprintCoroutine = AdjustSpeedOverTime(walkSpeed / 2.0f, timeToSprint));
     }
 
-    private void UnCrouch()
+    private void UnCrouch(InputAction.CallbackContext _)
     {
         // No obstruction
         if (!underCeiling)
