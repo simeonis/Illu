@@ -26,21 +26,9 @@ namespace Illu.Networking {
         public List<NetworkRoomPlayer> RoomPlayers { get; } = new List<NetworkRoomPlayer>();
         public List<NetworkGamePlayer> GamePlayers { get; } = new List<NetworkGamePlayer>();
 
-        public static event Action OnClientConnected;
-        public static event Action OnClientDisconnected;
-        public static event Action OnClientReadied;
-        public static event Action OnGameStarted;
         public static event Action<NetworkConnection> OnServerReadied;
 
-        public override void Awake()
-        {
-            base.Awake();
-        }
-
-        public override void OnDestroy()
-        {
-            base.OnDestroy();
-        }
+        [HideInInspector] public static string HostAddress = "";
 
         /*  --------------------------
         *       Callback functions
@@ -52,7 +40,6 @@ namespace Illu.Networking {
             base.OnStartServer();
             spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
             NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
-
             UIConsole.Log("Server Started");
         }
 
@@ -98,7 +85,7 @@ namespace Illu.Networking {
         {
             base.OnClientConnect(conn);
 
-            OnClientConnected?.Invoke();
+            GameManager.TriggerEvent("ClientConnected");
 
             // you can send the message here, or wherever else you want
             CreateCharacterMessage characterMessage = new CreateCharacterMessage
@@ -115,7 +102,8 @@ namespace Illu.Networking {
         public override void OnClientDisconnect(NetworkConnection conn)
         {
             base.OnClientDisconnect(conn);
-            OnClientDisconnected?.Invoke();
+
+            GameManager.TriggerEvent("ClientDisconnected");
 
             if (SceneManager.GetActiveScene().name != menuScene)
             {
@@ -140,35 +128,6 @@ namespace Illu.Networking {
             }
         }
 
-        // SERVER changes scene for all CLIENTS
-        [Server]
-        public override void ServerChangeScene(string newSceneName)
-        {
-            Debug.Log("YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEY");
-            UIConsole.Log("[Server]: Setting up new scene.");
-
-            // Game Started
-            if (SceneManager.GetActiveScene().name == menuScene && newSceneName != menuScene)
-            {
-                for (int i = RoomPlayers.Count - 1; i >= 0; i--)
-                {
-                    var conn = RoomPlayers[i].connectionToClient;
-                    var gameplayerInstance = Instantiate(gamePlayerPrefab);
-
-                    //if(conn.identity.gameObject)
-                    NetworkServer.Destroy(conn.identity.gameObject);
-
-                    NetworkServer.ReplacePlayerForConnection(conn, gameplayerInstance.gameObject);
-                }
-            }
-
-            UIConsole.Log("[Server]: Scene setup completed.");
-
-            base.ServerChangeScene(newSceneName);
-
-            UIConsole.Log("[Server]: Changing scene for all.");
-        }
-
         // CLIENT is changing scene
         private string previousScene;
         public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
@@ -187,12 +146,11 @@ namespace Illu.Networking {
             // Game Started
             if (previousScene == menuScene && sceneName != menuScene)
             {
+                GameManager.TriggerEvent("GameStarted");
                 UIConsole.Log("[Client]: Server has started the game");
-                OnGameStarted?.Invoke();
             }
 
             UIConsole.Log("[Client]: Sucessfully loaded " + sceneName + ".");
-            OnClientReadied?.Invoke();
         }
 
         // SERVER notified that CLIENT is ready
@@ -201,7 +159,7 @@ namespace Illu.Networking {
             base.OnServerReady(conn);
             UIConsole.Log("[Server]: Client" + "[" + conn.connectionId + "]"
             + " has successfully loaded scene: " + SceneManager.GetActiveScene().name + ".");
-            OnServerReadied?.Invoke(conn);
+            OnServerReadied?.Invoke(conn);  
         }
 
         // SERVER finished loading scene
@@ -217,14 +175,47 @@ namespace Illu.Networking {
         }
 
         /*  --------------------------
+        *        Regular functions
+        *   -------------------------- */
+
+        // SERVER changes scene for all CLIENTS
+        [Server]
+        public override void ServerChangeScene(string newSceneName)
+        {
+            UIConsole.Log("[Server]: Setting up new scene.");
+
+            // Game Started
+            if (SceneManager.GetActiveScene().name == menuScene && newSceneName != menuScene)
+            {
+                for (int i = RoomPlayers.Count - 1; i >= 0; i--)
+                {
+                    var conn = RoomPlayers[i].connectionToClient;
+                    var gameplayerInstance = Instantiate(gamePlayerPrefab);
+
+                    NetworkServer.Destroy(conn.identity.gameObject);
+                    NetworkServer.ReplacePlayerForConnection(conn, gameplayerInstance.gameObject);
+                }
+            }
+
+            UIConsole.Log("[Server]: Scene setup completed.");
+
+            base.ServerChangeScene(newSceneName);
+
+            UIConsole.Log("[Server]: Changing scene for all.");
+        }
+
+        public override void StartClient()
+        {
+            networkAddress = HostAddress;
+            base.StartClient();
+        }
+
+        /*  --------------------------
         *        Helper functions
         *   -------------------------- */
 
         private void OnCreateCharacter(NetworkConnection conn, CreateCharacterMessage characterMessage)
         {
-            UIConsole.Log("[Server]: Created character " + characterMessage.name +
-            " for Client" + "[" + conn.connectionId + "].");
-
             // playerPrefab is the one assigned in the inspector in Network
             // Manager but you can use different prefabs per race for example
             GameObject gameobject = Instantiate(playerPrefab);
@@ -239,6 +230,9 @@ namespace Illu.Networking {
 
             // call this to use this gameobject as the primary controller
             NetworkServer.AddPlayerForConnection(conn, gameobject);
+
+            UIConsole.Log("[Server]: Created character " + characterMessage.name +
+            " for Client" + "[" + conn.connectionId + "].");
         }
     }
 }

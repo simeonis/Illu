@@ -360,8 +360,6 @@ GameObject:
   - component: {fileID: 4446985994531773176}
   - component: {fileID: 4446985994531773177}
   - component: {fileID: 4446985994531773178}
-  - component: {fileID: 4446985994531773175}
-  - component: {fileID: 4446985994531773174}
   m_Layer: 0
   m_Name: Player Camera
   m_TagString: MainCamera
@@ -549,34 +547,6 @@ MonoBehaviour:
       data1: 0
       data2: 0
   defaultFrameSettings: 0
---- !u!114 &4446985994531773175
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4446985994531773180}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8295cbd0f95f4854ea24fe0ad1a642bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &4446985994531773174
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4446985994531773180}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eddbc604660b2ee47ad29ae1e757842c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  layerCullDistances:
-  - name: Equipment
-    layerNumber: 7
-    distance: 20
 --- !u!1 &4446985994721449034
 GameObject:
   m_ObjectHideFlags: 0

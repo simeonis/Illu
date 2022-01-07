@@ -1,12 +1,10 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.VFX;
+using Illu.Utility;
 
 public class Gyroscope : MonoBehaviour
 {
-    [Header("Camera Effects")]
-    [SerializeField] private CameraShake cameraShake;
-
     [Header("Rings")]
     [SerializeField] private Transform outerRing;
     [SerializeField] private Transform centerRing;
@@ -263,7 +261,7 @@ public class Gyroscope : MonoBehaviour
                         percent = 0f;
 
                         laser.Play();
-                        StartCoroutine(cameraShake.Shake(laserDuration, 0.25f));
+                        CameraUtility.singleton.ShakeCamera(laserDuration, 0.25f);
                         Invoke("PowerOff", laserDuration);
                     }
                 }

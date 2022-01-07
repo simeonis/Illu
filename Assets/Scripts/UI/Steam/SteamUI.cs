@@ -6,10 +6,6 @@ using Steamworks;
 namespace Illu.Steam {
     public class SteamUI : MonoBehaviour
     {
-        // Events
-        [Header("Events")]
-        [SerializeField] private Event E_ShowFriends;
-
         [Header("Target Parent")]
         [SerializeField] private RectTransform friendList;
         [SerializeField] private RectTransform inviteList;
@@ -108,7 +104,7 @@ namespace Illu.Steam {
             SteamEmptyLobby lobbyEmptyDetails = lobbyEmpty.GetComponent<SteamEmptyLobby>();
             lobbyEmptyDetails.addButton.onClick.AddListener(delegate { 
                 GenerateFriendList(SteamManager.GetSteamFriends());
-                E_ShowFriends.Trigger();
+                GameManager.TriggerEvent("ScreenFriend");
             });
         }
 

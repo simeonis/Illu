@@ -27,12 +27,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject errorPopupPrefab;
 
     // Screen callbacks
-    public static event Action OnRootScreen;
-    public static event Action OnHostScreen;
-    public static event Action OnFriendScreen;
-    //public static event Action OnJoinScreen;
     public static event Action<PlayerHUD> OnPlayScreen;
-    public static event Action OnSettingsScreen;
     public static event Action OnConsoleScreen;
     public static event Action OnErrorScreen;
 
@@ -42,7 +37,6 @@ public class UIManager : MonoBehaviour
 
     void Awake()
     {
-        NetworkManager.OnGameStarted += GameStarted;
         InputManager.playerControls.Land.Menu.performed += context => ShowMenu();
         InputManager.playerControls.Menu.Menu.performed += context => HideMenu();
         InputManager.playerControls.Land.Console.performed += context => ShowConsole();
@@ -51,7 +45,6 @@ public class UIManager : MonoBehaviour
 
     void OnDestroy()
     {
-        NetworkManager.OnGameStarted -= GameStarted;
         InputManager.playerControls.Land.Menu.performed -= context => ShowMenu();
         InputManager.playerControls.Menu.Menu.performed -= context => HideMenu();
         InputManager.playerControls.Land.Console.performed -= context => ShowConsole();
