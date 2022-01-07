@@ -4937,6 +4937,8 @@ GameObject:
   m_Component:
   - component: {fileID: 815971734}
   - component: {fileID: 815971735}
+  - component: {fileID: 815971737}
+  - component: {fileID: 815971736}
   m_Layer: 5
   m_Name: PlayerHUD
   m_TagString: Untagged
@@ -4978,6 +4980,63 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   crosshair: {fileID: 712497536}
   interactUI: {fileID: 1179218564}
+  interactMessage: {fileID: 11400000, guid: 5aedd720e5c706140847d4991780e5e6, type: 2}
+--- !u!114 &815971736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 815971733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1f5e2073f3079746bccc9826d4b8c73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Event: {fileID: 11400000, guid: 59ff7891f0ca0cc45b07c35fb69ec7a7, type: 2}
+  Response:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 815971735}
+        m_TargetAssemblyTypeName: PlayerHUD, Assembly-CSharp
+        m_MethodName: UpdateInteractMessage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &815971737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 815971733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1f5e2073f3079746bccc9826d4b8c73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Event: {fileID: 11400000, guid: 587caae35b0dadb48bc9d35ca3753878, type: 2}
+  Response:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 815971735}
+        m_TargetAssemblyTypeName: PlayerHUD, Assembly-CSharp
+        m_MethodName: UpdateInteractMessage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &887476841
 GameObject:
   m_ObjectHideFlags: 0
@@ -6348,7 +6407,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Interact Message
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 57cce84d1d06a4042b45418ef3064010, type: 2}
   m_sharedMaterial: {fileID: -5611144535697369860, guid: 57cce84d1d06a4042b45418ef3064010,

@@ -3,6 +3,12 @@ using TMPro;
 
 public class PlayerHUD : MonoBehaviour
 {
-    public RectTransform crosshair;
-    public TextMeshProUGUI interactUI;
+    [SerializeField] private RectTransform crosshair;
+    [SerializeField] private TextMeshProUGUI interactUI;
+    [SerializeField] private StringVariable interactMessage;
+
+    public void UpdateInteractMessage()
+    {
+        interactUI.text = interactMessage.Value;
+    }
 }

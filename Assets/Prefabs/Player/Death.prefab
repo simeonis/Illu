@@ -881,6 +881,7 @@ MonoBehaviour:
   networkInteractable: {fileID: 0}
   dropForce: 5
   rigidbody: {fileID: 0}
+  interactMessage: {fileID: 11400000, guid: 5aedd720e5c706140847d4991780e5e6, type: 2}
   Authority: 0
 --- !u!114 &8453773999225703103
 MonoBehaviour:

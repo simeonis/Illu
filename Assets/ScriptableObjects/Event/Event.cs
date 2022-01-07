@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Default Event", menuName = "Event/Default")]
+[CreateAssetMenu(fileName = "Event", menuName = "Scriptable Object/Event")]
 public class Event : ScriptableObject
 {
 	protected List<EventListener> listeners = new List<EventListener>();

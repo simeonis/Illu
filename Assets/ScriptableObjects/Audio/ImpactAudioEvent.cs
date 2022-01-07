@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Audio Events/ImpactAudioEvent")]
+[CreateAssetMenu(fileName = "Impact Audio", menuName = "Scriptable Object/Audio Events/Impact")]
 public class ImpactAudioEvent : ScriptableObject
 {
     public AudioClip[] clips_low;

@@ -6,7 +6,10 @@ public class Player : Interactor
 {
     [Range(1f, 50f)] public float dropForce = 5f;
     [HideInInspector] public new Rigidbody rigidbody;
-    private TextMeshProUGUI interactUI;
+
+    [Header("UI")]
+    [SerializeField] private StringVariable interactMessage;
+    private bool interactMessageLocked = false;
 
     public bool Authority;
     public NetworkConnection networkConnection;
@@ -27,9 +30,6 @@ public class Player : Interactor
         // Alternate Fire
         InputManager.playerControls.Land.AlternateFire.performed += context => AlternateFirePressed();
         InputManager.playerControls.Land.AlternateFire.canceled += context => AlternateFireReleased();
-
-        // UI
-        UIManager.OnPlayScreen += playerHUD => LoadInteractUI(playerHUD);
     }
 
     protected override void Start()
@@ -50,23 +50,23 @@ public class Player : Interactor
         // Alternate Fire
         InputManager.playerControls.Land.AlternateFire.performed -= context => AlternateFirePressed();
         InputManager.playerControls.Land.AlternateFire.canceled -= context => AlternateFireReleased();
-
-        UIManager.OnPlayScreen -= playerHUD => LoadInteractUI(playerHUD);
-        interactUI = null;
-    }
-
-    private void LoadInteractUI(PlayerHUD playerHUD)
-    {
-        interactUI = playerHUD.interactUI;
     }
 
     protected override void Update()
     {
         base.Update();
 
-        if (interactUI)
+        if (canInteract && !interactMessageLocked)
         {
-            interactUI.text = canInteract ? interactable.interactMessage : "";
+            interactMessageLocked = true;
+            interactMessage.Value = interactable.interactMessage;
+            GameManager.TriggerEvent("PlayerLookingAtInteractable");
+        } 
+        else if (!canInteract && interactMessageLocked)
+        {
+            interactMessageLocked = false;
+            interactMessage.Value = "";
+            GameManager.TriggerEvent("PlayerNotLookingAtInteractable");
         }
     }
 

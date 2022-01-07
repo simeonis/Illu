@@ -3,7 +3,7 @@ using System.Collections;
 using Random = UnityEngine.Random;
 
 
-[CreateAssetMenu(menuName = "Audio Events/Simple")]
+[CreateAssetMenu(fileName = "Simple Audio", menuName = "Scriptable Object/Audio Events/Simple")]
 public class SimpleAudioEvent : AudioEvent
 {
     public AudioClip[] clips;

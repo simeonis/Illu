@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         // Load all Events into static dictionary for easy access
-        var events = Resources.LoadAll<Event>("ScriptableObjects/Events");
+        var events = Resources.LoadAll<Event>("ScriptableObjects/Event");
         foreach (var e in events)
         {
             _events.Add(e.name, e);
