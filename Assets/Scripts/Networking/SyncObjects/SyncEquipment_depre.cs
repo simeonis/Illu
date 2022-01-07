@@ -11,6 +11,11 @@ using System.Collections;
 /// after send once more and stop syncing  
 ///////////////////////////////////////////////////////////////////////////
 
+//Problem: if I wait for permission The throw already happed
+//either send threw obj with authority or simulate on server only 
+
+//idea object with authority has list of interacables listens for changes and sends them 
+
 //TODO
 // add on collision with player pass auth 
 // add on interacte change owner 
@@ -76,12 +81,15 @@ public class SyncEquipment : NetworkBehaviour
         equipmentBody = _equipment.equipmentBody;
         receivedPositions = new List<MyNetworkData>();
         vistedPositions = new List<Vector3>();
+
+        Debug.Log("SyncInterval " + syncInterval);
     }
 
     //Update loop called on both Authority and other Clients 
     //Checks who it's on internally 
     void FixedUpdate()
     {
+        //switch to if moving 
         if (simulation && hasAuthority)
         {
             bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
@@ -177,7 +185,11 @@ public class SyncEquipment : NetworkBehaviour
     protected void RpcOnStopped()
     {
         initiatorDoneSending = true;
-        RemoveAuthority();
+
+        if (hasAuthority)
+        {
+            RemoveAuthority();
+        }
     }
 
     //Removes network authority from the Equipment

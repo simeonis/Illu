@@ -820,6 +820,7 @@ GameObject:
   - component: {fileID: 3079833293040566167}
   - component: {fileID: 1648132594907288785}
   - component: {fileID: 8547424904321008786}
+  - component: {fileID: -5317263064284233492}
   m_Layer: 0
   m_Name: Death
   m_TagString: Player
@@ -1021,3 +1022,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+--- !u!114 &-5317263064284233492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8453773999225703041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17bf117bd04e4404b8779cd0e64387eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  moveTriggerSensitivity: 0.01
+  allowedLagDistance: 2
+  allowedRotationAngle: 5
+  debug: 0

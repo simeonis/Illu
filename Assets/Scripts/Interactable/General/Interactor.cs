@@ -6,7 +6,7 @@ public abstract class Interactor : NetworkBehaviour
     [Header("Interaction")]
     [SerializeField] public Transform source;
     [SerializeField] private float interactionRange;
-    
+
     // Public
     [Header("Equipment")]
     [SerializeField] public Transform equipmentParent;
@@ -23,13 +23,15 @@ public abstract class Interactor : NetworkBehaviour
     [SyncVar]
     [HideInInspector] public GameObject networkInteractable;
     protected NetworkSimpleData networkSimpleData;
+    public SyncInteractables syncInteractables;
 
     protected virtual void Awake()
     {
         networkSimpleData = GetComponent<NetworkSimpleData>();
+        syncInteractables = GetComponent<SyncInteractables>();
     }
 
-    protected virtual void OnEnable() 
+    protected virtual void OnEnable()
     {
         // Network
         networkSimpleData.DataChanged += InteractEventHandler;
@@ -44,7 +46,7 @@ public abstract class Interactor : NetworkBehaviour
         equipmentSlot = new EquipmentSlot(transform);
     }
 
-    protected virtual void OnDisable() 
+    protected virtual void OnDisable()
     {
         // Network
         networkSimpleData.DataChanged -= InteractEventHandler;
@@ -61,16 +63,16 @@ public abstract class Interactor : NetworkBehaviour
 
     private void InteractEventHandler(object sender, DataChangedEventArgs e)
     {
-        switch(e.key)
+        switch (e.key)
         {
             case "INTERACTION_INTERACT":
-                if (networkInteractable != null) 
+                if (networkInteractable != null)
                 {
                     networkInteractable.GetComponent<Interactable>().Interaction(this);
                 }
                 break;
             case "INTERACTION_DROPPED":
-                if (equipmentSlot.HasEquipment()) 
+                if (equipmentSlot.HasEquipment())
                 {
                     equipmentSlot.GetEquipment().Interaction(this);
                 }
@@ -97,7 +99,7 @@ public abstract class Interactor : NetworkBehaviour
     }
 
     protected virtual void Interact()
-    {   
+    {
         // Note: Only send over network if looking at interactable or holding equipment
         // Interact
         if (!interaction && canInteract)
@@ -123,7 +125,7 @@ public abstract class Interactor : NetworkBehaviour
 
     private bool CheckInteraction(out Interactable interactable)
     {
-        if (Physics.Raycast(source.position, source.forward, out RaycastHit hit, interactionRange)) 
+        if (Physics.Raycast(source.position, source.forward, out RaycastHit hit, interactionRange))
         {
             interactable = hit.collider.GetComponent<Interactable>();
 
@@ -154,7 +156,7 @@ public abstract class Interactor : NetworkBehaviour
     }
 
     [Command]
-    private void SetNetworkInteractable(GameObject gameObject) 
+    private void SetNetworkInteractable(GameObject gameObject)
     {
         networkInteractable = gameObject;
     }

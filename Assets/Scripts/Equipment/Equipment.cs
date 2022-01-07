@@ -19,33 +19,57 @@ public class Equipment : Interactable
 
     public override void Interaction(Interactor interactor)
     {
+        Debug.Log("INteraction!!");
+
         if (!interactor.equipmentSlot.HasEquipment())
         {
             interactor.equipmentSlot.Equip(this);
             Disable();
+
+
+            //Is this taking synchonous time??
+            if (interactor.TryGetComponent(out Player player))
+            {
+                Debug.Log("Got the Player!!!!");
+                //give authority on pickup
+                // if (isServer)
+                // {
+                //     Debug.Log("Giving Authority");
+                //     //Seems to take time!
+                //     player.GiveAuthority(GetComponent<NetworkIdentity>());
+                // }
+
+                player.syncInteractables.RegisterInteractableToSync(this);
+            }
         }
         else
         {
+
             interactor.equipmentSlot.Unequip();
             Enable();
 
             if (interactor.TryGetComponent(out Player player))
             {
-
                 if (player.hasAuthority)
                 {
-                    Debug.Log("Giving Authority to Cube");
-                    player.GiveAuthority(GetComponent<NetworkIdentity>());
                     AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
                 }
+                else
+                {
+                    Debug.Log("I dont have auth CANT THROW");
+                }
+
 
             }
+
         }
     }
 
+    // //right now this is called as soon as it get auth after picking up
     public override void OnStartAuthority()
     {
-        syncEquipment.Trigger(DateTime.Now.Ticks);
+        Debug.Log("I Now Have Authority");
+        //syncEquipment.Trigger(DateTime.Now.Ticks);
     }
 
     public override void InteractionCancelled(Interactor interactor) { }
@@ -96,6 +120,7 @@ public class Equipment : Interactable
         equipmentBody.velocity = currVel;
         equipmentBody.AddForce(direction * force, ForceMode.Impulse); // Movement force
         equipmentBody.AddTorque(new Vector3(random, random, random)); // Rotation throw force
+        Debug.Log("Added Force");
     }
 
     public void AddCorrectionalForce(Vector3 direction)

@@ -214,7 +214,6 @@ public class MyNetworkManager : NetworkManager
             NetworkServer.Spawn(playerSpawnSystemInstance);
         }
 
-
         UIConsole.Log("[Server]: Scene successfully changed.");
     }
 
