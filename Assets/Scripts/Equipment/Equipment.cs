@@ -34,16 +34,8 @@ public class Equipment : Interactable
             //Is this taking synchonous time??
             if (interactor.TryGetComponent(out Player player))
             {
-                Debug.Log("Got the Player!!!!");
-                //give authority on pickup
-                // if (isServer)
-                // {
-                //     Debug.Log("Giving Authority");
-                //     //Seems to take time!
-                //     player.GiveAuthority(GetComponent<NetworkIdentity>());
-                // }
-
-                //player.syncInteractables.RegisterInteractableToSync(this);
+                Debug.Log("Got the Player!");
+                player.syncInteractables.RegisterInteractableToSync(this.gameObject);
             }
         }
         else
@@ -54,7 +46,6 @@ public class Equipment : Interactable
 
             if (interactor.TryGetComponent(out Player player))
             {
-                Debug.Log("Set the Player");
 
                 syncInteractables = player.GetComponent<SyncInteractables>();
 
@@ -171,5 +162,18 @@ public class Equipment : Interactable
     public void EquipmentPrimaryReleased() { Debug.Log("Equipment Primary Released"); }
     public void EquipmentSecondaryPressed() { Debug.Log("Equipment Secondary Pressed"); }
     public void EquipmentSecondaryReleased() { Debug.Log("Equipment Secondary Released"); }
+
+
+    //ADDING TEMP HERE
+    public void SetPosition(Vector3 pos)
+    {
+        Debug.Log("Seting Position " + pos);
+        transform.position = pos;
+    }
+
+    public Vector3 GetPosition()
+    {
+        return transform.position;
+    }
 
 }

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.22038329, g: 0.14790377, b: 0.2596193, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -26157,7 +26157,7 @@ GameObject:
   - component: {fileID: 2073576525}
   - component: {fileID: 2073576524}
   m_Layer: 0
-  m_Name: 'TEST CUBE '
+  m_Name: 'TESTCUBE '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

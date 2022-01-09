@@ -2,7 +2,6 @@ using UnityEngine;
 using Mirror;
 using System.Collections.Generic;
 using System;
-using System.Collections;
 
 ///////////////////////////////////////////////////////////////////////////
 /// in equimpent if released from player
@@ -10,7 +9,6 @@ using System.Collections;
 /// other client -> receive pos and rot and follows 
 /// after send once more and stop syncing  
 ///////////////////////////////////////////////////////////////////////////
-
 //Problem: if I wait for permission The throw already happed
 //either send threw obj with authority or simulate on server only 
 
@@ -35,12 +33,6 @@ public class SyncInteractables : NetworkBehaviour
 
     [SerializeField] private bool debug;
 
-    //Store the Remote Obj data on the client it was sent too 
-    //private Vector3 RemoteObjPosition;
-    private Quaternion RemoteObjRotation;
-
-    private List<Interactable> interactables;
-
     //private Equipment _equipment;
     //private Rigidbody equipmentBody;
 
@@ -54,134 +46,106 @@ public class SyncInteractables : NetworkBehaviour
     private float lastClientSendTime;
 
     /*
-    *   Means the cube is still following positional updates
-    *   Stays true until procceded all data received 
-    *   Even after the client is finished 
-    */
-    private bool simulation = false;
-
-    /*
     *   Index into the list of positions
     *   Only moves forward when the position is reached    
     */
     private int simStep = 0;
-
-    /*
-    *   Set to true when the client is done setting
-    *   Note: may still be simulating when true
-    */
-    private bool initiatorDoneSending = false;
-
 
     //List of Positions and time sent from the initiating cube 
     //List of reached positions on the reciving client for debugging 
     private List<MyNetworkData> receivedPositions;
     private List<Vector3> vistedPositions;
     private List<Vector3> sentPositions;
-
-
     private float oldMagnitude = 0f;
-    private long triggerTimeStamp;
-
+    //private long triggerTimeStamp;
     private const int processBufferCount = 3;
 
     private NetworkIdentity ni;
 
     private Vector3 positionToSend = Vector3.zero;
+    private Vector3 sentPosition = Vector3.zero;
+    private Transform c_Transform = null;
+    private Rigidbody c_RB = null;
+    private bool beginSending = false;
 
     void Start()
     {
-        interactables = new List<Interactable>();
-
-        //_equipment = GetComponent<Equipment>();
-        //equipmentBody = _equipment.equipmentBody;
         receivedPositions = new List<MyNetworkData>();
         vistedPositions = new List<Vector3>();
         sentPositions = new List<Vector3>();
 
         ni = GetComponent<NetworkIdentity>();
+
+        syncInterval = 0.05f;
     }
 
     //Update loop called on both Authority and other Clients 
     //Checks who it's on internally 
     void FixedUpdate()
     {
-
-        //Debug.Log("Sync Interactables: Is Local Player " + ni.hasAuthority + " NetID: " + ni.netId.ToString());
         //[Server] has authority send commands to other clients
         if (ni.hasAuthority)
         {
-            if (positionToSend != Vector3.zero)
+
+            if (positionToSend == Vector3.zero)
                 return;
 
-            // var equipmentBody = interactables[0].GetComponent<Rigidbody>();
+            if (positionToSend != sentPosition)
+                beginSending = true;
 
-            //bool increasing = equipmentBody.velocity.magnitude > oldMagnitude;
+            bool increasing = c_RB.velocity.magnitude > oldMagnitude;
 
-
-            if (Time.time - lastClientSendTime >= syncInterval)
+            if (beginSending && Time.time - lastClientSendTime >= syncInterval)
             {
                 MyNetworkData currentPos = new MyNetworkData(positionToSend, DateTime.Now.Ticks);
                 CmdSendPositionRotation(currentPos);
 
                 sentPositions.Add(positionToSend);
 
+                sentPosition = positionToSend;
+
                 // Update old data for checking against in the next loop
                 lastClientSendTime = Time.time;
-                //oldMagnitude = equipmentBody.velocity.magnitude;
+                oldMagnitude = c_RB.velocity.magnitude;
             }
-            // else if (!increasing && equipmentBody.velocity.magnitude <= 0.1)
-            // {
-            //     // Send one more position
-            //     // CmdSendPosition(transform.position);
-            //     CmdOnStop();
-            // }
+            else if (!increasing && c_RB.velocity.magnitude <= 0.1)
+            {
+                // Send one more position
+                // CmdSendPosition(transform.position);
+                CmdOnStop();
+                beginSending = false;
+                sentPositions.Clear();
+            }
         }
         // //[client]
         //Don't have authority listen for position updates and handle 
         else
         {
-            if (interactables.Count <= 0)
-                return;
-
-
             int count = receivedPositions.Count;
 
             if (count >= processBufferCount && simStep <= count)
             {
                 HandleRemotePositionUpdates();
             }
-            //better if it was last packet received 
-            else if (!serverIsSending && simStep == count)  //here we should predict if we reach the end and were not done sending!
+            //better if it was last packet received  // must be if!!!!!!!!!!!!
+            if (!serverIsSending && simStep == count)  //here we should predict if we reach the end and were not done sending!
             {
-
                 simStep = 0;
-                //equipmentBody.isKinematic = false;
-
                 //Probably should clear here .... not for debugging reasons
-                // receivedPositions.Clear();
-                // vistedPositions.Clear();
-
-                // equipmentBody.interpolation = RigidbodyInterpolation.Interpolate;
-                // equipmentBody.velocity = new Vector3();
-                // simulation = false;
+                receivedPositions.Clear();
+                vistedPositions.Clear();
             }
-
         }
-
-        // if (receivedPositions.Count > 0)
-        //     Debug.Log("Pos Len " + receivedPositions.Count);
-
     }
 
-    // public void RegisterInteractableToSync(Interactable go)
-    // {
-    //     interactables.Add(go);
-    // }
+    public void RegisterInteractableToSync(GameObject go)
+    {
+        c_Transform = go.GetComponent<Transform>();
+        c_RB = go.GetComponent<Rigidbody>();
+    }
 
     public void SendTransform(Vector3 position)
     {
-        Debug.Log("Pos " + position);
         positionToSend = position;
     }
 
@@ -199,12 +163,10 @@ public class SyncInteractables : NetworkBehaviour
     {
         //make sure were not the server
         serverIsSending = true;
+
         if (!ni.hasAuthority)
         {
             receivedPositions.Add(position);
-            //RemoteObjPosition = position;
-            // RemoteObjRotation = rotation;
-            // RemoteObjSpeed = Speed;
         }
     }
 
@@ -227,60 +189,40 @@ public class SyncInteractables : NetworkBehaviour
     //Runs until the list reaches the end 
     private float percent = 0.0f;
 
-    // [Client]
+    [Client]
     private void HandleRemotePositionUpdates()
     {
-        int count = receivedPositions.Count;
+        if (c_Transform == null)
+            return;
 
-        Debug.Log("SimStep " + simStep + " Count " + count + " interactables LEN" + interactables.Count);
+        int count = receivedPositions.Count;
 
         if (count > 0 && simStep <= count - 1)
         {
-            //get difference 
-            //fixedDeltaTime
-            Vector3 forward = transform.TransformDirection(Vector3.forward);
-            Vector3 toOther = receivedPositions[simStep].position - transform.position;
-
-            double timeDiff = 0;
-
-            var ITransform = interactables[0].GetComponent<Transform>();
+            float timeDiff = 0.05f;
 
             if (simStep <= 0)
             {
-
-                ITransform.position = receivedPositions[simStep].position;
+                c_Transform.position = receivedPositions[simStep].position;
             }
-
-            if (count > 1 && simStep > 0)
+            else if (count > 1 && simStep > 0)
             {
-                timeDiff = new TimeSpan(receivedPositions[simStep].timeSent - receivedPositions[simStep - 1].timeSent).TotalSeconds;
+                timeDiff = (float)new TimeSpan(receivedPositions[simStep].timeSent - receivedPositions[simStep - 1].timeSent).TotalSeconds;
             }
-            else //dont have a first value
-            {
-                timeDiff = new TimeSpan(receivedPositions[simStep].timeSent - triggerTimeStamp).TotalSeconds;
-            }
-
-            percent += Time.deltaTime / (float)timeDiff;
-            var currentTarget = receivedPositions[simStep].position;
-            var LagDistance = currentTarget - transform.position;
-
-            // High distance => sync is to much off => send to position
-            // if (LagDistance.magnitude > allowedLagDistance)
+            // else //dont have a first value
             // {
-            //     if (debug) Debug.LogWarning("Sync Position too Great! Teleporting equipment.");
-            //     transform.position = RemoteObjPosition;
-            //     LagDistance = Vector3.zero;
+            //     timeDiff = new TimeSpan(receivedPositions[simStep].timeSent - triggerTimeStamp).TotalSeconds;
             // }
 
-            vistedPositions.Add(currentTarget);
+            percent += Time.deltaTime / timeDiff;
 
+            var currentTarget = receivedPositions[simStep].position;
 
-
-            ITransform.position = Vector3.Lerp(ITransform.position, currentTarget, percent);
+            c_Transform.position = Vector3.Lerp(c_Transform.position, currentTarget, percent);
 
             if (percent >= 1)
             {
-                Debug.Log("Percent Equals One");
+                vistedPositions.Add(currentTarget);
                 percent = 0;
                 simStep++;
             }
@@ -289,52 +231,23 @@ public class SyncInteractables : NetworkBehaviour
 
     //Gizmo stuff for testing 
     //---------------------------------------------------------------------------------------------
-
     static void DrawDataPointGizmo(Vector3 pos, Color color)
     {
-        // use a little offset because transform.localPosition might be in
-        // the ground in many cases
         Vector3 offset = Vector3.up * 0.01f;
-
-        // draw position
         Gizmos.color = color;
         Gizmos.DrawSphere(pos + offset, 0.05f);
-
-    }
-
-    static void DrawLineBetweenDataPoints(Vector3 start, Vector3 end, Color color)
-    {
-        Gizmos.color = color;
-        Gizmos.DrawLine(start, end);
     }
 
     // draw the data points for easier debugging
     void OnDrawGizmos()
     {
-        Debug.Log("Sent Positions");
-        int i = 0;
         foreach (MyNetworkData data in receivedPositions)
-        {
-            Debug.Log("REC POS (" + i + ")-> " + data.position);
-            //draw start and goal points
-            DrawDataPointGizmo(data.position, Color.yellow);
-            // draw line between them
-            //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
-            i++;
-        }
+        { DrawDataPointGizmo(data.position, Color.yellow); }
 
         foreach (Vector3 pos in vistedPositions)
-        {
-            //draw start and goal points
-            DrawDataPointGizmo(pos, Color.red);
-            // draw line between them
-            //DrawLineBetweenDataPoints(transform.position, RemoteObjPosition, Color.cyan);
-        }
+        { DrawDataPointGizmo(pos, Color.red); }
 
         foreach (Vector3 pos in sentPositions)
-        {
-            //draw start and goal points
-            DrawDataPointGizmo(pos, Color.red);
-        }
+        { DrawDataPointGizmo(pos, Color.blue); }
     }
 }
