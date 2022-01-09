@@ -880,6 +880,7 @@ MonoBehaviour:
   interactionRange: 5
   equipmentParent: {fileID: 4446985993700699230}
   networkInteractable: {fileID: 0}
+  syncInteractables: {fileID: 0}
   dropForce: 5
   rigidbody: {fileID: 0}
   Authority: 0
@@ -1009,4 +1010,4 @@ MonoBehaviour:
   moveTriggerSensitivity: 0.01
   allowedLagDistance: 2
   allowedRotationAngle: 5
-  debug: 0
+  debug: 1

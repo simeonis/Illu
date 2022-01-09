@@ -68,6 +68,8 @@ public class SyncInteractables : NetworkBehaviour
     private Rigidbody c_RB = null;
     private bool beginSending = false;
 
+    private bool shouldTrack = false;
+
     void Start()
     {
         receivedPositions = new List<MyNetworkData>();
@@ -79,6 +81,22 @@ public class SyncInteractables : NetworkBehaviour
         syncInterval = 0.05f;
     }
 
+    public void RegisterInteractableToSync(GameObject go)
+    {
+        c_Transform = go.GetComponent<Transform>();
+        c_RB = go.GetComponent<Rigidbody>();
+    }
+
+    public void SetShouldTrack(bool track)
+    {
+        shouldTrack = track;
+    }
+
+    public void SendTransform(Vector3 position) // DO I NEED THIS
+    {
+        positionToSend = position;
+    }
+
     //Update loop called on both Authority and other Clients 
     //Checks who it's on internally 
     void FixedUpdate()
@@ -86,6 +104,8 @@ public class SyncInteractables : NetworkBehaviour
         //[Server] has authority send commands to other clients
         if (ni.hasAuthority)
         {
+            if (shouldTrack == false)
+                return;
 
             if (positionToSend == Vector3.zero)
                 return;
@@ -114,6 +134,7 @@ public class SyncInteractables : NetworkBehaviour
                 // CmdSendPosition(transform.position);
                 CmdOnStop();
                 beginSending = false;
+                shouldTrack = false;
                 sentPositions.Clear();
             }
         }
@@ -127,28 +148,16 @@ public class SyncInteractables : NetworkBehaviour
             {
                 HandleRemotePositionUpdates();
             }
-            //better if it was last packet received  // must be if!!!!!!!!!!!!
+            //better if it was last packet received  /
+            //*************->MUST BE IF<-************//
             if (!serverIsSending && simStep == count)  //here we should predict if we reach the end and were not done sending!
             {
                 simStep = 0;
-                //Probably should clear here .... not for debugging reasons
                 receivedPositions.Clear();
                 vistedPositions.Clear();
             }
         }
     }
-
-    public void RegisterInteractableToSync(GameObject go)
-    {
-        c_Transform = go.GetComponent<Transform>();
-        c_RB = go.GetComponent<Rigidbody>();
-    }
-
-    public void SendTransform(Vector3 position)
-    {
-        positionToSend = position;
-    }
-
 
     // Server sends Pos and Rot 
     [Command(channel = Channels.Unreliable)]
@@ -241,13 +250,16 @@ public class SyncInteractables : NetworkBehaviour
     // draw the data points for easier debugging
     void OnDrawGizmos()
     {
-        foreach (MyNetworkData data in receivedPositions)
-        { DrawDataPointGizmo(data.position, Color.yellow); }
+        if (debug)
+        {
+            foreach (MyNetworkData data in receivedPositions)
+            { DrawDataPointGizmo(data.position, Color.yellow); }
 
-        foreach (Vector3 pos in vistedPositions)
-        { DrawDataPointGizmo(pos, Color.red); }
+            foreach (Vector3 pos in vistedPositions)
+            { DrawDataPointGizmo(pos, Color.red); }
 
-        foreach (Vector3 pos in sentPositions)
-        { DrawDataPointGizmo(pos, Color.blue); }
+            foreach (Vector3 pos in sentPositions)
+            { DrawDataPointGizmo(pos, Color.blue); }
+        }
     }
 }

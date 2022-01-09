@@ -23,8 +23,6 @@ public class Equipment : Interactable
 
     public override void Interaction(Interactor interactor)
     {
-        Debug.Log("INteraction!!");
-
         if (!interactor.equipmentSlot.HasEquipment())
         {
             interactor.equipmentSlot.Equip(this);
@@ -34,7 +32,6 @@ public class Equipment : Interactable
             //Is this taking synchonous time??
             if (interactor.TryGetComponent(out Player player))
             {
-                Debug.Log("Got the Player!");
                 player.syncInteractables.RegisterInteractableToSync(this.gameObject);
             }
         }
@@ -49,13 +46,11 @@ public class Equipment : Interactable
 
                 syncInteractables = player.GetComponent<SyncInteractables>();
 
+                //Only the player with authority physically throws the object
                 if (player.hasAuthority)
                 {
+                    syncInteractables.SetShouldTrack(true);
                     AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
-                }
-                else
-                {
-                    Debug.Log("I dont have auth CANT THROW");
                 }
             }
         }
