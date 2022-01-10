@@ -107,7 +107,7 @@ public class SyncInteractables : NetworkBehaviour
             if (Time.time - lastClientSendTime >= syncInterval)
             {
                 serverIsSending = true;
-                MyNetworkData dataFrame = new MyNetworkData(c_Transform.position, DateTime.Now.Ticks);
+                MyNetworkData dataFrame = new MyNetworkData(c_Transform.position, c_Transform.rotation, DateTime.Now.Ticks);
                 CmdSendPositionRotation(dataFrame);
 
                 sentPositions.Add(c_Transform.position);
@@ -180,6 +180,7 @@ public class SyncInteractables : NetworkBehaviour
             if (simStep <= 0)
             {
                 c_Transform.position = receivedPositions[simStep].position;
+                c_Transform.rotation = receivedPositions[simStep].rotation;
             }
             else if (count > 1 && simStep > 0)
             {
@@ -192,13 +193,15 @@ public class SyncInteractables : NetworkBehaviour
 
             percent += Time.deltaTime / timeDiff;
 
-            var currentTarget = receivedPositions[simStep].position;
+            var currentPosTarget = receivedPositions[simStep].position;
+            var currentRotTarget = receivedPositions[simStep].rotation;
 
-            c_Transform.position = Vector3.Lerp(c_Transform.position, currentTarget, percent);
+            c_Transform.position = Vector3.Lerp(c_Transform.position, currentPosTarget, percent);
+            c_Transform.rotation = Quaternion.Lerp(c_Transform.rotation, currentRotTarget, percent);
 
             if (percent >= 1)
             {
-                vistedPositions.Add(currentTarget);
+                vistedPositions.Add(currentPosTarget);
                 percent = 0;
                 simStep++;
             }
@@ -228,5 +231,35 @@ public class SyncInteractables : NetworkBehaviour
             foreach (Vector3 pos in sentPositions)
             { DrawDataPointGizmo(pos, Color.blue); }
         }
+    }
+}
+
+public struct MyNetworkData
+{
+    public Vector3 position { get; private set; }
+    public Quaternion rotation { get; private set; }
+    public long timeSent { get; private set; }
+
+    public MyNetworkData(Vector3 position, Quaternion rotation, long timeSent)
+    {
+        this.position = position;
+        this.rotation = rotation;
+        this.timeSent = timeSent;
+    }
+}
+
+public static class CustomReadWriteFunctions
+{
+    public static void WriteMyNetworkData(this NetworkWriter writer, MyNetworkData MyNetworkData)
+    {
+        writer.WriteVector3(MyNetworkData.position);
+        writer.WriteQuaternion(MyNetworkData.rotation);
+        writer.WriteLong(MyNetworkData.timeSent);
+    }
+
+    public static MyNetworkData ReadMyNetworkData(this NetworkReader reader)
+    {
+
+        return new MyNetworkData(reader.ReadVector3(), reader.ReadQuaternion(), reader.ReadLong());
     }
 }

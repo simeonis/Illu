@@ -8,7 +8,6 @@ public class Equipment : Interactable
     protected Collider equipmentCollider;
     protected bool isEquipped = false;
     private Transform defaultParent;
-    private SyncEquipment syncEquipment;
     private SyncInteractables syncInteractables = null;
 
     private Transform equipTransform;
@@ -17,7 +16,6 @@ public class Equipment : Interactable
     {
         equipmentBody = GetComponent<Rigidbody>();
         equipmentCollider = GetComponent<Collider>();
-        syncEquipment = GetComponent<SyncEquipment>();
         equipTransform = GetComponent<Transform>();
     }
 
