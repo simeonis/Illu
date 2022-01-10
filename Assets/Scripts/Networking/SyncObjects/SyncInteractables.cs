@@ -31,6 +31,8 @@ public class SyncInteractables : NetworkBehaviour
     public float allowedLagDistance = 2.0f;
     public float allowedRotationAngle = 5f;
 
+    [SerializeField] private const int processBufferCount = 3;
+
     [SerializeField] private bool debug;
 
     //private Equipment _equipment;
@@ -38,37 +40,32 @@ public class SyncInteractables : NetworkBehaviour
 
     /*
     *   Set to true when the client is done setting
-    *   Note: may still be simulating when true
+    *   Note: may still be processing positions on client when false
     */
+    [SyncVar]
     private bool serverIsSending = false;
-
-    //local (Not Synced)
-    private float lastClientSendTime;
 
     /*
     *   Index into the list of positions
     *   Only moves forward when the position is reached    
     */
     private int simStep = 0;
+    private bool shouldTrack = false;
 
     //List of Positions and time sent from the initiating cube 
     //List of reached positions on the reciving client for debugging 
     private List<MyNetworkData> receivedPositions;
     private List<Vector3> vistedPositions;
     private List<Vector3> sentPositions;
+
+    //local (Not Synced)
+    private float lastClientSendTime;
     private float oldMagnitude = 0f;
-    //private long triggerTimeStamp;
-    private const int processBufferCount = 3;
+    private Vector3 sentPosition = Vector3.zero;
 
     private NetworkIdentity ni;
-
-    private Vector3 positionToSend = Vector3.zero;
-    private Vector3 sentPosition = Vector3.zero;
     private Transform c_Transform = null;
     private Rigidbody c_RB = null;
-    private bool beginSending = false;
-
-    private bool shouldTrack = false;
 
     void Start()
     {
@@ -87,15 +84,7 @@ public class SyncInteractables : NetworkBehaviour
         c_RB = go.GetComponent<Rigidbody>();
     }
 
-    public void SetShouldTrack(bool track)
-    {
-        shouldTrack = track;
-    }
-
-    public void SendTransform(Vector3 position) // DO I NEED THIS
-    {
-        positionToSend = position;
-    }
+    public void SetShouldTrack(bool track) { shouldTrack = track; }
 
     //Update loop called on both Authority and other Clients 
     //Checks who it's on internally 
@@ -107,22 +96,23 @@ public class SyncInteractables : NetworkBehaviour
             if (shouldTrack == false)
                 return;
 
-            if (positionToSend == Vector3.zero)
+            if (c_Transform == null)
                 return;
 
-            if (positionToSend != sentPosition)
-                beginSending = true;
+            if (c_Transform.position == sentPosition)
+                return;
 
             bool increasing = c_RB.velocity.magnitude > oldMagnitude;
 
-            if (beginSending && Time.time - lastClientSendTime >= syncInterval)
+            if (Time.time - lastClientSendTime >= syncInterval)
             {
-                MyNetworkData currentPos = new MyNetworkData(positionToSend, DateTime.Now.Ticks);
-                CmdSendPositionRotation(currentPos);
+                serverIsSending = true;
+                MyNetworkData dataFrame = new MyNetworkData(c_Transform.position, DateTime.Now.Ticks);
+                CmdSendPositionRotation(dataFrame);
 
-                sentPositions.Add(positionToSend);
+                sentPositions.Add(c_Transform.position);
 
-                sentPosition = positionToSend;
+                sentPosition = c_Transform.position;
 
                 // Update old data for checking against in the next loop
                 lastClientSendTime = Time.time;
@@ -132,8 +122,7 @@ public class SyncInteractables : NetworkBehaviour
             {
                 // Send one more position
                 // CmdSendPosition(transform.position);
-                CmdOnStop();
-                beginSending = false;
+                serverIsSending = false;
                 shouldTrack = false;
                 sentPositions.Clear();
             }
@@ -161,37 +150,15 @@ public class SyncInteractables : NetworkBehaviour
 
     // Server sends Pos and Rot 
     [Command(channel = Channels.Unreliable)]
-    void CmdSendPositionRotation(MyNetworkData position)
-    {
-        RPCSyncPosition(position);
-    }
+    void CmdSendPositionRotation(MyNetworkData dataFrame) { RPCSyncPosition(dataFrame); }
 
     //Server broadcasts Pos and Rot to all clients  
     [ClientRpc]
-    public void RPCSyncPosition(MyNetworkData position)
+    public void RPCSyncPosition(MyNetworkData dataFrame)
     {
         //make sure were not the server
-        serverIsSending = true;
-
         if (!ni.hasAuthority)
-        {
-            receivedPositions.Add(position);
-        }
-    }
-
-    //Inform server that we've stopped 
-    [Command(channel = Channels.Unreliable)]
-    void CmdOnStop()
-    {
-        //should just sent a positional check simulation runs until the end of the execution
-        RpcOnStopped();
-    }
-
-    //Called when the moving has stopped on Authority
-    [ClientRpc]
-    protected void RpcOnStopped()
-    {
-        serverIsSending = false;
+            receivedPositions.Add(dataFrame);
     }
 
     //Handle the received positional updates

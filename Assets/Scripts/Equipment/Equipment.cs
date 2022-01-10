@@ -44,7 +44,7 @@ public class Equipment : Interactable
             if (interactor.TryGetComponent(out Player player))
             {
 
-                syncInteractables = player.GetComponent<SyncInteractables>();
+                syncInteractables = player.GetComponent<SyncInteractables>(); //maybe don't need the caching 
 
                 //Only the player with authority physically throws the object
                 if (player.hasAuthority)
@@ -54,19 +54,6 @@ public class Equipment : Interactable
                 }
             }
         }
-    }
-
-    void FixedUpdate()
-    {
-        if (syncInteractables != null)
-            syncInteractables.SendTransform(equipTransform.position);
-    }
-
-    // //right now this is called as soon as it get auth after picking up
-    public override void OnStartAuthority()
-    {
-        Debug.Log("I Now Have Authority");
-        //syncEquipment.Trigger(DateTime.Now.Ticks);
     }
 
     public override void InteractionCancelled(Interactor interactor) { }
