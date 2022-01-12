@@ -1007,7 +1007,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  moveTriggerSensitivity: 0.01
-  allowedLagDistance: 2
-  allowedRotationAngle: 5
+  processBufferCount: 2
   debug: 1
+  isEquipped: 0

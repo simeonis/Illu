@@ -24,14 +24,14 @@ using System;
 public class SyncInteractables : NetworkBehaviour
 {
     [Header("Networking Parameters")]
-    [Tooltip("How much the local player moves before triggering an Update to all clients")]
-    public float moveTriggerSensitivity = 0.01f;
+    // [Tooltip("How much the local player moves before triggering an Update to all clients")]
+    // public float moveTriggerSensitivity = 0.01f;
 
-    [Tooltip("How far the remote player can be off before snapping to remote position")]
-    public float allowedLagDistance = 2.0f;
-    public float allowedRotationAngle = 5f;
+    // [Tooltip("How far the remote player can be off before snapping to remote position")]
+    // public float allowedLagDistance = 2.0f;
+    // public float allowedRotationAngle = 5f;
 
-    [SerializeField] private const int processBufferCount = 3;
+    [SerializeField] private int processBufferCount = 3;
 
     [SerializeField] private bool debug;
 
@@ -66,6 +66,10 @@ public class SyncInteractables : NetworkBehaviour
     private NetworkIdentity ni;
     private Transform c_Transform = null;
     private Rigidbody c_RB = null;
+
+    [SyncVar]
+    public bool isEquipped = false;
+    public bool clientUnEquiped = true;
 
     void Start()
     {
@@ -129,9 +133,39 @@ public class SyncInteractables : NetworkBehaviour
         }
         // //[client]
         //Don't have authority listen for position updates and handle 
-        else
+        // else
+        // {
+        //     int count = receivedPositions.Count;
+
+        //     if (count >= processBufferCount && simStep <= count)
+        //     {
+        //         HandleRemotePositionUpdates();
+        //     }
+        //     //better if it was last packet received  /
+        //     //*************->MUST BE IF<-************//
+        //     if (!serverIsSending && simStep == count)  //here we should predict if we reach the end and were not done sending!
+        //     {
+        //         simStep = 0;
+        //         receivedPositions.Clear();
+        //         vistedPositions.Clear();
+        //     }
+        // }
+    }
+
+    void LateUpdate()
+    {
+        if (c_Transform == null)
+            return;
+
+        if (c_RB == null)
+            return;
+
+        if (!ni.hasAuthority)
         {
             int count = receivedPositions.Count;
+
+            if (!clientUnEquiped)
+                return;
 
             if (count >= processBufferCount && simStep <= count)
             {
@@ -144,6 +178,11 @@ public class SyncInteractables : NetworkBehaviour
                 simStep = 0;
                 receivedPositions.Clear();
                 vistedPositions.Clear();
+
+                if (!isEquipped)
+                {
+                    c_RB.isKinematic = false;
+                }
             }
         }
     }
@@ -184,6 +223,7 @@ public class SyncInteractables : NetworkBehaviour
             }
             else if (count > 1 && simStep > 0)
             {
+                c_RB.isKinematic = true;
                 timeDiff = (float)new TimeSpan(receivedPositions[simStep].timeSent - receivedPositions[simStep - 1].timeSent).TotalSeconds;
             }
             // else //dont have a first value
@@ -191,7 +231,7 @@ public class SyncInteractables : NetworkBehaviour
             //     timeDiff = new TimeSpan(receivedPositions[simStep].timeSent - triggerTimeStamp).TotalSeconds;
             // }
 
-            percent += Time.deltaTime / timeDiff;
+            percent += Time.time / timeDiff;
 
             var currentPosTarget = receivedPositions[simStep].position;
             var currentRotTarget = receivedPositions[simStep].rotation;

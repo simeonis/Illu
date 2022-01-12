@@ -26,7 +26,6 @@ public class ImpactAudioEvent : ScriptableObject
 
         if (velocity < 4)
         {
-            Debug.Log("vel 1");
             source.clip = clips_low[Random.Range(0, clips_low.Length)];
             source.volume = Random.Range(volume_1.minValue, volume_1.maxValue);
             source.Play();
@@ -34,7 +33,6 @@ public class ImpactAudioEvent : ScriptableObject
         }
         else if (velocity < 6)
         {
-            Debug.Log("vel 2");
             source.clip = clips_med[Random.Range(0, clips_med.Length)];
             source.volume = Random.Range(volume_2.minValue, volume_2.maxValue);
             source.Play();
@@ -42,7 +40,6 @@ public class ImpactAudioEvent : ScriptableObject
         }
         else
         {
-            Debug.Log("vel 3");
             source.clip = clips_high[Random.Range(0, clips_high.Length)];
             source.volume = Random.Range(volume_3.minValue, volume_3.maxValue);
             source.Play();

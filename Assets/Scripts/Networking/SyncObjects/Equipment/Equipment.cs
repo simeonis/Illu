@@ -30,7 +30,12 @@ public class Equipment : Interactable
             //Is this taking synchonous time??
             if (interactor.TryGetComponent(out Player player))
             {
+                player.syncInteractables.isEquipped = true;
+
                 player.syncInteractables.RegisterInteractableToSync(this.gameObject);
+
+                if (!player.hasAuthority)
+                    player.syncInteractables.clientUnEquiped = false;
             }
         }
         else
@@ -41,14 +46,18 @@ public class Equipment : Interactable
 
             if (interactor.TryGetComponent(out Player player))
             {
-
                 syncInteractables = player.GetComponent<SyncInteractables>(); //maybe don't need the caching 
 
                 //Only the player with authority physically throws the object
                 if (player.hasAuthority)
                 {
                     syncInteractables.SetShouldTrack(true);
+                    player.syncInteractables.isEquipped = false;
                     AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
+                }
+                else
+                {
+                    player.syncInteractables.clientUnEquiped = true;
                 }
             }
         }
@@ -102,7 +111,6 @@ public class Equipment : Interactable
         equipmentBody.velocity = currVel;
         equipmentBody.AddForce(direction * force, ForceMode.Impulse); // Movement force
         equipmentBody.AddTorque(new Vector3(random, random, random)); // Rotation throw force
-        Debug.Log("Added Force");
     }
 
     public void AddCorrectionalForce(Vector3 direction)
@@ -142,18 +150,4 @@ public class Equipment : Interactable
     public void EquipmentPrimaryReleased() { Debug.Log("Equipment Primary Released"); }
     public void EquipmentSecondaryPressed() { Debug.Log("Equipment Secondary Pressed"); }
     public void EquipmentSecondaryReleased() { Debug.Log("Equipment Secondary Released"); }
-
-
-    //ADDING TEMP HERE
-    public void SetPosition(Vector3 pos)
-    {
-        Debug.Log("Seting Position " + pos);
-        transform.position = pos;
-    }
-
-    public Vector3 GetPosition()
-    {
-        return transform.position;
-    }
-
 }
