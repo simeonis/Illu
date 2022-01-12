@@ -13,14 +13,17 @@ public class SyncPlayer : NetworkBehaviour
 
     [Header("Authority")]
     [Tooltip("Set to true if moves come from owner client, set to false if moves always come from server")]
-    public bool clientAuthority = true;
+    [SerializeField] private bool clientAuthority = true;
 
     [Header("Networking Parameters")]
     [Tooltip("How much the local player moves before triggering an Update to all clients")]
-    public float moveTriggerSensitivity = 0.01f;
+    [SerializeField] private float moveTriggerSensitivity = 0.01f;
 
     [Tooltip("How far the remote player can be off before snapping to remote position")]
-    public float allowedLagDistance = 10.0f;
+    [SerializeField] private float allowedLagDistance = 10.0f;
+
+    [Tooltip("Anything less then this value will snap to Zero vector and player won't attempt to move closer")]
+    [SerializeField] private float maximumAcceptableLag = 0.5f;
 
     [Tooltip("How fast a remote player corrects its look")]
     [SerializeField] private float correntRotSpeed = 2.0f;
@@ -198,7 +201,7 @@ public class SyncPlayer : NetworkBehaviour
 
         
 
-        if (LagDistance.magnitude < 0.025f)
+        if (LagDistance.magnitude < maximumAcceptableLag)
         {   //Player is nearly at the point
             networkPlayerController.moveDirection = Vector3.zero;
         }
