@@ -97,11 +97,33 @@ public class NetworkPlayerController : NetworkBehaviour
 
     // Needed to smooth movement over a network
     private InputAction.CallbackContext defaultContext = new InputAction.CallbackContext();
-    public void NetworkJump() => Jump(defaultContext);
-    public void NetworkCrouch() => Crouch(defaultContext);
-    public void NetworkUnCrouch() => UnCrouch(defaultContext);
-    public void NetworkWalk() => Walk(defaultContext);
-    public void NetworkSprint() => Sprint(defaultContext);
+    public void NetworkJump()
+    {
+        if (!hasAuthority)
+            Jump(defaultContext);
+    }
+    public void NetworkCrouch()
+    {
+        if (!hasAuthority)
+            Crouch(defaultContext);
+    }
+    public void NetworkUnCrouch()
+    {
+        if (!hasAuthority)
+            UnCrouch(defaultContext);
+    }
+    public void NetworkWalk()
+    {
+        if (!hasAuthority)
+            Walk(defaultContext);
+    }
+    public void NetworkSprint()
+    {
+        if (!hasAuthority)
+            Sprint(defaultContext);
+    }
+
+    private SyncPlayer syncPlayer;
 
     void Start()
     {
@@ -116,6 +138,8 @@ public class NetworkPlayerController : NetworkBehaviour
         // ---------------TEMPORARY-------------------
         head = orientation.Find("Model").Find("Head");
         // -------------------------------------------
+
+        syncPlayer = GetComponent<SyncPlayer>();
 
         // Rigidbody
         playerBody = GetComponent<Rigidbody>();
@@ -285,6 +309,8 @@ public class NetworkPlayerController : NetworkBehaviour
     {
         if (canJump && isGrounded)
         {
+            if (hasAuthority)
+                syncPlayer.CmdSendJump();
             // Disable jump capability
             canJump = false;
 
@@ -307,6 +333,8 @@ public class NetworkPlayerController : NetworkBehaviour
         isSprinting = false;
         if (!isCrouching)
         {
+            if (hasAuthority)
+                syncPlayer.CmdHandleSprint(false);
             // Run coroutine to adjust movespeed → walk speed
             if (sprintCoroutine != null) StopCoroutine(sprintCoroutine);
             StartCoroutine(sprintCoroutine = AdjustSpeedOverTime(walkSpeed, timeToSprint));
@@ -318,6 +346,9 @@ public class NetworkPlayerController : NetworkBehaviour
         isSprinting = true;
         if (!isCrouching)
         {
+            if (hasAuthority)
+                syncPlayer.CmdHandleSprint(true);
+
             // Run coroutine to adjust movespeed → sprint speed
             if (sprintCoroutine != null) StopCoroutine(sprintCoroutine);
             StartCoroutine(sprintCoroutine = AdjustSpeedOverTime(sprintSpeed, timeToSprint));
@@ -327,6 +358,9 @@ public class NetworkPlayerController : NetworkBehaviour
     private void Crouch(InputAction.CallbackContext _)
     {
         isCrouching = true;
+
+        if (hasAuthority)
+            syncPlayer.CmdHandleCrouch(true);
 
         // Run coroutine to adjust camera and collider's position/height
         if (crouchCoroutine != null) StopCoroutine(crouchCoroutine);
@@ -343,6 +377,9 @@ public class NetworkPlayerController : NetworkBehaviour
         if (!underCeiling)
         {
             isCrouching = false;
+
+            if (hasAuthority)
+                syncPlayer.CmdHandleCrouch(false);
 
             // Run coroutine to reset camera and collider's position/height
             if (crouchCoroutine != null) StopCoroutine(crouchCoroutine);

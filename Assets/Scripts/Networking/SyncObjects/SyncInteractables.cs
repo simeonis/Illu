@@ -54,7 +54,7 @@ public class SyncInteractables : NetworkBehaviour
 
     //List of Positions and time sent from the initiating cube 
     //List of reached positions on the reciving client for debugging 
-    private List<MyNetworkData> receivedPositions;
+    private List<InteractableSyncData> receivedPositions;
     private List<Vector3> vistedPositions;
     private List<Vector3> sentPositions;
 
@@ -73,7 +73,7 @@ public class SyncInteractables : NetworkBehaviour
 
     void Start()
     {
-        receivedPositions = new List<MyNetworkData>();
+        receivedPositions = new List<InteractableSyncData>();
         vistedPositions = new List<Vector3>();
         sentPositions = new List<Vector3>();
 
@@ -92,6 +92,8 @@ public class SyncInteractables : NetworkBehaviour
 
     //Update loop called on both Authority and other Clients 
     //Checks who it's on internally 
+
+    private TimeSpan serverStartTime;
     void FixedUpdate()
     {
         //[Server] has authority send commands to other clients
@@ -111,10 +113,15 @@ public class SyncInteractables : NetworkBehaviour
             if (Time.time - lastClientSendTime >= syncInterval)
             {
                 serverIsSending = true;
-                MyNetworkData dataFrame = new MyNetworkData(c_Transform.position, c_Transform.rotation, DateTime.Now.Ticks);
+                InteractableSyncData dataFrame = new InteractableSyncData(c_Transform.position, c_Transform.rotation, DateTime.Now.Ticks);
                 CmdSendPositionRotation(dataFrame);
 
                 sentPositions.Add(c_Transform.position);
+
+                if (sentPositions.Count == 1)
+                {
+                    serverStartTime = DateTime.Now.TimeOfDay;
+                }
 
                 sentPosition = c_Transform.position;
 
@@ -129,6 +136,7 @@ public class SyncInteractables : NetworkBehaviour
                 serverIsSending = false;
                 shouldTrack = false;
                 sentPositions.Clear();
+                Debug.Log($"Server Time diff: {DateTime.Now.TimeOfDay - serverStartTime}");
             }
         }
         // //[client]
@@ -152,7 +160,8 @@ public class SyncInteractables : NetworkBehaviour
         // }
     }
 
-    void LateUpdate()
+    private TimeSpan startTime;
+    void Update()
     {
         if (c_Transform == null)
             return;
@@ -167,15 +176,31 @@ public class SyncInteractables : NetworkBehaviour
             if (!clientUnEquiped)
                 return;
 
+            if (count == 1)
+            {
+                startTime = DateTime.Now.TimeOfDay;
+            }
+
             if (count >= processBufferCount && simStep <= count)
             {
                 HandleRemotePositionUpdates();
             }
+
+            // if (serverIsSending && simStep == count)
+            // {
+            //     Debug.Log("I'm waiting for information");
+            // }
+
             //better if it was last packet received  /
             //*************->MUST BE IF<-************//
             if (!serverIsSending && simStep == count)  //here we should predict if we reach the end and were not done sending!
             {
                 simStep = 0;
+
+                if (receivedPositions.Count > 0)
+                {
+                    Debug.Log($"Time diff: {startTime - DateTime.Now.TimeOfDay}");
+                }
                 receivedPositions.Clear();
                 vistedPositions.Clear();
 
@@ -189,20 +214,24 @@ public class SyncInteractables : NetworkBehaviour
 
     // Server sends Pos and Rot 
     [Command(channel = Channels.Unreliable)]
-    void CmdSendPositionRotation(MyNetworkData dataFrame) { RPCSyncPosition(dataFrame); }
+    void CmdSendPositionRotation(InteractableSyncData dataFrame) { RPCSyncPosition(dataFrame); }
 
     //Server broadcasts Pos and Rot to all clients  
     [ClientRpc]
-    public void RPCSyncPosition(MyNetworkData dataFrame)
+    public void RPCSyncPosition(InteractableSyncData dataFrame)
     {
         //make sure were not the server
         if (!ni.hasAuthority)
             receivedPositions.Add(dataFrame);
+
+        Debug.Log("Time " + DateTime.Now.TimeOfDay);
     }
 
     //Handle the received positional updates
     //Runs until the list reaches the end 
     private float percent = 0.0f;
+    private Vector3 currentPos;
+    private Quaternion currentRot;
 
     [Client]
     private void HandleRemotePositionUpdates()
@@ -218,8 +247,8 @@ public class SyncInteractables : NetworkBehaviour
 
             if (simStep <= 0)
             {
-                c_Transform.position = receivedPositions[simStep].position;
-                c_Transform.rotation = receivedPositions[simStep].rotation;
+                currentPos = c_Transform.position = receivedPositions[simStep].position;
+                currentRot = c_Transform.rotation = receivedPositions[simStep].rotation;
             }
             else if (count > 1 && simStep > 0)
             {
@@ -231,17 +260,19 @@ public class SyncInteractables : NetworkBehaviour
             //     timeDiff = new TimeSpan(receivedPositions[simStep].timeSent - triggerTimeStamp).TotalSeconds;
             // }
 
-            percent += Time.time / timeDiff;
+            percent += Time.fixedTime / timeDiff;
 
-            var currentPosTarget = receivedPositions[simStep].position;
-            var currentRotTarget = receivedPositions[simStep].rotation;
+            var targetPos = receivedPositions[simStep].position;
+            var targetRot = receivedPositions[simStep].rotation;
 
-            c_Transform.position = Vector3.Lerp(c_Transform.position, currentPosTarget, percent);
-            c_Transform.rotation = Quaternion.Lerp(c_Transform.rotation, currentRotTarget, percent);
+            c_Transform.position = Vector3.Lerp(currentPos, targetPos, percent);
+            c_Transform.rotation = Quaternion.Lerp(currentRot, targetRot, percent);
 
             if (percent >= 1)
             {
-                vistedPositions.Add(currentPosTarget);
+                currentPos = c_Transform.position;
+                currentRot = c_Transform.rotation;
+                vistedPositions.Add(targetPos);
                 percent = 0;
                 simStep++;
             }
@@ -262,7 +293,7 @@ public class SyncInteractables : NetworkBehaviour
     {
         if (debug)
         {
-            foreach (MyNetworkData data in receivedPositions)
+            foreach (InteractableSyncData data in receivedPositions)
             { DrawDataPointGizmo(data.position, Color.yellow); }
 
             foreach (Vector3 pos in vistedPositions)
@@ -274,13 +305,13 @@ public class SyncInteractables : NetworkBehaviour
     }
 }
 
-public struct MyNetworkData
+public struct InteractableSyncData
 {
     public Vector3 position { get; private set; }
     public Quaternion rotation { get; private set; }
     public long timeSent { get; private set; }
 
-    public MyNetworkData(Vector3 position, Quaternion rotation, long timeSent)
+    public InteractableSyncData(Vector3 position, Quaternion rotation, long timeSent)
     {
         this.position = position;
         this.rotation = rotation;
@@ -288,18 +319,45 @@ public struct MyNetworkData
     }
 }
 
+public struct PlayerSyncData
+{
+    public Vector3 position { get; private set; }
+    public Quaternion headRot { get; private set; }
+    public Quaternion bodyRot { get; private set; }
+    public Quaternion rootRot { get; private set; }
+
+    public PlayerSyncData(Vector3 position, Quaternion headRot, Quaternion bodyRot, Quaternion rootRot)
+    {
+        this.position = position;
+        this.headRot = headRot;
+        this.bodyRot = bodyRot;
+        this.rootRot = rootRot;
+    }
+}
+
 public static class CustomReadWriteFunctions
 {
-    public static void WriteMyNetworkData(this NetworkWriter writer, MyNetworkData MyNetworkData)
+    public static void WriteInteractableSyncData(this NetworkWriter writer, InteractableSyncData interactableSyncData)
     {
-        writer.WriteVector3(MyNetworkData.position);
-        writer.WriteQuaternion(MyNetworkData.rotation);
-        writer.WriteLong(MyNetworkData.timeSent);
+        writer.WriteVector3(interactableSyncData.position);
+        writer.WriteQuaternion(interactableSyncData.rotation);
+        writer.WriteLong(interactableSyncData.timeSent);
     }
 
-    public static MyNetworkData ReadMyNetworkData(this NetworkReader reader)
+    public static InteractableSyncData ReadInteractableSyncData(this NetworkReader reader)
     {
+        return new InteractableSyncData(reader.ReadVector3(), reader.ReadQuaternion(), reader.ReadLong());
+    }
 
-        return new MyNetworkData(reader.ReadVector3(), reader.ReadQuaternion(), reader.ReadLong());
+    public static void WritePlayerSyncData(this NetworkWriter writer, PlayerSyncData playerSyncData)
+    {
+        writer.WriteVector3(playerSyncData.position);
+        writer.WriteQuaternion(playerSyncData.headRot);
+        writer.WriteQuaternion(playerSyncData.bodyRot);
+        writer.WriteQuaternion(playerSyncData.rootRot);
+    }
+    public static PlayerSyncData ReadPlayerSyncData(this NetworkReader reader)
+    {
+        return new PlayerSyncData(reader.ReadVector3(), reader.ReadQuaternion(), reader.ReadQuaternion(), reader.ReadQuaternion());
     }
 }
