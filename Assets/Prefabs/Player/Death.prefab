@@ -785,10 +785,11 @@ GameObject:
   - component: {fileID: 8453773999225703048}
   - component: {fileID: 8453773999225703049}
   - component: {fileID: 1596715246450041839}
-  - component: {fileID: 8453773999225703103}
-  - component: {fileID: -2917725176885302414}
-  - component: {fileID: 3079833293040566167}
   - component: {fileID: 1648132594907288785}
+  - component: {fileID: 3079833293040566167}
+  - component: {fileID: -3646379702446462702}
+  - component: {fileID: -2917725176885302414}
+  - component: {fileID: 8453773999225703103}
   - component: {fileID: 8547424904321008786}
   - component: {fileID: -5317263064284233492}
   m_Layer: 0
@@ -884,86 +885,6 @@ MonoBehaviour:
   dropForce: 5
   rigidbody: {fileID: 0}
   Authority: 0
---- !u!114 &8453773999225703103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8453773999225703041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 071a59b0d4c51544f8d07378bc345443, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &-2917725176885302414
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8453773999225703041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 266cc909596b74e02b74fd52e39f09d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 1
-  moveTriggerSensitivity: 0.01
-  allowedLagDistance: 4
-  maximumAcceptableLag: 0.5
-  correntRotSpeed: 2
-  allowRotLagAmount: 0.5
-  smoothRot: 1
-  debug: 0
-  controller: {fileID: 8453773999225703031}
-  playerCamera: {fileID: 4446985994531773179}
-  orientation: {fileID: 4446985993725635025}
---- !u!114 &3079833293040566167
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8453773999225703041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b581604ceeb6438da8a771eee094776, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  head: {fileID: 4581107650617857064}
-  orientation: {fileID: 4446985993725635025}
-  horizontalSensitivity: 10
-  verticalSensitivity: 10
-  walkSpeed: 6
-  sprintSpeed: 12
-  timeToSprint: 0.25
-  airResistance: 0.4
-  moveSpeed: 6
-  moveDirection: {x: 0, y: 0, z: 0}
-  jumpForce: 3
-  jumpCooldown: 0.5
-  crouchFactor: 0.5
-  timeToCrouch: 0.25
-  ceilingDetection: 0.4
-  stepUpHeight: 0.6
-  detectionRadius: 0.8
-  realisticSlopes: 0
-  groundDrag: 6
-  airDrag: 2
-  gravityScalar: 6.5
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 8
-  playerFeet: {fileID: 4446985994231398379}
-  groundDetection: 0.4
-  playerCamera: {fileID: 4446985994531773179}
-  visionLocked: 0
-  debugMode: 1
 --- !u!114 &1648132594907288785
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -980,6 +901,105 @@ MonoBehaviour:
   syncInterval: 0.1
   playerCamera: {fileID: 4446985994531773176}
   playerModel: {fileID: 1648692978509114669}
+--- !u!114 &3079833293040566167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8453773999225703041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b581604ceeb6438da8a771eee094776, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  orientation: {fileID: 4446985993725635025}
+  horizontalSensitivity: 10
+  verticalSensitivity: 10
+--- !u!114 &-3646379702446462702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8453773999225703041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6e783de773134b4285d8d3266674d26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isSprinting: 0
+  isCrouching: 0
+  head: {fileID: 4581107650617857064}
+  orientation: {fileID: 4446985993725635025}
+  walkSpeed: 6
+  sprintSpeed: 12
+  timeToSprint: 0.25
+  airResistance: 0.4
+  moveSpeed: 6
+  moveDirection: {x: 0, y: 0, z: 0}
+  jumpForce: 3
+  jumpCooldown: 0.5
+  canJump: 1
+  crouchFactor: 0.5
+  timeToCrouch: 0.25
+  ceilingDetection: 0.4
+  underCeiling: 0
+  stuckCrouching: 0
+  stepUpHeight: 0.6
+  detectionRadius: 0.8
+  realisticSlopes: 0
+  groundDrag: 6
+  airDrag: 2
+  gravityScalar: 6.5
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
+  playerFeet: {fileID: 4446985994231398379}
+  groundDetection: 0.4
+  isGrounded: 0
+  playerCamera: {fileID: 4446985994531773179}
+  visionLocked: 0
+  debugMode: 0
+--- !u!114 &-2917725176885302414
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8453773999225703041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 266cc909596b74e02b74fd52e39f09d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 1
+  moveTriggerSensitivity: 0.01
+  allowedLagDistance: 10
+  maximumAcceptableDeviance: 0.5
+  correntRotSpeed: 2
+  allowRotLagAmount: 0.5
+  smoothRot: 1
+  debug: 0
+  controller: {fileID: 8453773999225703031}
+  playerCamera: {fileID: 4446985994531773179}
+  orientation: {fileID: 4446985993725635025}
+--- !u!114 &8453773999225703103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8453773999225703041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 071a59b0d4c51544f8d07378bc345443, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8547424904321008786
 MonoBehaviour:
   m_ObjectHideFlags: 0
