@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.22038329, g: 0.14790377, b: 0.2596193, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -23597,11 +23597,14 @@ MonoBehaviour:
       data:
         m_Name: Custom Pass
         enabled: 1
-        targetColorBuffer: 0
-        targetDepthBuffer: 0
-        clearFlags: 0
+        targetColorBuffer: 1
+        targetDepthBuffer: 1
+        clearFlags: 3
         passFoldout: 0
         m_Version: 0
+        edgeDetectThreshold: 1.27
+        edgeRadius: 1
+        glowColor: {r: 0.01886791, g: 0.01886791, b: 0.01886791, a: 1}
 --- !u!4 &1726741423
 Transform:
   m_ObjectHideFlags: 0
