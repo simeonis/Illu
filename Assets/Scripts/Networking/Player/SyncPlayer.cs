@@ -1,6 +1,5 @@
 using UnityEngine;
 using Mirror;
-using UnityEngine.InputSystem;
 
 //////////////////////////////////////////////////////////////////////////
 ///Sync Player
@@ -51,28 +50,21 @@ public class SyncPlayer : NetworkBehaviour
 
     private PlayerSyncData remotePlayerSyncData;
 
-    Vector3 lastPosition;
-    Quaternion lastRotation;
-    Quaternion lastBodyRotation;
-    Quaternion lastRootRotation;
+    PlayerSyncData lastPlayerSyncData;
     Vector3 transPosition;
 
     // local authority send time
     float lastClientSendTime;
 
     private PlayerMotor playerMotor;
-    private NetworkPlayerController networkPlayerController;
-
-    private InputAction.CallbackContext defaultContext = new InputAction.CallbackContext();
 
     void Awake()
     {
         playerMotor = GetComponent<PlayerMotor>();
-        networkPlayerController = GetComponent<NetworkPlayerController>();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         // send to server if we are local player and have authority
         if (isClient)
@@ -106,21 +98,15 @@ public class SyncPlayer : NetworkBehaviour
     {
         Quaternion RootRotation = transform.rotation;
         // moved or rotated?
-        bool moved = Vector3.Distance(lastPosition, transform.position) > moveTriggerSensitivity;
-        bool headRotated = Quaternion.Angle(lastRotation, playerCamera.rotation) > moveTriggerSensitivity;
-        bool bodyRotated = Quaternion.Angle(lastBodyRotation, orientation.rotation) > moveTriggerSensitivity;
-        bool rootRotated = Quaternion.Angle(lastRootRotation, RootRotation) > moveTriggerSensitivity;
+        bool moved = Vector3.Distance(lastPlayerSyncData.position, transform.position) > moveTriggerSensitivity;
+        bool headRotated = Quaternion.Angle(lastPlayerSyncData.headRot, playerCamera.rotation) > moveTriggerSensitivity;
+        bool bodyRotated = Quaternion.Angle(lastPlayerSyncData.bodyRot, orientation.rotation) > moveTriggerSensitivity;
+        bool rootRotated = Quaternion.Angle(lastPlayerSyncData.rootRot, RootRotation) > moveTriggerSensitivity;
 
         bool change = moved || headRotated || bodyRotated || rootRotated;
 
         if (change)
-        {
-            //position/rotation/bodyrot
-            lastPosition = transform.position;
-            lastRotation = playerCamera.rotation;
-            lastBodyRotation = orientation.rotation;
-            lastRootRotation = RootRotation;
-        }
+            lastPlayerSyncData = new PlayerSyncData(transform.position, playerCamera.rotation, orientation.rotation, RootRotation);
 
         return change;
     }
@@ -169,7 +155,6 @@ public class SyncPlayer : NetworkBehaviour
         }
         else //Player has to go to the point
         {
-            Debug.Log("FinalLagDistance " + FinalLagDistance);
             playerMotor.UserMovement(FinalLagDistance);
         }
     }

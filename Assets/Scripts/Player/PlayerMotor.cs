@@ -101,15 +101,6 @@ class PlayerMotor : MonoBehaviour
         Cursor.visible = false;
     }
 
-    void SetLookDirection()
-    {
-
-    }
-    void SetMovementDirection()
-    {
-
-    }
-
     void Update()
     {
         UserInfo();

@@ -1028,7 +1028,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  processBufferCount: 10
+  processBufferCount: 2
   debug: 1
   isEquipped: 0
   clientUnEquiped: 1
