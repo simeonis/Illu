@@ -30,6 +30,7 @@ public class Equipment : Interactable
             //Is this taking synchonous time??
             if (interactor.TryGetComponent(out Player player))
             {
+                player.syncInteractables.ClearPositions();
                 player.syncInteractables.isEquipped = true;
 
                 player.syncInteractables.RegisterInteractableToSync(this.gameObject);

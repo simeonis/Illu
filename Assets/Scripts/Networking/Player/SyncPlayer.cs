@@ -147,7 +147,9 @@ public class SyncPlayer : NetworkBehaviour
 
         //ignore the y distance
         Vector3 unwantedUp = Vector3.Dot(LagDistance, orientation.up) * orientation.up;
-        Vector3 FinalLagDistance = LagDistance - unwantedUp;
+        Vector3 finalLagVector = LagDistance - unwantedUp;
+
+
 
         if (LagDistance.magnitude < maximumAcceptableDeviance)
         {   //Player is nearly at the point
@@ -155,7 +157,7 @@ public class SyncPlayer : NetworkBehaviour
         }
         else //Player has to go to the point
         {
-            playerMotor.UserMovement(FinalLagDistance);
+            playerMotor.UserMovement(finalLagVector);
         }
     }
 

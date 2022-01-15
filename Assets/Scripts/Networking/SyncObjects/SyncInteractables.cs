@@ -6,21 +6,12 @@ using System;
 ///////////////////////////////////////////////////////////////////////////
 /// in equimpent if released from player
 /// start sending position and rotation to all client copies
-/// other client -> receive pos and rot and follows 
-/// after send once more and stop syncing  
+/// other client -> receive pos and rot and add to buffer 
 ///////////////////////////////////////////////////////////////////////////
-//Problem: if I wait for permission The throw already happed
-//either send threw obj with authority or simulate on server only 
-
-//idea object with authority has list of interacables listens for changes and sends them 
 
 //TODO
 // add on collision with player pass auth 
 // add on interacte change owner 
-
-// start filling a buffer of positions
-//try sending a time / by distance to get speed = inerpolate with that 
-
 public class SyncInteractables : NetworkBehaviour
 {
     [Header("Networking Parameters")]
@@ -53,10 +44,7 @@ public class SyncInteractables : NetworkBehaviour
     private bool shouldTrack = false;
 
     //List of Positions and time sent from the initiating cube 
-    //List of reached positions on the reciving client for debugging 
     private List<InteractableSyncData> receivedPositions;
-    private List<Vector3> vistedPositions;
-    private List<Vector3> sentPositions;
 
     //local (Not Synced)
     private float lastClientSendTime;
@@ -74,11 +62,7 @@ public class SyncInteractables : NetworkBehaviour
     void Start()
     {
         receivedPositions = new List<InteractableSyncData>();
-        vistedPositions = new List<Vector3>();
-        sentPositions = new List<Vector3>();
-
         ni = GetComponent<NetworkIdentity>();
-
         syncInterval = 0.05f;
     }
 
@@ -86,14 +70,13 @@ public class SyncInteractables : NetworkBehaviour
     {
         c_Transform = go.GetComponent<Transform>();
         c_RB = go.GetComponent<Rigidbody>();
+        Debug.Log("RB " + c_RB.isKinematic);
     }
 
     public void SetShouldTrack(bool track) { shouldTrack = track; }
 
     //Update loop called on both Authority and other Clients 
     //Checks who it's on internally 
-
-    private TimeSpan serverStartTime;
     void FixedUpdate()
     {
         //[Server] has authority send commands to other clients
@@ -116,12 +99,6 @@ public class SyncInteractables : NetworkBehaviour
                 InteractableSyncData dataFrame = new InteractableSyncData(c_Transform.position, c_Transform.rotation, DateTime.Now.Ticks);
                 CmdSendPositionRotation(dataFrame);
 
-                sentPositions.Add(c_Transform.position);
-
-                if (sentPositions.Count == 1)
-                {
-                    serverStartTime = DateTime.Now.TimeOfDay;
-                }
 
                 sentPosition = c_Transform.position;
 
@@ -135,8 +112,6 @@ public class SyncInteractables : NetworkBehaviour
                 // CmdSendPosition(transform.position);
                 serverIsSending = false;
                 shouldTrack = false;
-                sentPositions.Clear();
-                Debug.Log($"Server Time diff: {DateTime.Now.TimeOfDay - serverStartTime}");
             }
         }
         // //[client]
@@ -185,31 +160,24 @@ public class SyncInteractables : NetworkBehaviour
             {
                 HandleRemotePositionUpdates();
             }
-
-            // if (serverIsSending && simStep == count)
-            // {
-            //     Debug.Log("I'm waiting for information");
-            // }
-
+            //here we should predict if we reach the end and were not done sending!
             //better if it was last packet received  /
             //*************->MUST BE IF<-************//
-            if (!serverIsSending && simStep == count)  //here we should predict if we reach the end and were not done sending!
+            if (!serverIsSending && simStep == count)
             {
                 simStep = 0;
-
-                if (receivedPositions.Count > 0)
-                {
-                    Debug.Log($"Time diff: {startTime - DateTime.Now.TimeOfDay}");
-                }
-                receivedPositions.Clear();
-                vistedPositions.Clear();
+                ClearPositions();
 
                 if (!isEquipped)
-                {
                     c_RB.isKinematic = false;
-                }
+
             }
         }
+    }
+
+    public void ClearPositions()
+    {
+        receivedPositions.Clear();
     }
 
     // Server sends Pos and Rot 
@@ -223,8 +191,6 @@ public class SyncInteractables : NetworkBehaviour
         //make sure were not the server
         if (!ni.hasAuthority)
             receivedPositions.Add(dataFrame);
-
-        Debug.Log("Time " + DateTime.Now.TimeOfDay);
     }
 
     //Handle the received positional updates
@@ -260,7 +226,7 @@ public class SyncInteractables : NetworkBehaviour
             //     timeDiff = new TimeSpan(receivedPositions[simStep].timeSent - triggerTimeStamp).TotalSeconds;
             // }
 
-            percent += Time.fixedTime / timeDiff;
+            percent += Time.deltaTime / timeDiff;
 
             var targetPos = receivedPositions[simStep].position;
             var targetRot = receivedPositions[simStep].rotation;
@@ -272,7 +238,6 @@ public class SyncInteractables : NetworkBehaviour
             {
                 currentPos = c_Transform.position;
                 currentRot = c_Transform.rotation;
-                vistedPositions.Add(targetPos);
                 percent = 0;
                 simStep++;
             }
@@ -295,69 +260,7 @@ public class SyncInteractables : NetworkBehaviour
         {
             foreach (InteractableSyncData data in receivedPositions)
             { DrawDataPointGizmo(data.position, Color.yellow); }
-
-            foreach (Vector3 pos in vistedPositions)
-            { DrawDataPointGizmo(pos, Color.red); }
-
-            foreach (Vector3 pos in sentPositions)
-            { DrawDataPointGizmo(pos, Color.blue); }
         }
     }
 }
 
-public struct InteractableSyncData
-{
-    public Vector3 position { get; private set; }
-    public Quaternion rotation { get; private set; }
-    public long timeSent { get; private set; }
-
-    public InteractableSyncData(Vector3 position, Quaternion rotation, long timeSent)
-    {
-        this.position = position;
-        this.rotation = rotation;
-        this.timeSent = timeSent;
-    }
-}
-
-public struct PlayerSyncData
-{
-    public Vector3 position { get; private set; }
-    public Quaternion headRot { get; private set; }
-    public Quaternion bodyRot { get; private set; }
-    public Quaternion rootRot { get; private set; }
-
-    public PlayerSyncData(Vector3 position, Quaternion headRot, Quaternion bodyRot, Quaternion rootRot)
-    {
-        this.position = position;
-        this.headRot = headRot;
-        this.bodyRot = bodyRot;
-        this.rootRot = rootRot;
-    }
-}
-
-public static class CustomReadWriteFunctions
-{
-    public static void WriteInteractableSyncData(this NetworkWriter writer, InteractableSyncData interactableSyncData)
-    {
-        writer.WriteVector3(interactableSyncData.position);
-        writer.WriteQuaternion(interactableSyncData.rotation);
-        writer.WriteLong(interactableSyncData.timeSent);
-    }
-
-    public static InteractableSyncData ReadInteractableSyncData(this NetworkReader reader)
-    {
-        return new InteractableSyncData(reader.ReadVector3(), reader.ReadQuaternion(), reader.ReadLong());
-    }
-
-    public static void WritePlayerSyncData(this NetworkWriter writer, PlayerSyncData playerSyncData)
-    {
-        writer.WriteVector3(playerSyncData.position);
-        writer.WriteQuaternion(playerSyncData.headRot);
-        writer.WriteQuaternion(playerSyncData.bodyRot);
-        writer.WriteQuaternion(playerSyncData.rootRot);
-    }
-    public static PlayerSyncData ReadPlayerSyncData(this NetworkReader reader)
-    {
-        return new PlayerSyncData(reader.ReadVector3(), reader.ReadQuaternion(), reader.ReadQuaternion(), reader.ReadQuaternion());
-    }
-}

@@ -10,10 +10,8 @@ public class NetworkPlayerController : NetworkBehaviour
 
     [Header("Transforms")]
     [SerializeField] private Transform orientation;
-
     private SyncPlayer syncPlayer;
     private PlayerMotor playerMotor;
-
     // Mouse variables
     [Header("Mouse Sensitivity")]
     [SerializeField, Range(0f, 1000f)] private float horizontalSensitivity = 10f;
