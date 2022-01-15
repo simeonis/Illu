@@ -78,6 +78,11 @@ class PlayerMotor : MonoBehaviour
     // Miscellaneous
     private CapsuleCollider playerCollider;
 
+    void Awake()
+    {
+        playerBody = GetComponent<Rigidbody>();
+    }
+
     void Start()
     {
         // Transform
@@ -88,7 +93,7 @@ class PlayerMotor : MonoBehaviour
         // -------------------------------------------
 
         // Rigidbody
-        playerBody = GetComponent<Rigidbody>();
+        // playerBody = GetComponent<Rigidbody>();
         playerBody.freezeRotation = true;
         playerBody.useGravity = false;
 
@@ -174,6 +179,7 @@ class PlayerMotor : MonoBehaviour
         // the player is on a non-realistic slope and moving
         else if (realisticSlopes || !onSlope || !isMoving)
         {
+            Debug.Log("playerBody " + playerBody + " transform " + transform + " gravityScalar " + gravityScalar);
             playerBody.AddForce(-transform.up * gravityScalar * 10f);
         }
 

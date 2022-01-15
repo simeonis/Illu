@@ -13,7 +13,6 @@ public class NetworkPlayerController : NetworkBehaviour
 
     private SyncPlayer syncPlayer;
     private PlayerMotor playerMotor;
-
     // Mouse variables
     [Header("Mouse Sensitivity")]
     [SerializeField, Range(0f, 1000f)] private float horizontalSensitivity = 10f;
