@@ -5,7 +5,8 @@ using UnityEngine.SceneManagement;
 using Mirror;
 using System.Linq;
 
-namespace Illu.Networking {
+namespace Illu.Networking
+{
     public struct CreateCharacterMessage : NetworkMessage
     {
         public string name;
@@ -29,6 +30,8 @@ namespace Illu.Networking {
         public static event Action<NetworkConnection> OnServerReadied;
 
         [HideInInspector] public static string HostAddress = "";
+
+        private bool isLanConnection = false;
 
         /*  --------------------------
         *       Callback functions
@@ -159,7 +162,7 @@ namespace Illu.Networking {
             base.OnServerReady(conn);
             UIConsole.Log("[Server]: Client" + "[" + conn.connectionId + "]"
             + " has successfully loaded scene: " + SceneManager.GetActiveScene().name + ".");
-            OnServerReadied?.Invoke(conn);  
+            OnServerReadied?.Invoke(conn);
         }
 
         // SERVER finished loading scene
@@ -208,6 +211,24 @@ namespace Illu.Networking {
         {
             networkAddress = HostAddress;
             base.StartClient();
+        }
+
+        public void StartLan()
+        {
+            var switchTransport = (SwitchTransport)transport;
+            switchTransport.PickTransport(1);
+            isLanConnection = true;
+            StartHost();
+        }
+
+        public void JoinLan()
+        {
+            var switchTransport = (SwitchTransport)transport;
+            switchTransport.PickTransport(1);
+            HostAddress = "localhost";
+            isLanConnection = true;
+            StartClient();
+
         }
 
         /*  --------------------------

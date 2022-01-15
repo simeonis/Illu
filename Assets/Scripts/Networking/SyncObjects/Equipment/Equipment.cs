@@ -8,13 +8,15 @@ public class Equipment : Interactable
     protected Collider equipmentCollider;
     protected bool isEquipped = false;
     private Transform defaultParent;
-    private SyncEquipment syncEquipment;
+    private SyncInteractables syncInteractables = null;
+
+    private Transform equipTransform;
 
     protected void Awake()
     {
         equipmentBody = GetComponent<Rigidbody>();
         equipmentCollider = GetComponent<Collider>();
-        syncEquipment = GetComponent<SyncEquipment>();
+        equipTransform = GetComponent<Transform>();
     }
 
     public override void Interaction(Interactor interactor)
@@ -23,28 +25,43 @@ public class Equipment : Interactable
         {
             interactor.equipmentSlot.Equip(this);
             Disable();
+
+
+            //Is this taking synchonous time??
+            if (interactor.TryGetComponent(out Player player))
+            {
+                player.syncInteractables.ClearPositions();
+                player.syncInteractables.isEquipped = true;
+
+                player.syncInteractables.RegisterInteractableToSync(this.gameObject);
+
+                if (!player.hasAuthority)
+                    player.syncInteractables.clientUnEquiped = false;
+            }
         }
         else
         {
+
             interactor.equipmentSlot.Unequip();
             Enable();
 
             if (interactor.TryGetComponent(out Player player))
-            {   
-                
-                if(player.hasAuthority)
+            {
+                syncInteractables = player.GetComponent<SyncInteractables>(); //maybe don't need the caching 
+
+                //Only the player with authority physically throws the object
+                if (player.hasAuthority)
                 {
-                    Debug.Log("Giving Authority to Cube");
-                    player.GiveAuthority(GetComponent<NetworkIdentity>());
+                    syncInteractables.SetShouldTrack(true);
+                    player.syncInteractables.isEquipped = false;
+                    AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
                 }
-                AddForce(player.source.forward, player.dropForce, player.rigidbody.velocity);
+                else
+                {
+                    player.syncInteractables.clientUnEquiped = true;
+                }
             }
         }
-    }
-
-    public override void OnStartAuthority()
-    {
-        syncEquipment.Trigger(DateTime.Now.Ticks);
     }
 
     public override void InteractionCancelled(Interactor interactor) { }
@@ -134,5 +151,4 @@ public class Equipment : Interactable
     public void EquipmentPrimaryReleased() { Debug.Log("Equipment Primary Released"); }
     public void EquipmentSecondaryPressed() { Debug.Log("Equipment Secondary Pressed"); }
     public void EquipmentSecondaryReleased() { Debug.Log("Equipment Secondary Released"); }
-
 }

@@ -13,14 +13,17 @@ public class SyncPlayer : NetworkBehaviour
 
     [Header("Authority")]
     [Tooltip("Set to true if moves come from owner client, set to false if moves always come from server")]
-    public bool clientAuthority = true;
+    [SerializeField] private bool clientAuthority = true;
 
     [Header("Networking Parameters")]
     [Tooltip("How much the local player moves before triggering an Update to all clients")]
-    public float moveTriggerSensitivity = 0.01f;
+    [SerializeField] private float moveTriggerSensitivity = 0.01f;
 
     [Tooltip("How far the remote player can be off before snapping to remote position")]
-    public float allowedLagDistance = 10.0f;
+    [SerializeField] private float allowedLagDistance = 10.0f;
+
+    [Tooltip("Anything less then this value will snap to Zero vector and player won't attempt to move closer")]
+    [SerializeField] private float maximumAcceptableDeviance = 0.5f;
 
     [Tooltip("How fast a remote player corrects its look")]
     [SerializeField] private float correntRotSpeed = 2.0f;
@@ -45,65 +48,23 @@ public class SyncPlayer : NetworkBehaviour
     [Tooltip("Pass in Orientation")]
     public Transform orientation;
 
-    private Vector3 RemotePlayerPosition;
-    private Quaternion RemotePlayerRotation;
-    private Quaternion RemotePlayerBodyRotation;
-    private Quaternion RemotePlayerRootRotation;
+    private PlayerSyncData remotePlayerSyncData;
 
-    Vector3 lastPosition;
-    Quaternion lastRotation;
-    Quaternion lastBodyRotation;
-    Quaternion lastRootRotation;
+    PlayerSyncData lastPlayerSyncData;
     Vector3 transPosition;
 
     // local authority send time
     float lastClientSendTime;
 
-    private NetworkPlayerController networkPlayerController;
+    private PlayerMotor playerMotor;
 
     void Awake()
     {
-        networkPlayerController = GetComponent<NetworkPlayerController>();
-    }
-
-    void OnEnable()
-    {
-        if (isClient)
-        {
-            // Send to server if we are local player
-            if (hasAuthority)
-            {
-                InputManager.playerControls.Land.Crouch.performed += context => CmdHandleCrouch(true);
-                InputManager.playerControls.Land.Crouch.canceled += context => CmdHandleCrouch(false);
-
-                InputManager.playerControls.Land.Sprint.performed += context => CmdHandleSprint(true);
-                InputManager.playerControls.Land.Sprint.canceled += context => CmdHandleSprint(false);
-
-                InputManager.playerControls.Land.Jump.performed += context => CmdSendJump();
-            }
-        }
-    }
-
-    void OnDisable()
-    {
-        if (isClient)
-        {
-            // send to server if we are local player
-            if (hasAuthority)
-            {
-                InputManager.playerControls.Land.Crouch.performed -= context => CmdHandleCrouch(true);
-                InputManager.playerControls.Land.Crouch.canceled -= context => CmdHandleCrouch(false);
-
-                InputManager.playerControls.Land.Sprint.performed -= context => CmdHandleSprint(true);
-                InputManager.playerControls.Land.Sprint.canceled -= context => CmdHandleSprint(false);
-
-                InputManager.playerControls.Land.Jump.performed -= context => CmdSendJump();
-            }
-        }
+        playerMotor = GetComponent<PlayerMotor>();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         // send to server if we are local player and have authority
         if (isClient)
@@ -114,8 +75,10 @@ public class SyncPlayer : NetworkBehaviour
                 if (Time.time - lastClientSendTime >= syncInterval)
                 {
                     if (HasEitherMovedRotated())
-                        CMDSendPosAndRot(transform.position, playerCamera.rotation, orientation.rotation, networkPlayerController.GetRotation());
-
+                    {
+                        PlayerSyncData playerSyncData = new PlayerSyncData(transform.position, playerCamera.rotation, orientation.rotation, transform.rotation);
+                        CMDSendPlayerSyncData(playerSyncData);
+                    }
                     lastClientSendTime = Time.time;
                 }
             }
@@ -131,83 +94,72 @@ public class SyncPlayer : NetworkBehaviour
 
     //return whether there's been a change in position or rotation 
     //to prevent spamming the network when not moving 
-    bool HasEitherMovedRotated()
+    private bool HasEitherMovedRotated()
     {
-        Quaternion RootRotation = networkPlayerController.GetRotation();
+        Quaternion RootRotation = transform.rotation;
         // moved or rotated?
-        bool moved = Vector3.Distance(lastPosition, transform.position) > moveTriggerSensitivity;
-        bool headRotated = Quaternion.Angle(lastRotation, playerCamera.rotation) > moveTriggerSensitivity;
-        bool bodyRotated = Quaternion.Angle(lastBodyRotation, orientation.rotation) > moveTriggerSensitivity;
-        bool rootRotated = Quaternion.Angle(lastRootRotation, RootRotation) > moveTriggerSensitivity;
+        bool moved = Vector3.Distance(lastPlayerSyncData.position, transform.position) > moveTriggerSensitivity;
+        bool headRotated = Quaternion.Angle(lastPlayerSyncData.headRot, playerCamera.rotation) > moveTriggerSensitivity;
+        bool bodyRotated = Quaternion.Angle(lastPlayerSyncData.bodyRot, orientation.rotation) > moveTriggerSensitivity;
+        bool rootRotated = Quaternion.Angle(lastPlayerSyncData.rootRot, RootRotation) > moveTriggerSensitivity;
 
         bool change = moved || headRotated || bodyRotated || rootRotated;
 
         if (change)
-        {
-            //position/rotation/bodyrot
-            lastPosition = transform.position;
-            lastRotation = playerCamera.rotation;
-            lastBodyRotation = orientation.rotation;
-            lastRootRotation = RootRotation;
-        }
+            lastPlayerSyncData = new PlayerSyncData(transform.position, playerCamera.rotation, orientation.rotation, RootRotation);
 
         return change;
     }
 
     // local authority client sends sync message to server for broadcasting
     [Command(channel = Channels.Unreliable)]
-    void CMDSendPosAndRot(Vector3 position, Quaternion headRot, Quaternion bodyRot, Quaternion rootRot)
+    void CMDSendPlayerSyncData(PlayerSyncData playerSyncData)
     {
         // Ignore messages from client if notCmdClientToServerSync in client authority mode
         if (!clientAuthority)
             return;
 
-        RPCSyncPosition(position, headRot, bodyRot, rootRot);
+        RPCPlayerSyncData(playerSyncData);
     }
 
     [ClientRpc]
-    public void RPCSyncPosition(Vector3 position, Quaternion headRot, Quaternion bodyRot, Quaternion rootRot)
+    public void RPCPlayerSyncData(PlayerSyncData playerSyncData)
     {
         if (debug)
-            Debug.Log("RPC Position: " + position + "HeadRot " + headRot + "bodyRot " + bodyRot);
-        RemotePlayerPosition = position;
-        RemotePlayerRotation = headRot;
-        RemotePlayerBodyRotation = bodyRot;
-        RemotePlayerRootRotation = rootRot;
+            Debug.Log("RPC Position: " + playerSyncData.position + "HeadRot " + playerSyncData.headRot + "bodyRot " + playerSyncData.bodyRot);
+
+        remotePlayerSyncData = playerSyncData;
     }
 
     [Client]
     public void HandleRemotePositionUpdates()
     {
-        var LagDistance = RemotePlayerPosition - transform.position;
+        var LagDistance = remotePlayerSyncData.position - transform.position;
 
         //High distance => sync is to much off => send to position
-        if (LagDistance.magnitude > networkPlayerController.moveSpeed / 3)
+        if (LagDistance.magnitude > allowedLagDistance)
         {
             if (debug)
                 Debug.LogWarning("Sync Position to Great");
-            controller.position = RemotePlayerPosition;
+            controller.position = remotePlayerSyncData.position;
             LagDistance = Vector3.zero;
         }
 
         //ignore the y distance
-        // LagDistance -= LagDistance.up;
-
         Vector3 unwantedUp = Vector3.Dot(LagDistance, orientation.up) * orientation.up;
-        Vector3 FinalLagDistance = LagDistance - unwantedUp;
+        Vector3 finalLagVector = LagDistance - unwantedUp;
 
-        
 
-        if (LagDistance.magnitude < 0.025f)
+
+        if (LagDistance.magnitude < maximumAcceptableDeviance)
         {   //Player is nearly at the point
-            networkPlayerController.moveDirection = Vector3.zero;
+            playerMotor.UserMovement(Vector3.zero);
         }
         else //Player has to go to the point
         {
-            networkPlayerController.moveDirection = FinalLagDistance;
+            playerMotor.UserMovement(finalLagVector);
         }
     }
-
 
     [Client]
     private void HandleRemoteRotationUpdates()
@@ -215,9 +167,9 @@ public class SyncPlayer : NetworkBehaviour
         // The step size is equal to speed times frame time.
         var step = correntRotSpeed * Time.deltaTime;
 
-        float camDiff = Quaternion.Dot(playerCamera.rotation, RemotePlayerRotation);
-        float bodyDiff = Quaternion.Dot(orientation.rotation, RemotePlayerBodyRotation);
-        float rootDiff = Quaternion.Dot(networkPlayerController.GetRotation(), RemotePlayerRootRotation);
+        float camDiff = Quaternion.Dot(playerCamera.rotation, remotePlayerSyncData.headRot);
+        float bodyDiff = Quaternion.Dot(orientation.rotation, remotePlayerSyncData.bodyRot);
+        float rootDiff = Quaternion.Dot(transform.rotation, remotePlayerSyncData.rootRot);
 
         if (debug)
             Debug.Log("camDiff " + camDiff + " bodyDiff" + bodyDiff);
@@ -225,40 +177,39 @@ public class SyncPlayer : NetworkBehaviour
         if (smoothRot && camDiff <= allowRotLagAmount)
         {
             // Rotate our playerCamera a step closer to the target's.
-            playerCamera.rotation = Quaternion.RotateTowards(playerCamera.rotation, RemotePlayerRotation, step);
+            playerCamera.rotation = Quaternion.RotateTowards(playerCamera.rotation, remotePlayerSyncData.headRot, step);
         }
         else
         {
-            playerCamera.rotation = RemotePlayerRotation;
+            playerCamera.rotation = remotePlayerSyncData.headRot;
         }
 
         if (smoothRot && bodyDiff <= allowRotLagAmount)
         {
             // Rotate our orientation a step closer to the target's.
-            orientation.rotation = Quaternion.RotateTowards(orientation.rotation, RemotePlayerBodyRotation, step);
+            orientation.rotation = Quaternion.RotateTowards(orientation.rotation, remotePlayerSyncData.bodyRot, step);
         }
         else
         {
-            orientation.rotation = RemotePlayerBodyRotation;
+            orientation.rotation = remotePlayerSyncData.bodyRot;
         }
 
         if (smoothRot && rootDiff <= allowRotLagAmount)
         {
             // Rotate our orientation a step closer to the target's.
-            networkPlayerController.SetRotation(Quaternion.RotateTowards(networkPlayerController.GetRotation(), RemotePlayerRootRotation, step));
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, remotePlayerSyncData.rootRot, step);
         }
         else
         {
-            networkPlayerController.SetRotation(RemotePlayerRootRotation);
+            transform.rotation = remotePlayerSyncData.rootRot;
 
         }
     }
 
-
     //Handle Sending Crouch, Jump, Sprint
     //--------------------------------------------------------------
     [Command(channel = Channels.Unreliable)]
-    private void CmdHandleCrouch(bool CrouchState)
+    public void CmdHandleCrouch(bool CrouchState)
     {
         RpcCrouch(CrouchState);
     }
@@ -266,45 +217,49 @@ public class SyncPlayer : NetworkBehaviour
     [ClientRpc]
     private void RpcCrouch(bool CrouchState)
     {
-        if (CrouchState)
+        if (!hasAuthority)
         {
-            networkPlayerController.NetworkCrouch();
-        }
-        else
-        {
-            networkPlayerController.NetworkUnCrouch();
+            if (CrouchState)
+            {
+                playerMotor.Crouch();
+            }
+            else
+            {
+                playerMotor.UnCrouch();
+            }
         }
     }
 
     [Command(channel = Channels.Unreliable)]
-    private void CmdHandleSprint(bool SprintState)
-    {
-        RpcSprint(SprintState);
-    }
+    public void CmdHandleSprint(bool SprintState) { RpcSprint(SprintState); }
 
     [ClientRpc]
     private void RpcSprint(bool SprintState)
     {
-        if (SprintState)
+        if (!hasAuthority)
         {
-            networkPlayerController.NetworkSprint();
-        }
-        else
-        {
-            networkPlayerController.NetworkWalk();
+            if (SprintState)
+            {
+                playerMotor.Sprint();
+            }
+            else
+            {
+                playerMotor.Walk();
+            }
         }
     }
 
     [Command(channel = Channels.Unreliable)]
-    private void CmdSendJump()
-    {
-        RpcSendJump();
-    }
+    public void CmdSendJump() { RpcSendJump(); }
 
     [ClientRpc]
     private void RpcSendJump()
     {
-        networkPlayerController.NetworkJump();
+        if (!hasAuthority)
+        {
+            playerMotor.canJump = false;
+            playerMotor.Jump();
+        }
     }
 
     //Static Draw Methods
@@ -331,10 +286,10 @@ public class SyncPlayer : NetworkBehaviour
     void OnDrawGizmos()
     {
         // draw start and goal points
-        DrawDataPointGizmo(RemotePlayerPosition, Color.green);
+        DrawDataPointGizmo(remotePlayerSyncData.position, Color.green);
         DrawDataPointGizmo(transPosition, Color.red);
 
         // draw line between them
-        DrawLineBetweenDataPoints(transPosition, RemotePlayerPosition, Color.cyan);
+        DrawLineBetweenDataPoints(transPosition, remotePlayerSyncData.position, Color.cyan);
     }
 }
