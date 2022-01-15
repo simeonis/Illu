@@ -104,7 +104,7 @@ namespace Illu.Steam {
             SteamEmptyLobby lobbyEmptyDetails = lobbyEmpty.GetComponent<SteamEmptyLobby>();
             lobbyEmptyDetails.addButton.onClick.AddListener(delegate { 
                 GenerateFriendList(SteamManager.GetSteamFriends());
-                GameManager.TriggerEvent("ScreenFriend");
+                GameManager.TriggerEvent("SteamFriendsRequested");
             });
         }
 
@@ -138,6 +138,7 @@ namespace Illu.Steam {
 
         private void GenerateFriendList(List<List<SteamUserRecord>> steamFriends)
         {
+            DestroyFriendList();
             GameObject subList = null;
             float numberOfTypes = steamFriends.Count;
             for (int i = 0; i < numberOfTypes; i++)
@@ -158,6 +159,7 @@ namespace Illu.Steam {
                         horizontalGroup.childForceExpandWidth = false;
                         horizontalGroup.childControlWidth = false;
                         horizontalGroup.childControlHeight = true;
+                        horizontalGroup.childAlignment = TextAnchor.UpperCenter;
                     }
 
                     SteamUserRecord steamFriend = steamFriends[i][j];
@@ -168,7 +170,7 @@ namespace Illu.Steam {
             }
         }
 
-        public void DestroyFriendList()
+        private void DestroyFriendList()
         {
             foreach (Transform child in friendList.transform)
             {
