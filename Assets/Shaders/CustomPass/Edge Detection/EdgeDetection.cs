@@ -20,9 +20,9 @@ class EdgeDetectionEditor : CustomPassDrawer
         public static GUIContent glowColor = new GUIContent("Color", "Color of the effect");
     }
 
-    SerializedProperty		edgeDetectThreshold;
-    SerializedProperty		edgeRadius;
-    SerializedProperty		glowColor;
+    SerializedProperty edgeDetectThreshold;
+    SerializedProperty edgeRadius;
+    SerializedProperty glowColor;
 
     protected override void Initialize(SerializedProperty customPass)
     {
@@ -50,14 +50,14 @@ class EdgeDetectionEditor : CustomPassDrawer
 
 class EdgeDetection : CustomPass
 {
-    public float    edgeDetectThreshold = 1;
-    public int      edgeRadius = 1;
-    public Color    glowColor = Color.white;
+    public float edgeDetectThreshold = 1;
+    public int edgeRadius = 1;
+    public Color glowColor = Color.white;
 
-    Material    fullscreenMaterial;
-    RTHandle    tipsBuffer; // additional render target for compositing the custom and camera color buffers
+    Material fullscreenMaterial;
+    RTHandle tipsBuffer; // additional render target for compositing the custom and camera color buffers
 
-    int         compositingPass;
+    int compositingPass;
 
     // It can be used to configure render targets and their clear state. Also to create temporary render target textures.
     // When empty this render pass will render to the active camera render target.
