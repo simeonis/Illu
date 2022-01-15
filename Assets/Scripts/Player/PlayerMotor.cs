@@ -179,7 +179,6 @@ class PlayerMotor : MonoBehaviour
         // the player is on a non-realistic slope and moving
         else if (realisticSlopes || !onSlope || !isMoving)
         {
-            Debug.Log("playerBody " + playerBody + " transform " + transform + " gravityScalar " + gravityScalar);
             playerBody.AddForce(-transform.up * gravityScalar * 10f);
         }
 
