@@ -4,8 +4,7 @@ using UnityEngine;
 namespace Illu.Utility {
     [System.Serializable] 
     public struct LayerCullDistances {
-        public string name;
-        public int layerNumber;
+        public LayerMask layer;
         public float distance;
     }
 
@@ -17,7 +16,7 @@ namespace Illu.Utility {
         private static CameraUtility _instance;
         public static CameraUtility singleton { get { return _instance; } }
         private Canvas canvas;
-        private new Camera camera;
+        public new Camera camera;
 
         void Awake()
         {
@@ -31,9 +30,15 @@ namespace Illu.Utility {
             }
         }
 
+        public static bool VisibleFromCamera(MeshRenderer renderer, Camera camera) 
+        {
+            Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(camera);
+            return GeometryUtility.TestPlanesAABB(frustumPlanes, renderer.bounds);
+        }
+
         public void FindSceneCamera()
         {
-            Camera camera = FindObjectOfType<Camera>();
+            Camera camera = Camera.main;
             if (camera)
             {
                 this.camera = camera;
@@ -60,7 +65,8 @@ namespace Illu.Utility {
             for(int i=0; i<layerCullDistances.Length; i++)
             {
                 LayerCullDistances lcd = layerCullDistances[i];
-                distances[lcd.layerNumber] = lcd.distance;
+                int index = (int) Mathf.Log(lcd.layer.value, 2);
+                distances[index] = lcd.distance;
             }
 
             camera.layerCullDistances = distances;

@@ -413,7 +413,7 @@ Camera:
   m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 959
+    m_Bits: 4031
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -980,7 +980,7 @@ MonoBehaviour:
   syncInterval: 0.1
   clientAuthority: 1
   moveTriggerSensitivity: 0.01
-  allowedLagDistance: 10
+  allowedLagDistance: 2
   maximumAcceptableDeviance: 0.5
   correntRotSpeed: 2
   allowRotLagAmount: 0.5

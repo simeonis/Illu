@@ -70,7 +70,6 @@ public class SyncInteractables : NetworkBehaviour
     {
         c_Transform = go.GetComponent<Transform>();
         c_RB = go.GetComponent<Rigidbody>();
-        Debug.Log("RB " + c_RB.isKinematic);
     }
 
     public void SetShouldTrack(bool track) { shouldTrack = track; }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using RenderPipeline = UnityEngine.Rendering.HighDefinition;
 
 public class PortalRender : MonoBehaviour
 {
