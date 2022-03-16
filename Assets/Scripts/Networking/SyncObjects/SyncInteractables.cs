@@ -255,11 +255,11 @@ public class SyncInteractables : NetworkBehaviour
     // draw the data points for easier debugging
     void OnDrawGizmos()
     {
-        if (debug)
-        {
-            foreach (InteractableSyncData data in receivedPositions)
-            { DrawDataPointGizmo(data.position, Color.yellow); }
-        }
+        // if (debug)
+        // {
+        //     foreach (InteractableSyncData data in receivedPositions)
+        //     { DrawDataPointGizmo(data.position, Color.yellow); }
+        // }
     }
 }
 
