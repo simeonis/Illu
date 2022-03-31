@@ -1,6 +1,6 @@
 
-
-
-class LanManager {
+//TODO
+class LanManager
+{
 
 }
