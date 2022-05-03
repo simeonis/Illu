@@ -5,11 +5,11 @@ using System.Collections.Generic;
 public class EventListenerManager : MonoBehaviour
 {
     [SerializeField]
-    protected List<EventListener2> listeners = new List<EventListener2>();
+    protected List<EventListenerNew> listeners = new List<EventListenerNew>();
 
     private void OnEnable()
     {
-        foreach (EventListener2 listener in listeners)
+        foreach (EventListenerNew listener in listeners)
         {
             //listener.Event.RegisterListener(listener);
         }
@@ -18,7 +18,7 @@ public class EventListenerManager : MonoBehaviour
 
     private void OnDisable()
     {
-        foreach (EventListener2 listener in listeners)
+        foreach (EventListenerNew listener in listeners)
         {
             // listener.Event.UnregisterListener(listener);
         }

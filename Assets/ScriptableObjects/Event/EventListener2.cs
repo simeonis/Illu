@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [System.Serializable]
-public class EventListener2
+public class EventListenerNew
 {
     public Event Event;
     public UnityEvent Response;
