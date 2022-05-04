@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 [CustomPropertyDrawer(typeof(EventListenerNew))]
 public class EventListener2_PropertyDrawer : PropertyDrawer
 {
+
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         // Draw label
@@ -21,53 +22,47 @@ public class EventListener2_PropertyDrawer : PropertyDrawer
 
         EditorGUILayout.BeginVertical();
 
-        GUIStyle SectionNameStyle = new GUIStyle();
-        SectionNameStyle.fontSize = 35;
-
         // Draw fields - pass GUIContent.none to each so they are drawn without labels
-        var p = property.FindPropertyRelative("Event");
+        var eventProperty = property.FindPropertyRelative("Event");
 
-        GUIStyle g = new GUIStyle();
-        g.fontSize = 20;
-        g.normal.textColor = Color.white;
+        GUIStyle myFoldoutStyle = new GUIStyle(EditorStyles.foldout);
 
-        if (p != null)
+        myFoldoutStyle.fontSize = 12;
+        myFoldoutStyle.normal.textColor = Color.white;
+
+        if (eventProperty != null)
         {
-            EditorGUILayout.BeginHorizontal();
-
-            if (p.objectReferenceValue != null)
+            if (eventProperty.objectReferenceValue != null)
             {
-                SerializedObject serializedObject = new SerializedObject(p.objectReferenceValue);
+                SerializedObject serializedObject = new SerializedObject(eventProperty.objectReferenceValue);
                 SerializedProperty propSP = serializedObject.FindProperty("m_Name");
 
                 if (propSP != null)
                 {
                     var myStringWithSpaces = Regex.Replace(propSP.stringValue, "([A-Z])([a-z]*)", " $1$2");
-                    EditorGUILayout.TextField(myStringWithSpaces, g, GUILayout.Height(30));
+                    property.isExpanded = EditorGUILayout.Foldout(property.isExpanded, myStringWithSpaces, myFoldoutStyle);
                 }
             }
             else
             {
-                EditorGUILayout.TextField("No Event Assigned", g, GUILayout.Height(30));
+                property.isExpanded = EditorGUILayout.Foldout(property.isExpanded, "No Event Assigned", myFoldoutStyle);
             }
 
 
-            EditorGUILayout.BeginVertical();
+            if (property.isExpanded)
+            {
+                EditorGUILayout.BeginVertical();
 
-            EditorGUILayout.PropertyField(p, GUIContent.none, GUILayout.Height(40));
+                EditorGUILayout.PropertyField(eventProperty, GUIContent.none, GUILayout.Height(40));
+                SerializedProperty responses = property.FindPropertyRelative("Response");
 
-            SerializedProperty responses = property.FindPropertyRelative("Response");
-
-            responses.isExpanded = EditorGUILayout.Foldout(responses.isExpanded, "Responses()");
-
-            if (responses.isExpanded)
                 EditorGUILayout.PropertyField(responses, GUIContent.none, true);
 
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+                GUILayout.Space(5f);
+                GUILayout.Box(GUIContent.none, box, GUILayout.Height(1f));
+            }
 
-            GUILayout.Box(GUIContent.none, GUILayout.Height(10));
-            GUILayout.Box(GUIContent.none, box, GUILayout.Height(1f));
             EditorGUILayout.EndVertical();
         }
 
@@ -75,6 +70,11 @@ public class EventListener2_PropertyDrawer : PropertyDrawer
         EditorGUI.indentLevel = indent;
 
 
+    }
+
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    {
+        return EditorGUIUtility.singleLineHeight - 15;
     }
 
 }
