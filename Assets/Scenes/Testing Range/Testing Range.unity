@@ -17636,12 +17636,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc2283316da7e4737a8edac991c60f40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  moveTriggerSensitivity: 0.01
-  allowedLagDistance: 2
-  allowedRotationAngle: 5
-  debug: 0
 --- !u!82 &1339642472
 AudioSource:
   m_ObjectHideFlags: 0
@@ -20044,6 +20038,19 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
+      type: {class: EdgeDetection, ns: , asm: Assembly-CSharp}
+      data:
+        m_Name: Outlines
+        enabled: 1
+        targetColorBuffer: 1
+        targetDepthBuffer: 1
+        clearFlags: 3
+        passFoldout: 1
+        m_Version: 0
+        edgeDetectThreshold: 1
+        edgeRadius: 2
+        glowColor: {r: 0, g: 0, b: 0, a: 1}
+    00000001:
       type: {class: DrawRenderersCustomPass, ns: UnityEngine.Rendering.HighDefinition,
         asm: Unity.RenderPipelines.HighDefinition.Runtime}
       data:
@@ -20068,7 +20075,7 @@ MonoBehaviour:
         depthCompareFunction: 8
         depthWrite: 1
         shaderPass: 0
-    00000001:
+    00000002:
       type: {class: DrawRenderersCustomPass, ns: UnityEngine.Rendering.HighDefinition,
         asm: Unity.RenderPipelines.HighDefinition.Runtime}
       data:
@@ -20093,7 +20100,7 @@ MonoBehaviour:
         depthCompareFunction: 4
         depthWrite: 1
         shaderPass: 0
-    00000002:
+    00000003:
       type: {class: DrawRenderersCustomPass, ns: UnityEngine.Rendering.HighDefinition,
         asm: Unity.RenderPipelines.HighDefinition.Runtime}
       data:
@@ -20118,19 +20125,6 @@ MonoBehaviour:
         depthCompareFunction: 8
         depthWrite: 1
         shaderPass: 0
-    00000003:
-      type: {class: EdgeDetection, ns: , asm: Assembly-CSharp}
-      data:
-        m_Name: Outlines
-        enabled: 1
-        targetColorBuffer: 1
-        targetDepthBuffer: 1
-        clearFlags: 3
-        passFoldout: 1
-        m_Version: 0
-        edgeDetectThreshold: 1
-        edgeRadius: 2
-        glowColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!4 &1489188787
 Transform:
   m_ObjectHideFlags: 0

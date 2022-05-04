@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "com.jimmycushnie.noisynodes": "https://github.com/JimmyCushnie/Noisy-Nodes.git",
+    "com.nobi.roundedcorners": "https://github.com/kirevdokimov/Unity-UI-Rounded-Corners.git",
     "com.unity.animation.rigging": "1.0.3",
+    "com.unity.cinemachine": "2.6.11",
     "com.unity.ide.vscode": "1.2.3",
     "com.unity.inputsystem": "1.0.2",
     "com.unity.probuilder": "5.0.3",
