@@ -2,8 +2,8 @@ using UnityEditor;
 using UnityEngine;
 using System.Text.RegularExpressions;
 
-[CustomPropertyDrawer(typeof(EventListenerNew))]
-public class EventListener2_PropertyDrawer : PropertyDrawer
+[CustomPropertyDrawer(typeof(EventListener))]
+public class EventListenerPropertyDrawer : PropertyDrawer
 {
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)

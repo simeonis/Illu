@@ -1,26 +1,29 @@
 using UnityEngine;
-using UnityEngine.Events;
 using System.Collections.Generic;
 
+// EventListenerManager
+// Manages a list of EventListeners on an Object
+// Registers them all on enable 
+// Deregisters them all on disable 
 public class EventListenerManager : MonoBehaviour
 {
     [SerializeField]
-    protected List<EventListenerNew> listeners = new List<EventListenerNew>();
+    protected List<EventListener> listeners = new List<EventListener>();
 
     private void OnEnable()
     {
-        foreach (EventListenerNew listener in listeners)
+        foreach (EventListener listener in listeners)
         {
-            //listener.Event.RegisterListener(listener);
+            listener.Event.RegisterListener(listener);
         }
 
     }
 
     private void OnDisable()
     {
-        foreach (EventListenerNew listener in listeners)
+        foreach (EventListener listener in listeners)
         {
-            // listener.Event.UnregisterListener(listener);
+            listener.Event.UnregisterListener(listener);
         }
     }
 }

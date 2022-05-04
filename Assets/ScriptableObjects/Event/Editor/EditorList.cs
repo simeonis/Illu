@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
-using System.Collections.Generic;
 
+//Custom List Inspector 
 public static class EditorList
 {
     private static GUILayoutOption miniButtonWidth = GUILayout.Width(50f);
