@@ -228,7 +228,6 @@ namespace Illu.Networking
             HostAddress = "localhost";
             isLanConnection = true;
             StartClient();
-
         }
 
         /*  --------------------------

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Cinemachine;
 
 namespace Illu.Utility {
     [System.Serializable] 
@@ -36,28 +37,22 @@ namespace Illu.Utility {
             return GeometryUtility.TestPlanesAABB(frustumPlanes, renderer.bounds);
         }
 
-        public void FindSceneCamera()
+        public void UpdateCanvasCamera()
         {
-            Camera camera = Camera.main;
+            FindSceneCamera();
             if (camera)
             {
-                this.camera = camera;
-
-                // Desired outcome (Post-processing for UI)
-                canvas.renderMode = RenderMode.ScreenSpaceCamera;
                 canvas.worldCamera = camera;
-                CullCamera(camera);
-            }
-            else 
-            {
-                this.camera = null;
-
-                // Undesired outcome (No post-processing for UI)
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                CullCamera();
             }
         }
 
-        private void CullCamera(Camera camera)
+        public void FindSceneCamera()
+        {
+            camera = GameObject.FindObjectOfType<Camera>();
+        }
+
+        private void CullCamera()
         {
             float[] distances = new float[32];
 
@@ -98,6 +93,32 @@ namespace Illu.Utility {
             }
 
             camera.transform.localPosition = originalPos;
+        }
+
+        private GameObject lockedVirtualCamera;
+        public void LockCinemachine(bool state)
+        {
+            if (camera.TryGetComponent<CinemachineBrain>(out var brain))
+            {
+                if (!lockedVirtualCamera)
+                    lockedVirtualCamera = brain.ActiveVirtualCamera.VirtualCameraGameObject;
+                lockedVirtualCamera.SetActive(!state);
+            }
+
+            // Camera[] cameras = Camera.allCameras;
+            // if (cameras.Length > 0)
+            // {
+            //     foreach (Camera camera in cameras)
+            //     {
+            //         if (camera.TryGetComponent<CinemachineBrain>(out var brain))
+            //         {
+            //             if (!lockedVirtualCamera)
+            //                 lockedVirtualCamera = brain.ActiveVirtualCamera.VirtualCameraGameObject;
+            //             lockedVirtualCamera.SetActive(!state);
+            //             break;
+            //         }
+            //     }
+            // }
         }
     }
 }

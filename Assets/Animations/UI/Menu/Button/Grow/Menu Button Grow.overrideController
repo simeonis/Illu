@@ -6,7 +6,7 @@ AnimatorOverrideController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Grow Button
+  m_Name: Menu Button Grow
   m_Controller: {fileID: 9100000, guid: 9b178a2d576020247a13b38c98f7faaf, type: 2}
   m_Clips:
   - m_OriginalClip: {fileID: 7400000, guid: 7f7b354e755857348bf51115175db6f4, type: 2}

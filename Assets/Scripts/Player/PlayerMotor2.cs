@@ -34,9 +34,12 @@ public class PlayerMotor2 : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float groundDetection = 0.25f;
     private bool isGrounded = false;
 
-    private Rigidbody playerBody;
+    // Collisions variables
+    [Header("Collisions")]
     [SerializeField] private CapsuleCollider wallCollider;
     [SerializeField] private CapsuleCollider groundCollider;
+
+    private Rigidbody playerBody;
 
     void Start()
     {
@@ -107,12 +110,6 @@ public class PlayerMotor2 : MonoBehaviour
     public void UpdateMoveDirection(Vector3 direction)
     {
         moveDirection = direction.normalized * moveSpeed * 10f;
-
-        // Slide along wall
-        if (Physics.Raycast(transform.position, moveDirection, out wallHit, wallCollider.radius, groundMask))
-        {
-            moveDirection = Vector3.ProjectOnPlane(moveDirection, wallHit.normal);
-        }
     }
 
     void OnDrawGizmos()

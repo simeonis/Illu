@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
-using Mirror;
+using Illu.Utility;
 
 public class GameManager : MonoBehaviour
 {
-    [Scene]
     [SerializeField] private string rootScene;
 
     private static Dictionary<string, Event> _events = new Dictionary<string, Event>();
@@ -35,10 +34,19 @@ public class GameManager : MonoBehaviour
 
     void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode) {
         TriggerEvent("SceneChanged");
-        if (scene.name == "Main Menu")
+        switch(scene.name)
         {
-            TriggerEvent("SceneMenu");
+            case "Main Menu":
+                TriggerEvent("SceneMenu");
+                break;
+            default:
+                break;
         }
+    }
+
+    public void ChangeScene(string scene)
+    {
+        SceneManager.LoadScene(scene);
     }
 
     void OnDisable()
@@ -46,14 +54,14 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnLevelFinishedLoading;
     }
 
-    public void Exit()
-    {
-        Application.Quit();
-    }
-
     public void Resume()
     {
         InputManager.ToggleActionMap(InputManager.playerControls.Land);
+        
+        // Temporary solution
+        // Cinemachine doesn't ignore NEW Input System action maps when disabled
+        CameraUtility.singleton.LockCinemachine(false);
+        
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -61,7 +69,17 @@ public class GameManager : MonoBehaviour
     public void Pause()
     {
         InputManager.ToggleActionMap(InputManager.playerControls.Menu);
+        
+        // Temporary solution
+        // Cinemachine doesn't ignore NEW Input System action maps when disabled
+        CameraUtility.singleton.LockCinemachine(true);
+        
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+    }
+
+    public void Exit()
+    {
+        Application.Quit();
     }
 }

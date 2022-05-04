@@ -1,5 +1,6 @@
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerMotor2))]
 public class PlayerController2 : MonoBehaviour
@@ -13,13 +14,7 @@ public class PlayerController2 : MonoBehaviour
     [SerializeField] Transform playerCamera;
     [SerializeField] CinemachineVirtualCamera cinemachineCamera;
     private CinemachinePOV cinemachinePOV;
-    private PlayerControls playerControls;
     private PlayerMotor2 playerMotor;
-
-    void Awake()
-    {
-        playerControls = new PlayerControls();
-    }
 
     void Start()
     {
@@ -30,26 +25,22 @@ public class PlayerController2 : MonoBehaviour
         cinemachinePOV = cinemachineCamera.GetCinemachineComponent<CinemachinePOV>();
         cinemachinePOV.m_HorizontalAxis.m_MaxSpeed = sensitivity / 100f * 3.2f;
         cinemachinePOV.m_VerticalAxis.m_MaxSpeed = sensitivity / 100f * 1.2f;
-
-        // Cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     void OnEnable() 
     {
-        playerControls.Land.Enable();
+        InputManager.playerControls.Land.Enable();
 
         // Jump
-        playerControls.Land.Jump.performed += context => Jump();
+        InputManager.playerControls.Land.Jump.performed += Jump;
     }
 
     void OnDisable() 
     {
-        playerControls.Land.Disable();
+        InputManager.playerControls.Land.Disable();
 
         // Jump
-        playerControls.Land.Jump.performed -= context => Jump();
+        InputManager.playerControls.Land.Jump.performed -= Jump;
     }
 
     void Update()
@@ -70,7 +61,7 @@ public class PlayerController2 : MonoBehaviour
 
     void SetLookDirection()
     {
-        Vector2 movementInput = playerControls.Land.Movement.ReadValue<Vector2>();
+        Vector2 movementInput = InputManager.playerControls.Land.Movement.ReadValue<Vector2>();
         Vector3 direction = (transform.forward * movementInput.y + transform.right * movementInput.x).normalized;
 
         if (direction.magnitude >= 0.1f)
@@ -89,7 +80,7 @@ public class PlayerController2 : MonoBehaviour
         }
     }
 
-    void Jump() 
+    void Jump(InputAction.CallbackContext context) 
     {
         playerMotor.Jump();
     }
