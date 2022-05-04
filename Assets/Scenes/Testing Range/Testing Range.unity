@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.22038329, g: 0.14790377, b: 0.2596193, a: 1}
+  m_IndirectSpecularColor: {r: 0.2691813, g: 0.18049672, b: 0.32005298, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -541,6 +541,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &94603142
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1511,6 +1513,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &126452414
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3132,6 +3136,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &177304510
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9205,6 +9211,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &600981435
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -12357,6 +12365,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &926702105
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14567,6 +14577,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 1056469278}
+  glassAudioEvent: {fileID: 11400000, guid: 9d6838c93818a42a289fe434beacf273, type: 2}
 --- !u!65 &1056469275
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -15831,6 +15843,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &1111171476
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -16002,6 +16016,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!1 &1133028517
 GameObject:
   m_ObjectHideFlags: 0
@@ -16945,6 +16961,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &1192837895
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -17467,6 +17485,7 @@ GameObject:
   - component: {fileID: 1339642470}
   - component: {fileID: 1339642465}
   - component: {fileID: 1339642464}
+  - component: {fileID: 1339642471}
   - component: {fileID: 1339642473}
   - component: {fileID: 1339642472}
   m_Layer: 0
@@ -17605,6 +17624,18 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1339642471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339642463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc2283316da7e4737a8edac991c60f40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!82 &1339642472
 AudioSource:
   m_ObjectHideFlags: 0
@@ -17929,6 +17960,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &1391851218
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -18378,6 +18411,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &1439435919
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -19898,6 +19933,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &1483078283
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -20001,6 +20038,19 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
+      type: {class: EdgeDetection, ns: , asm: Assembly-CSharp}
+      data:
+        m_Name: Outlines
+        enabled: 1
+        targetColorBuffer: 1
+        targetDepthBuffer: 1
+        clearFlags: 3
+        passFoldout: 1
+        m_Version: 0
+        edgeDetectThreshold: 1
+        edgeRadius: 2
+        glowColor: {r: 0, g: 0, b: 0, a: 1}
+    00000001:
       type: {class: DrawRenderersCustomPass, ns: UnityEngine.Rendering.HighDefinition,
         asm: Unity.RenderPipelines.HighDefinition.Runtime}
       data:
@@ -20025,7 +20075,7 @@ MonoBehaviour:
         depthCompareFunction: 8
         depthWrite: 1
         shaderPass: 0
-    00000001:
+    00000002:
       type: {class: DrawRenderersCustomPass, ns: UnityEngine.Rendering.HighDefinition,
         asm: Unity.RenderPipelines.HighDefinition.Runtime}
       data:
@@ -20050,7 +20100,7 @@ MonoBehaviour:
         depthCompareFunction: 4
         depthWrite: 1
         shaderPass: 0
-    00000002:
+    00000003:
       type: {class: DrawRenderersCustomPass, ns: UnityEngine.Rendering.HighDefinition,
         asm: Unity.RenderPipelines.HighDefinition.Runtime}
       data:
@@ -20075,19 +20125,6 @@ MonoBehaviour:
         depthCompareFunction: 8
         depthWrite: 1
         shaderPass: 0
-    00000003:
-      type: {class: EdgeDetection, ns: , asm: Assembly-CSharp}
-      data:
-        m_Name: Outlines
-        enabled: 1
-        targetColorBuffer: 1
-        targetDepthBuffer: 1
-        clearFlags: 3
-        passFoldout: 1
-        m_Version: 0
-        edgeDetectThreshold: 1
-        edgeRadius: 2
-        glowColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!4 &1489188787
 Transform:
   m_ObjectHideFlags: 0
@@ -20149,6 +20186,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &1503177547
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -24317,6 +24356,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &1753456378
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -24551,6 +24592,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &1804924966
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -25895,6 +25938,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rippleDuration: 2
+  glassAudioSource: {fileID: 0}
+  glassAudioEvent: {fileID: 0}
 --- !u!65 &1967138039
 BoxCollider:
   m_ObjectHideFlags: 0

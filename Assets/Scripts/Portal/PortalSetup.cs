@@ -2,15 +2,11 @@ using UnityEngine;
 
 public class PortalSetup : MonoBehaviour
 {
-    public Camera sourceView;
-    public Shader shader;
-
-    private Portal[] portals;
-
-    // Start is called before the first frame update
-    void Start()
+    public void Setup()
     {
-        portals = FindObjectsOfType<Portal>();
+        Camera camera = Camera.main;
+        Shader shader = Shader.Find("Unlit/PortalCutout");
+        Portal[] portals = FindObjectsOfType<Portal>();
 
         // Texture setup
         for (int i = 0; i < portals.Length; i++)
@@ -26,7 +22,7 @@ public class PortalSetup : MonoBehaviour
             };
 
             // Player camera setup
-            portals[i].render.playerCamera = sourceView;
+            portals[i].render.playerCamera = camera;
         }
     }
 }

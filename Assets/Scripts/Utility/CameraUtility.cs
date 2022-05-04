@@ -1,11 +1,11 @@
 using System.Collections;
 using UnityEngine;
+using Cinemachine;
 
 namespace Illu.Utility {
     [System.Serializable] 
     public struct LayerCullDistances {
-        public string name;
-        public int layerNumber;
+        public LayerMask layer;
         public float distance;
     }
 
@@ -17,7 +17,7 @@ namespace Illu.Utility {
         private static CameraUtility _instance;
         public static CameraUtility singleton { get { return _instance; } }
         private Canvas canvas;
-        private new Camera camera;
+        public new Camera camera;
 
         void Awake()
         {
@@ -31,28 +31,28 @@ namespace Illu.Utility {
             }
         }
 
-        public void FindSceneCamera()
+        public static bool VisibleFromCamera(MeshRenderer renderer, Camera camera) 
         {
-            Camera camera = FindObjectOfType<Camera>();
+            Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(camera);
+            return GeometryUtility.TestPlanesAABB(frustumPlanes, renderer.bounds);
+        }
+
+        public void UpdateCanvasCamera()
+        {
+            FindSceneCamera();
             if (camera)
             {
-                this.camera = camera;
-
-                // Desired outcome (Post-processing for UI)
-                canvas.renderMode = RenderMode.ScreenSpaceCamera;
                 canvas.worldCamera = camera;
-                CullCamera(camera);
-            }
-            else 
-            {
-                this.camera = null;
-
-                // Undesired outcome (No post-processing for UI)
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                CullCamera();
             }
         }
 
-        private void CullCamera(Camera camera)
+        public void FindSceneCamera()
+        {
+            camera = GameObject.FindObjectOfType<Camera>();
+        }
+
+        private void CullCamera()
         {
             float[] distances = new float[32];
 
@@ -60,7 +60,8 @@ namespace Illu.Utility {
             for(int i=0; i<layerCullDistances.Length; i++)
             {
                 LayerCullDistances lcd = layerCullDistances[i];
-                distances[lcd.layerNumber] = lcd.distance;
+                int index = (int) Mathf.Log(lcd.layer.value, 2);
+                distances[index] = lcd.distance;
             }
 
             camera.layerCullDistances = distances;
@@ -92,6 +93,32 @@ namespace Illu.Utility {
             }
 
             camera.transform.localPosition = originalPos;
+        }
+
+        private GameObject lockedVirtualCamera;
+        public void LockCinemachine(bool state)
+        {
+            if (camera.TryGetComponent<CinemachineBrain>(out var brain))
+            {
+                if (!lockedVirtualCamera)
+                    lockedVirtualCamera = brain.ActiveVirtualCamera.VirtualCameraGameObject;
+                lockedVirtualCamera.SetActive(!state);
+            }
+
+            // Camera[] cameras = Camera.allCameras;
+            // if (cameras.Length > 0)
+            // {
+            //     foreach (Camera camera in cameras)
+            //     {
+            //         if (camera.TryGetComponent<CinemachineBrain>(out var brain))
+            //         {
+            //             if (!lockedVirtualCamera)
+            //                 lockedVirtualCamera = brain.ActiveVirtualCamera.VirtualCameraGameObject;
+            //             lockedVirtualCamera.SetActive(!state);
+            //             break;
+            //         }
+            //     }
+            // }
         }
     }
 }

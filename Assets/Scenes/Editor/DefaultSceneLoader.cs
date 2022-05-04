@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using Illu.Utility;
 
 [InitializeOnLoadAttribute]
 public static class DefaultSceneLoader
@@ -17,7 +18,7 @@ public static class DefaultSceneLoader
             EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
         }
 
-        if (state == PlayModeStateChange.EnteredPlayMode)
+        if (state == PlayModeStateChange.EnteredPlayMode && CameraUtility.singleton == null)
         {
             EditorSceneManager.LoadScene(0);
         }
