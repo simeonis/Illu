@@ -44,11 +44,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void ChangeScene(string scene)
-    {
-        SceneManager.LoadScene(scene);
-    }
-
     void OnDisable()
     {
         SceneManager.sceneLoaded -= OnLevelFinishedLoading;

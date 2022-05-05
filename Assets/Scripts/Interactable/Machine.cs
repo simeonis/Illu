@@ -41,7 +41,7 @@ public abstract class Machine : Interactable
         isInteracting = true;
 
         // Lock player
-        playerController.visionLocked = true;
+        // playerController.visionLocked = true;
         //playerControls.Land.Disable();
         //playerControls.Lever.Enable();
 
@@ -64,7 +64,7 @@ public abstract class Machine : Interactable
         isInteracting = false;
 
         // Release player
-        playerController.visionLocked = false;
+        // playerController.visionLocked = false;
         // playerControls.Land.Enable();
         // playerControls.Lever.Disable();
 
