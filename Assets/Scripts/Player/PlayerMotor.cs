@@ -112,9 +112,18 @@ public class PlayerMotor : MonoBehaviour
         moveDirection = direction.normalized * moveSpeed * 10f;
     }
 
+    #if UNITY_EDITOR
+    [Header("Debug"), InspectorName("enable")] 
+    public bool enable = false;
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(transform.position, groundDetection);
+        if (enable)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(transform.position, groundDetection);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawRay(transform.position, moveDirection.normalized);
+        }
     }
+    #endif
 }

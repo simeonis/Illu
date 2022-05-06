@@ -10,9 +10,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Range(0f, 100f)] private float sensitivity = 50f;
     private float xRotation, yRotation;
 
-    [SerializeField] Transform orientation;
-    [SerializeField] Transform playerCamera;
-    [SerializeField] CinemachineVirtualCamera cinemachineCamera;
+    [SerializeField] public Transform orientation;
+    [SerializeField] public Transform playerCamera;
+    [SerializeField] private CinemachineVirtualCamera cinemachineCamera;
     private CinemachinePOV cinemachinePOV;
     private PlayerMotor playerMotor;
 

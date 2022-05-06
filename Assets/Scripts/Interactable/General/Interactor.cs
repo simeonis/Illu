@@ -1,163 +1,158 @@
 using UnityEngine;
-using Mirror;
 
-public abstract class Interactor : NetworkBehaviour
+public abstract class Interactor : MonoBehaviour
 {
     [Header("Interaction")]
-    [SerializeField] public Transform source;
-    [SerializeField] private float interactionRange;
+    [SerializeField] protected float range;
+    [SerializeField] protected Vector3 offset;
+    [SerializeField] protected LayerMask layers;
 
-    // Public
-    [Header("Equipment")]
-    [SerializeField] public Transform equipmentParent;
-    public EquipmentSlot equipmentSlot;
-
-    // Protected
-    protected bool canInteract;
-    protected bool interaction = false;
-
-    // Private
-    protected Interactable interactable;
-
-    // Network
-    [SyncVar]
-    [HideInInspector] public GameObject networkInteractable;
-    protected NetworkSimpleData networkSimpleData;
-    public SyncInteractables syncInteractables;
-
-    protected virtual void Awake()
+    protected Interactable cachedInteractable;
+    protected Collider colliderInteractable; // The closest, valid interactable's collider
+    protected Collider[] potentialCollisions = new Collider[10];
+    private InteractorState state = InteractorState.Searching;
+    private enum InteractorState
     {
-        networkSimpleData = GetComponent<NetworkSimpleData>();
-        syncInteractables = GetComponent<SyncInteractables>();
-    }
-
-    protected virtual void OnEnable()
-    {
-        // Network
-        networkSimpleData.DataChanged += InteractEventHandler;
-
-        // Input
-        InputManager.playerControls.Land.Interact.performed += context => Interact();
-        InputManager.playerControls.Land.Interact.canceled += context => InteractCanceled();
-    }
-
-    protected virtual void Start()
-    {
-        equipmentSlot = new EquipmentSlot(transform);
-    }
-
-    protected virtual void OnDisable()
-    {
-        // Network
-        networkSimpleData.DataChanged -= InteractEventHandler;
-
-        // Input
-        InputManager.playerControls.Land.Interact.performed -= context => Interact();
-        InputManager.playerControls.Land.Interact.canceled -= context => InteractCanceled();
+        Searching,
+        Interacting,
     }
 
     protected virtual void Update()
     {
-        canInteract = CheckInteraction(out interactable);
-    }
-
-    private void InteractEventHandler(object sender, DataChangedEventArgs e)
-    {
-        switch (e.key)
+        switch(state)
         {
-            case "INTERACTION_INTERACT":
-                if (networkInteractable != null)
-                {
-                    networkInteractable.GetComponent<Interactable>().Interaction(this);
-                }
+            case InteractorState.Searching:
+                SearchInteractable();
                 break;
-            case "INTERACTION_DROPPED":
-                if (equipmentSlot.HasEquipment())
-                {
-                    equipmentSlot.GetEquipment().Interaction(this);
-                }
-                break;
-            case "INTERACTION_CANCELLED":
-                if (networkInteractable != null)
-                {
-                    networkInteractable.GetComponent<Interactable>().InteractionCancelled(this);
-                }
-                break;
-            case "INTERACTION_ABORTED":
-                if (networkInteractable != null)
-                {
-                    networkInteractable.GetComponent<Interactable>().InteractionCancelled(this);
-                    interactable = null;
-
-                    // Server [SyncVar]
-                    if (hasAuthority) SetNetworkInteractable(null);
-                }
-                break;
-            default:
+            case InteractorState.Interacting:
+                InteractionRange();
                 break;
         }
     }
-
+    
     protected virtual void Interact()
     {
-        // Note: Only send over network if looking at interactable or holding equipment
-        // Interact
-        if (!interaction && canInteract)
+        if (GetInteractable(out var interactable))
         {
-            interaction = true;
-            networkSimpleData.SendData("INTERACTION_INTERACT");
-        }
-        // Drop
-        else if (!canInteract && equipmentSlot.HasEquipment())
-        {
-            networkSimpleData.SendData("INTERACTION_DROPPED");
+            state = InteractorState.Interacting;
+            interactable.Interact(this);
         }
     }
 
     protected virtual void InteractCanceled()
     {
-        if (interaction)
+        if (GetInteractable(out var interactable) && IsInteracting())
         {
-            interaction = false;
-            networkSimpleData.SendData("INTERACTION_CANCELLED");
+            state = InteractorState.Searching;
+            interactable.InteractCancel(this);
+            cachedInteractable = null;
         }
     }
 
-    private bool CheckInteraction(out Interactable interactable)
+    // Checks if interactor is currently interacting with an interactable
+    protected bool IsInteracting()
     {
-        if (Physics.Raycast(source.position, source.forward, out RaycastHit hit, interactionRange))
-        {
-            interactable = hit.collider.GetComponent<Interactable>();
-
-            // Possible interaction
-            if (interactable != null)
-            {
-                // Server [SyncVar]
-                if (hasAuthority) SetNetworkInteractable(hit.collider.gameObject);
-            }
-            // No possible interaction
-            else
-            {
-                // Cancel any ongoing interaction (no longer looking at them)
-                if (interaction && !equipmentSlot.HasEquipment())
-                {
-                    interaction = false;
-                    networkSimpleData.SendData("INTERACTION_ABORTED");
-                }
-            }
-
-            return interactable != null;
-        }
-        else
+        return state == InteractorState.Interacting;
+    }
+    
+    // Checks if interactable has been found and returns it
+    // Used to avoid calling GetComponent in every update loop
+    protected bool GetInteractable(out Interactable interactable)
+    {
+        if (!colliderInteractable)
         {
             interactable = null;
             return false;
         }
+        else if (!cachedInteractable)
+        {
+            cachedInteractable = colliderInteractable.GetComponent<Interactable>();
+        }
+
+        interactable = cachedInteractable;
+        return true;
     }
 
-    [Command]
-    private void SetNetworkInteractable(GameObject gameObject)
+    // Searches for interactables (max. 10) nearby interactor and choses the closest one
+    protected virtual void SearchInteractable()
     {
-        networkInteractable = gameObject;
+        // Find all potential interactables in range of the interactor
+        int collisionsFound = Physics.OverlapSphereNonAlloc(transform.position + transform.TransformDirection(offset), range, potentialCollisions, layers);
+
+        // No interactables in range
+        if (collisionsFound <= 0)
+        {
+            colliderInteractable = null;
+        }
+
+        // Default: No validation
+        Collider[] validCollisions;
+        int validAmount = ValidateCollider(potentialCollisions, collisionsFound, out validCollisions);
+
+        // No interactables in range and in-front of interactor
+        if (validAmount <= 0)
+        {
+            colliderInteractable = null;
+        }
+        // One interactable in range and in-front of interactor
+        else if (validAmount == 1)
+        {
+            colliderInteractable = validCollisions[0];
+            cachedInteractable = null; // Invalidate cache
+        }
+        // Multiple interactables in range and in-front of interactor
+        else
+        {
+            Collider closestCollider = null;
+            float minDistance = float.MaxValue;
+            
+            // Search for closest interactable to interactor
+            for (int i=0; i < validAmount; i++)
+            {
+                Collider collider = validCollisions[i];
+                float distance = Vector3.Distance(transform.position, collider.transform.position);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    closestCollider = collider;
+                }
+            }
+
+            colliderInteractable = closestCollider;
+            cachedInteractable = null; // Invalidate cache
+        }
     }
+
+    // Currently does nothing, useful for overriding
+    // Example: Player only validates colliders that are within 90 degrees of camera's forward vector
+    protected virtual int ValidateCollider(Collider[] colliders, int collidersFound, out Collider[] validatedColliders)
+    {
+        validatedColliders = colliders;
+        return collidersFound;
+    }
+
+    // Cancels interaction if interactor gets too far from interactable
+    protected virtual void InteractionRange()
+    {
+        if (GetInteractable(out var interactable))
+        {
+            if (Vector3.Distance(transform.position, interactable.transform.position) > range)
+            {
+                InteractCanceled();
+            }
+        }
+    }
+
+    #if UNITY_EDITOR
+    [Header("Debug"), InspectorName("enable")] 
+    public bool enable = false;
+    protected virtual void OnDrawGizmos()
+    {
+        if (enable)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position + transform.TransformDirection(offset), range);
+        }
+    }
+    #endif
 }
