@@ -27,7 +27,7 @@ public class PlayerController2 : MonoBehaviour
         cinemachinePOV.m_VerticalAxis.m_MaxSpeed = sensitivity / 100f * 1.2f;
     }
 
-    void OnEnable() 
+    void OnEnable()
     {
         InputManager.playerControls.Land.Enable();
 
@@ -35,7 +35,7 @@ public class PlayerController2 : MonoBehaviour
         InputManager.playerControls.Land.Jump.performed += Jump;
     }
 
-    void OnDisable() 
+    void OnDisable()
     {
         InputManager.playerControls.Land.Disable();
 
@@ -56,7 +56,7 @@ public class PlayerController2 : MonoBehaviour
     float VectorAngle360(Vector3 from, Vector3 to, Vector3 right)
     {
         float angle = Vector3.Angle(from, to);
-        return (Vector3.Angle(right, to) > 90f) ? 360f - angle : angle;            
+        return (Vector3.Angle(right, to) > 90f) ? 360f - angle : angle;
     }
 
     void SetLookDirection()
@@ -68,7 +68,7 @@ public class PlayerController2 : MonoBehaviour
         {
             // Angle 
             float targetAngle = VectorAngle360(transform.forward, direction, transform.right) + playerCamera.localEulerAngles.y;
-            
+
             float smoothAngle = Mathf.SmoothDampAngle(orientation.localEulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
             orientation.rotation = transform.rotation * Quaternion.Euler(0f, smoothAngle, 0f);
 
@@ -80,7 +80,7 @@ public class PlayerController2 : MonoBehaviour
         }
     }
 
-    void Jump(InputAction.CallbackContext context) 
+    void Jump(InputAction.CallbackContext context)
     {
         playerMotor.Jump();
     }
