@@ -3,9 +3,13 @@ using UnityEngine;
 public class Player : Interactor
 {
     [Header("Player Interaction")]
+    public Transform playerCamera;
     [SerializeField] private float raycastRange;
-    [SerializeField] private Transform playerCamera;
     [SerializeField] private StringVariable message;
+
+    [Header("Equipment Slots")]
+    [SerializeField] private Transform rightHand;
+    private Equipment equipment = null;
 
     protected void OnEnable()
     {
@@ -45,17 +49,51 @@ public class Player : Interactor
 
     protected override void Interact()
     {
-        base.Interact();
         GameManager.TriggerEvent("PlayerInteracting");
+        
+        // Interactable in range
+        if (GetInteractable(out var interactable))
+        {
+            if (IsEquipped() && (interactable as Equipment)) equipment.Interact(this);
+            else 
+            {
+                state = InteractorState.Interacting;
+                interactable.Interact(this);
+            }
+        }
+        // No interactable in range & holding equipment
+        else if (IsEquipped())
+        {
+            equipment.Interact(this);
+        }
     }
 
-    private void FirePressed() {}
+    public void Equip(Equipment equipment)
+    {
+        equipment.transform.SetParent(rightHand, false);
+        equipment.transform.localPosition = Vector3.zero;
+        equipment.transform.localRotation = Quaternion.identity;
+        this.equipment = equipment;
+    }
 
-    private void FireReleased() {}
+    public void Drop(Equipment equipment)
+    {
+        if (this.equipment == equipment)
+        {
+            this.equipment.transform.parent = null;
+            this.equipment = null;
+        }
+    }
 
-    private void AlternateFirePressed() {}
+    public bool IsEquipped()
+    {
+        return equipment != null;
+    }
 
-    private void AlternateFireReleased() {}
+    private void FirePressed() => equipment?.EquipmentPrimaryPressed();
+    private void FireReleased() => equipment?.EquipmentPrimaryReleased();
+    private void AlternateFirePressed() => equipment?.EquipmentSecondaryPressed();
+    private void AlternateFireReleased() => equipment?.EquipmentSecondaryReleased();
 
     private void UpdateUI()
     {

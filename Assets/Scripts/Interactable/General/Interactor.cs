@@ -10,8 +10,8 @@ public abstract class Interactor : MonoBehaviour
     protected Interactable cachedInteractable;
     protected Collider colliderInteractable; // The closest, valid interactable's collider
     protected Collider[] potentialCollisions = new Collider[10];
-    private InteractorState state = InteractorState.Searching;
-    private enum InteractorState
+    protected InteractorState state = InteractorState.Searching;
+    protected enum InteractorState
     {
         Searching,
         Interacting,
@@ -144,7 +144,7 @@ public abstract class Interactor : MonoBehaviour
     }
 
     #if UNITY_EDITOR
-    [Header("Debug"), InspectorName("enable")] 
+    [Header("Debug")] 
     public bool enable = false;
     protected virtual void OnDrawGizmos()
     {

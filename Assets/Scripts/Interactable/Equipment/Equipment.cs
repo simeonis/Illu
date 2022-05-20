@@ -4,47 +4,51 @@ using UnityEngine;
 public class Equipment : Interactable
 {
     [HideInInspector] public Rigidbody equipmentBody;
+    [HideInInspector] public Collider equipmentCollider;
+    protected Player player;
 
-    void Start()
+    protected override void Start()
     {
         equipmentBody = GetComponent<Rigidbody>();
+        equipmentCollider = GetComponent<Collider>();
+        ChangeChildrenLayerMask(transform, "Equipment", true);
     }
 
     public override void Interact(Interactor interactor)
     {
-        Debug.Log($"INTERACTION_INTERACT: {transform.name}");
-    }
-
-    public override void InteractCancel(Interactor interactor)
-    {
-        Debug.Log($"INTERACTION_CANCELLED: {transform.name}");
-    }
-
-    /* 
-     * Modifies layer of each child inside of parent.
-     * If inclusive is true, parent's layer is also modified.
-     * Useful for Camera Culling Mask.
-     */
-    protected void ChangeChildrenLayerMask(Transform parent, string layer, bool inclusive)
-    {
-        if (inclusive) ChangeLayerMask(parent, layer);
-        foreach (Transform child in parent.transform)
+        if (interactor is Player)
         {
-            if (child == null) continue;
-            ChangeChildrenLayerMask(child, layer, true);
+            player = interactor as Player;
+
+            // Drop
+            if (player.IsEquipped())
+            {
+                // 1. Remove equipment from interactor's hand
+                player.Drop(this);
+                // 2. Enable rigidbody
+                equipmentBody.isKinematic = false;
+                // 3. Enable collider
+                equipmentCollider.enabled = true;
+                // 4. Remove reference to player
+                player = null;
+            }
+            // Pick-Up
+            else
+            {
+                // 1. Disable rigidbody
+                equipmentBody.isKinematic = true;
+                // 2. Disable collider
+                equipmentCollider.enabled = false;
+                // 3. Move equipment to interactor's hand
+                player.Equip(this);
+            }
         }
     }
 
-    /*
-     * Modifies layer of specific element without modifying it's children.
-     */
-    protected void ChangeLayerMask(Transform element, string layer)
-    {
-        element.gameObject.layer = LayerMask.NameToLayer(layer);
-    }
+    public override void InteractCancel(Interactor interactor) {}
 
-    public void EquipmentPrimaryPressed() { Debug.Log("Equipment Primary Pressed"); }
-    public void EquipmentPrimaryReleased() { Debug.Log("Equipment Primary Released"); }
-    public void EquipmentSecondaryPressed() { Debug.Log("Equipment Secondary Pressed"); }
-    public void EquipmentSecondaryReleased() { Debug.Log("Equipment Secondary Released"); }
+    public virtual void EquipmentPrimaryPressed() { Debug.Log("Equipment Primary Pressed"); }
+    public virtual void EquipmentPrimaryReleased() { Debug.Log("Equipment Primary Released"); }
+    public virtual void EquipmentSecondaryPressed() { Debug.Log("Equipment Secondary Pressed"); }
+    public virtual void EquipmentSecondaryReleased() { Debug.Log("Equipment Secondary Released"); }
 }
