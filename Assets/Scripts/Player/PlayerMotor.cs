@@ -4,226 +4,283 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMotor : MonoBehaviour
 {
-    // Animation variables
     [Header("Animation Modifiers")]
     [SerializeField] private Animator animator;
     private int isGroundedHash;
     private int isMovingHash;
     private int isJumpingHash; 
     private int isFallingHash;
-    private int isDownHash;
-    private int standUpHash;
-    private int standUpSpeedHash;
-    private int verticalVelocityHash;
+    private int isSafeLandingHash;
+    private int hasLandedHash;
+    private int moveSpeedHash;
+    private int fallSpeedHash;
 
-    // Movement variables
-    [Header("Movement Modifiers")]
-    [SerializeField, Tooltip("Max speed when walking")] 
-    private float walkSpeed = 6f;
-    [SerializeField, Tooltip("Max speed when sprinting")]
-    private float sprintSpeed = 12f;
-    [SerializeField, Tooltip("Time in seconds it takes the player to transition from walking to sprinting")] 
-    private float sprintAcceleration = 0.25f;
-    [SerializeField, Range(0f, 1f), Tooltip("Air resistance")] 
-    private float airResistance = 0.4f;
-    private bool isMoving = false;
-    private float moveSpeed = 6f;
-    private Vector3 moveDirection = Vector3.zero;
+    [Header("Rotation Modifiers")]
+    [SerializeField] private Transform orientation;
+    [SerializeField] private Transform playerCamera;
+    private float turnSmoothVelocity;
+
+    [Header("Locomotion Modifiers")]
+    [SerializeField, Tooltip("Max walk speed")] 
+    private float walkSpeed = 4f;
+    [SerializeField, Tooltip("Max sprint speed")] 
+    private float sprintSpeed = 10f;
+    [SerializeField, Tooltip("Rate of change to reach max speed")]
+    private float acceleration = 50;
+    [SerializeField, Tooltip("Max acceleration")]
+    private float maxAcceleration = 150f;
+    [SerializeField, Tooltip("Acceleration factor based on direction change")]
+    private AnimationCurve accelerationDotFactor;
+    private Vector3 targetVel = Vector3.zero;
+    private Vector3 unitMoveDir = Vector3.zero; // User input
     private float verticalVelocity = 0.0f;
+    private float moveSpeed = 0.0f;
+    private bool isSprintPressed = false;
+    private bool isMoving = false;
     private RaycastHit wallHit;
 
-    // Drag variables
-    [Header("Drag Modifiers")]
-    [SerializeField, Tooltip("Drag force applied while grounded")] 
-    private float groundDrag = 6f;
-    [SerializeField, Tooltip("Drag force applied while airborne")] 
-    private float airDrag = 2f;
-
-    // Jump variables
     [Header("Jump Modifiers")]
-    [SerializeField] private float jumpForce = 8f;
+    [SerializeField, Tooltip("Apex of jump")] 
+    private float maxJumpHeight = 1.5f;
+    [SerializeField, Tooltip("Time to complete a full jump in seconds")]
+    private float maxJumpTime = 0.75f;
+    [SerializeField, Tooltip("Amount of time a player can still jump, even after walking off a platform")] 
+    private float coyoteTime = 0.15f;
+    private float coyoteTimeCounter;
+    private float initialJumpVelocity;
+    private bool isJumpPressed = false;
     private bool isJumping = false;
 
-    // Fall variables
     [Header("Fall Modifiers")]
     [SerializeField, Tooltip("Threshold velocity in which the player will count as falling")] 
     private float fallThresholdVelocity = 1f;
-    [SerializeField, Tooltip("Highest velocity that ensures a safe landing")] 
-    private float safeVelocity = 6f;
-    [SerializeField, Tooltip("Lowest velocity that causes a harmful landing")] 
-    private float harmfulVelocity = 20f;
-    [SerializeField, Tooltip("Time in seconds it takes the player to stand up")]
-    private float standUpTime = 1f;
+    [SerializeField, Tooltip("Velocity or lower that ensures a safe landing")] 
+    private float safeVelocity = 20f;
+    [SerializeField, Tooltip("Velocity or higher that causes a harmful landing")] 
+    private float harmfulVelocity = 24f;
+    [SerializeField, Tooltip("Player \"Landing Flat Impact\" animation clip")]
+    private AnimationClip landingFlatImpactAnimationClip;
+    [SerializeField, Tooltip("Player \"Stand Up\" animation clip")]
+    private AnimationClip standUpAnimationClip;
     private bool isFalling = false;
-    private bool willLandSafe = true;
+    private bool isSafeLanding = true;
 
-    // Gravity variables
-    [Header("Gravity Modifiers")]
-    [SerializeField, Range(0f, 25f), Tooltip("Force of gravity being applied to the player")] 
-    private float gravityScalar = 9.8f;
-    private float gravityAcceleration = 0f;
-
-    // Ground variables
     [Header("Ground Modifiers")]
     [SerializeField, Tooltip("Layers that the player can collide with")] 
     private LayerMask groundMask;
     [SerializeField, Range(0f, 1f), Tooltip("Range from feet that checks if the player is grounded")]
-    private float groundDetection = 0.25f;
+    private float groundDetection = 0.18f;
     private bool isGrounded = false;
 
-    // Collider variables
-    [Header("Colliders")]
-    [SerializeField] private CapsuleCollider wallCollider;
-    [SerializeField] private CapsuleCollider groundCollider;
     private Rigidbody playerBody;
+    private float gravity;
+    private bool isFrozen = false;
 
     void Start()
     {
         playerBody = GetComponent<Rigidbody>();
 
-        // Movement
         moveSpeed = walkSpeed;
 
-        // Animation Hash (Increases performance)
+        // Gravity + Jump
+        float timeToApex = maxJumpTime * 0.5f;
+        gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex, 2);
+        initialJumpVelocity = (2 * maxJumpHeight) / timeToApex;
+
+        // Animation Hash (Increases Performance)
         isGroundedHash = Animator.StringToHash("isGrounded");
         isMovingHash = Animator.StringToHash("isMoving");
         isJumpingHash = Animator.StringToHash("isJumping");
         isFallingHash = Animator.StringToHash("isFalling");
-        isDownHash = Animator.StringToHash("isDown");
-        standUpHash = Animator.StringToHash("standUp");
-        standUpSpeedHash = Animator.StringToHash("standUpSpeed");
-        verticalVelocityHash = Animator.StringToHash("verticalVelocity");
-    }
-
-    IEnumerator StandUp()
-    {
-        float standUpAnimationlength = 4.8f;
-        animator.SetFloat(standUpSpeedHash, standUpAnimationlength / standUpTime);
-        animator.SetTrigger(standUpHash);
-
-        yield return new WaitForSeconds(standUpTime);
-
-        willLandSafe = true;
+        isSafeLandingHash = Animator.StringToHash("isSafeLanding");
+        hasLandedHash = Animator.StringToHash("hasLanded");
+        moveSpeedHash = Animator.StringToHash("moveSpeed");
+        fallSpeedHash = Animator.StringToHash("fallSpeed");
     }
 
     void Update()
     {
-        // Grounded
+        // Grounded (transform.position = feet)
         isGrounded = Physics.CheckSphere(transform.position, groundDetection, groundMask);
         animator.SetBool(isGroundedHash, isGrounded);
         
-        // Moving
+        // Locomotion
         isMoving = playerBody.velocity.magnitude > 0.1f;
         animator.SetBool(isMovingHash, isMoving);
 
-        // Jumping
-        if (isJumping && isFalling)
-        {
-            isJumping = false;
-            animator.SetBool(isJumpingHash, false);
-        }
-
-        // Falling end
-        if (isFalling && isGrounded)
-        {
-            isFalling = false;
-            animator.SetBool(isFallingHash, false);
-            animator.SetBool(isDownHash, !willLandSafe);
-            if (!willLandSafe) StartCoroutine(StandUp());
-        }
-        // Falling begin
-        else if (verticalVelocity < -fallThresholdVelocity)
+        // Falling - Started
+        if (!isFalling && !isGrounded && verticalVelocity < -fallThresholdVelocity)
         {
             isFalling = true;
             animator.SetBool(isFallingHash, true);
         }
-
-        // Landing
+        // Falling - Finished
+        else if (isFalling && isGrounded)
+        {
+            isFalling = false;
+            animator.SetBool(isFallingHash, false);
+            
+            // Harmful Landing
+            if (!isSafeLanding)
+            {
+                isSafeLanding = true;
+                StartCoroutine(StandUp());
+            }
+        }
+        // Falling
         if (isFalling)
         {
-            animator.SetFloat(verticalVelocityHash, verticalVelocity);
+            animator.SetFloat(fallSpeedHash, verticalVelocity);
 
-            // Safe-land
+            // Safe Landing
             if (verticalVelocity >= -safeVelocity)
             {
-                willLandSafe = true;
+                isSafeLanding = true;
             }
-            // Flattened
+            // Harmful Landing
             else if (verticalVelocity <= -harmfulVelocity)
             {
-                willLandSafe = false;
-            }
-            // Stumble
-            else
-            {
-                // Do something
+                isSafeLanding = false;
             }
         } 
-        
-        // Drag
-        playerBody.drag = isGrounded ? groundDrag : airDrag;
     }
 
     void FixedUpdate()
     {
         Gravity();
-        Move();
+        Locomotion();
+        Jump();
+        
         verticalVelocity = Vector3.Dot(playerBody.velocity, transform.up);
     }
 
     void Gravity()
     {
-        // Reset gravity acceleration
-        if (isGrounded && gravityAcceleration != 0)
-        {
-            gravityAcceleration = 0f;
-        }
-
-        // Falling, relative to player's orientation
-        if (isFalling)
-        {
-            gravityAcceleration += 25f * Time.deltaTime; // Increase gravity acceleration
-            playerBody.AddForce(transform.up * -(gravityScalar + gravityAcceleration) * 2f, ForceMode.Acceleration);
-        }
-        // Ascending, relative to player's orientation
-        else
-        {
-            playerBody.AddForce(transform.up * -gravityScalar, ForceMode.Acceleration);
-        }
+        playerBody.AddForce(transform.up * gravity, ForceMode.Acceleration);
     }
 
-    void Move()
+    void Locomotion()
     {
-        if (!willLandSafe) return;
+        float velDot = Vector3.Dot(unitMoveDir, targetVel);
 
-        if (isGrounded)
-        {
-            playerBody.AddForce(moveDirection, ForceMode.Acceleration);
-        }
-        else
-        {
-            playerBody.AddForce(moveDirection * airResistance, ForceMode.Acceleration);
-        }
+        // Increases acceleration based on target velocity angle difference to the current velocity
+        float accel = acceleration * accelerationDotFactor.Evaluate(velDot);
+
+        // Set move speed to sprint speed if "sprint_key" is pressed
+        moveSpeed = isSprintPressed ? sprintSpeed : walkSpeed;
+
+        // Move previous target velocity to current target velocity
+        targetVel = Vector3.MoveTowards(targetVel, unitMoveDir * moveSpeed, accel * Time.fixedDeltaTime);
+        
+        // Adjust the player's animation from walking to sprinting gradually (and vice versa)
+        animator.SetFloat(moveSpeedHash, (targetVel.magnitude - walkSpeed) / (sprintSpeed - walkSpeed));
+        
+        // Rigidbody's current velocity (excluding upwards axis)
+        Vector3 currVel = playerBody.velocity - Vector3.Project(playerBody.velocity, transform.up);
+        
+        // Acceleration needed to achieve target velocity from current velocity
+        Vector3 targetAcceleration = (targetVel - currVel) / Time.fixedDeltaTime;
+        targetAcceleration = Vector3.ClampMagnitude(targetAcceleration, maxAcceleration);
+        
+        playerBody.AddForce(targetAcceleration, ForceMode.Acceleration);
     }
 
-    public void Jump()
+    void Jump()
     {
-        if (isGrounded && willLandSafe)
+        // Coyote Time
+        if (isGrounded) coyoteTimeCounter = coyoteTime;
+        else coyoteTimeCounter -= Time.deltaTime;
+
+        if (!isJumping && (coyoteTimeCounter > 0f) && isJumpPressed)
         {
+            isJumping = true;
+            isJumpPressed = false; // Remove this to hold jump button
+            animator.SetBool(isJumpingHash, true);
+            
             // Cancel upwards velocity, relative to player's orientation
-            playerBody.velocity = playerBody.velocity - Vector3.Project(playerBody.velocity, transform.up);
+            playerBody.velocity -= Vector3.Project(playerBody.velocity, transform.up);
             
             // Add upwards force, relative to player's orientation
-            playerBody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-
-            isJumping = true;
-            animator.SetBool(isJumpingHash, true);
+            playerBody.AddForce(transform.up * initialJumpVelocity, ForceMode.VelocityChange);
+        } 
+        // No longer considered jumping when beginning to fall
+        else if (isJumping && isFalling)
+        {
+            isJumping = false;
+            animator.SetBool(isJumpingHash, false);
         }
     }
 
-    public void UpdateMoveDirection(Vector3 direction)
+    IEnumerator StandUp()
     {
-        moveDirection = direction.normalized * moveSpeed * 10f;
+        Freeze();
+        animator.SetTrigger(hasLandedHash);
+
+        yield return new WaitForSeconds(standUpAnimationClip.length + landingFlatImpactAnimationClip.length);
+
+        Unfreeze();
+    }
+
+    /// <summary>
+    /// Notifies the intended direction.
+    /// </summary>
+    public void UpdateMovement(Vector2 direction)
+    {
+        if (isFrozen) return;
+        unitMoveDir = (transform.forward * direction.y) + (transform.right * direction.x);
+
+        // Rotates player in direction of movement, relative to camera's direction
+        if (unitMoveDir.magnitude >= 0.1f)
+        {
+            // Visual explanation: https://youtu.be/4HpC--2iowE?t=762
+            float targetAngle = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg + playerCamera.localEulerAngles.y;
+            float smoothAngle = Mathf.SmoothDampAngle(orientation.localEulerAngles.y, targetAngle, ref turnSmoothVelocity, 0.1f);
+            orientation.rotation = transform.rotation * Quaternion.Euler(0f, smoothAngle, 0f);
+            unitMoveDir = Quaternion.Euler(transform.up * targetAngle) * transform.forward;
+        }
+    }
+
+    /// <summary>
+    /// Notifies that the "jump_key" has been pressed/unpressed.
+    /// </summary>
+    public void SetJump(bool isPressed)
+    {
+        if (isFrozen) return;
+        isJumpPressed = isPressed;
+        if (!isJumpPressed) coyoteTimeCounter = 0f;
+    }
+
+    /// <summary>
+    /// Notifies that the "sprint_key" has been pressed/unpressed.
+    /// </summary>
+    public void SetSprint(bool isPressed) 
+    {
+        if (isFrozen) return;
+        isSprintPressed = isPressed;
+    }
+
+    /// <summary>
+    /// Disables all movement, expect for gravity.
+    /// </summary>
+    public void Freeze() 
+    {
+        isFrozen = true;
+
+        // Cancel user input
+        isJumpPressed = false;
+        isSprintPressed = false;
+        unitMoveDir = Vector3.zero;
+
+        // Cancel horizontal movement
+        playerBody.velocity -= Vector3.Project(playerBody.velocity, transform.forward + transform.right);
+    }
+
+    /// <summary>
+    /// Re-enables all movement.
+    /// </summary>
+    public void Unfreeze()
+    {
+        isFrozen = false;
     }
 
     #if UNITY_EDITOR
@@ -236,7 +293,8 @@ public class PlayerMotor : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(transform.position, groundDetection);
             Gizmos.color = Color.blue;
-            Gizmos.DrawRay(transform.position, moveDirection.normalized);
+            Vector3 direction = unitMoveDir.magnitude > 0f ? unitMoveDir : orientation.forward;
+            Gizmos.DrawRay(transform.position, direction);
         }
     }
     #endif

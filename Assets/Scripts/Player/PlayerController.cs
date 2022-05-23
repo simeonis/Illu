@@ -8,13 +8,11 @@ public class PlayerController : MonoBehaviour
     // Mouse variables
     [Header("Mouse Sensitivity")]
     [SerializeField, Range(0f, 100f)] private float sensitivity = 50f;
-    private float xRotation, yRotation;
-
-    [SerializeField] public Transform orientation;
-    [SerializeField] public Transform playerCamera;
     [SerializeField] private CinemachineVirtualCamera cinemachineCamera;
+    
     private CinemachinePOV cinemachinePOV;
     private PlayerMotor playerMotor;
+    private InputAction inputMovement;
 
     void Start()
     {
@@ -25,6 +23,9 @@ public class PlayerController : MonoBehaviour
         cinemachinePOV = cinemachineCamera.GetCinemachineComponent<CinemachinePOV>();
         cinemachinePOV.m_HorizontalAxis.m_MaxSpeed = sensitivity / 100f * 3.2f;
         cinemachinePOV.m_VerticalAxis.m_MaxSpeed = sensitivity / 100f * 1.2f;
+
+        // Movement
+        inputMovement = InputManager.playerControls.Land.Movement;
     }
 
     void OnEnable() 
@@ -32,7 +33,12 @@ public class PlayerController : MonoBehaviour
         InputManager.playerControls.Land.Enable();
 
         // Jump
-        InputManager.playerControls.Land.Jump.performed += Jump;
+        InputManager.playerControls.Land.Jump.started += onJump;
+        InputManager.playerControls.Land.Jump.canceled += onJump;
+
+        // Sprint
+        InputManager.playerControls.Land.Sprint.started += onSprint;
+        InputManager.playerControls.Land.Sprint.canceled += onSprint;
     }
 
     void OnDisable() 
@@ -40,49 +46,15 @@ public class PlayerController : MonoBehaviour
         InputManager.playerControls.Land.Disable();
 
         // Jump
-        InputManager.playerControls.Land.Jump.performed -= Jump;
+        InputManager.playerControls.Land.Jump.started -= onJump;
+        InputManager.playerControls.Land.Jump.canceled -= onJump;
+
+        // Sprint
+        InputManager.playerControls.Land.Sprint.started -= onSprint;
+        InputManager.playerControls.Land.Sprint.canceled -= onSprint;
     }
 
-    void Update()
-    {
-        SetLookDirection();
-        playerMotor.UpdateMoveDirection(moveDirection);
-    }
-
-    private Vector3 moveDirection = Vector3.zero;
-    private float turnSmoothTime = 0.1f;
-    private float turnSmoothVelocity;
-
-    float VectorAngle360(Vector3 from, Vector3 to, Vector3 right)
-    {
-        float angle = Vector3.Angle(from, to);
-        return (Vector3.Angle(right, to) > 90f) ? 360f - angle : angle;            
-    }
-
-    void SetLookDirection()
-    {
-        Vector2 movementInput = InputManager.playerControls.Land.Movement.ReadValue<Vector2>();
-        Vector3 direction = (transform.forward * movementInput.y + transform.right * movementInput.x).normalized;
-
-        if (direction.magnitude >= 0.1f)
-        {
-            // Angle 
-            float targetAngle = VectorAngle360(transform.forward, direction, transform.right) + playerCamera.localEulerAngles.y;
-            
-            float smoothAngle = Mathf.SmoothDampAngle(orientation.localEulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-            orientation.rotation = transform.rotation * Quaternion.Euler(0f, smoothAngle, 0f);
-
-            moveDirection = (Quaternion.Euler(transform.up * targetAngle) * transform.forward).normalized;
-        }
-        else
-        {
-            moveDirection = Vector3.zero;
-        }
-    }
-
-    void Jump(InputAction.CallbackContext context) 
-    {
-        playerMotor.Jump();
-    }
-
+    void Update() => playerMotor.UpdateMovement(inputMovement.ReadValue<Vector2>());
+    void onJump(InputAction.CallbackContext context) => playerMotor.SetJump(context.ReadValueAsButton());
+    void onSprint(InputAction.CallbackContext context) => playerMotor.SetSprint(context.ReadValueAsButton());
 }

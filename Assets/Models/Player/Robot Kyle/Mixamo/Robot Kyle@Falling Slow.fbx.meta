@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: 2dfd79e4ffc8b5e4c9c6b31835aa69ce
+guid: a38f24244b39a7a4ea0f5445b3379a01
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable:
   - first:
       74: -203655887218126122
-    second: Falling Flat Impact
+    second: Falling Slow
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -35,19 +35,19 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Falling Flat Impact
+      name: Falling Slow
       takeName: mixamo.com
       internalID: 0
-      firstFrame: 14
-      lastFrame: 46
+      firstFrame: 0
+      lastFrame: 32
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
+      loopTime: 1
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
