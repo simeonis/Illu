@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace Illu.Networking
 {
+
     public struct CreateCharacterMessage : NetworkMessage
     {
         public string name;
@@ -32,6 +33,24 @@ namespace Illu.Networking
         [HideInInspector] public static string HostAddress = "";
 
         private bool isLanConnection = false;
+
+
+        public static NetworkManager Instance { get; private set; }
+
+        override public void Awake()
+        {
+            base.Awake();
+            // If there is an instance, and it's not me, delete myself.
+            if (Instance != null && Instance != this)
+            {
+                Destroy(this);
+            }
+            else
+            {
+                Instance = this;
+            }
+        }
+
 
         /*  --------------------------
         *       Callback functions

@@ -4,11 +4,22 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    public static PlayerControls playerControls;
+    public  PlayerControls playerControls;
     public static event Action<InputActionMap> OnActionMapChanged;
+
+    public static InputManager Instance { get; private set; }
 
     void Awake()
     {
+        if (Instance != null && Instance != this) 
+        { 
+            Destroy(this); 
+        } 
+        else 
+        { 
+            Instance = this; 
+        } 
+
         playerControls = new PlayerControls();
 
         playerControls.Land.Menu.performed += context => GameManager.TriggerEvent("GamePaused");
@@ -31,7 +42,7 @@ public class InputManager : MonoBehaviour
     {
         if (actionMap.enabled) return;
 
-        playerControls.Disable(); // Disable ALL action maps
+        InputManager.Instance.playerControls.Disable(); // Disable ALL action maps
         OnActionMapChanged?.Invoke(actionMap);
         actionMap.Enable(); // Enable ONLY one action map
     }

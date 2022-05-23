@@ -7,6 +7,21 @@ public class DeathManager : MonoBehaviour
     [SerializeField] private Transform respawnLocation;
     private float offset;
 
+    public static DeathManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        // If there is an instance, and it's not me, delete myself.
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
+
     void Start()
     {
         offset = GetComponent<BoxCollider>().size.x;
@@ -20,7 +35,7 @@ public class DeathManager : MonoBehaviour
 
             Vector3 position = collider.transform.position;
             collider.transform.position = position + collider.transform.up * (offset);
-            
+
             // // Reset position
             // collider.transform.position = respawnLocation.position;
 

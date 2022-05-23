@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 9820.141, g: 4785.1836, b: 1068.7598, a: 1}
+  m_IndirectSpecularColor: {r: 8430.397, g: 4072.658, b: 906.7303, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -9327,6 +9327,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sensitivity: 5
   cinemachineCamera: {fileID: 5682371787303505142}
+  playerMotor: {fileID: 4642921150948796516}
 --- !u!54 &4642921150948796518
 Rigidbody:
   m_ObjectHideFlags: 0

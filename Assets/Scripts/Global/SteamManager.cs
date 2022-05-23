@@ -4,9 +4,12 @@ using Mirror;
 using Mirror.FizzySteam;
 using System.Collections.Generic;
 
-namespace Illu.Steam {
+namespace Illu.Steam
+{
     public class SteamManager : MonoBehaviour
     {
+        public static SteamManager Instance { get; private set; }
+
         // SteamUI
         [SerializeField] private SteamUI SteamUI;
 
@@ -25,6 +28,20 @@ namespace Illu.Steam {
         // Networking
         private const string HostAddressKey = "Host Address Key";
         //public Networking.NetworkManager networkManager;
+
+
+        void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(this);
+            }
+            else
+            {
+                Instance = this;
+            }
+        }
+
 
         void Start()
         {
@@ -72,10 +89,10 @@ namespace Illu.Steam {
             {
                 GameManager.TriggerEvent("SteamLobbyCreated");
                 UIConsole.Log("Steam lobby created successfully.\nAttempting to host...");
-                
+
                 // Creating HOST
                 GameManager.TriggerEvent("ServerStart");
-                
+
                 // Setting HostAddress in Lobby Metadata
                 lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
                 SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey, SteamUser.GetSteamID().ToString());
@@ -115,7 +132,7 @@ namespace Illu.Steam {
 
                 // Adds Clients UI to Client Lobby
                 int lobbyCount = SteamMatchmaking.GetNumLobbyMembers(lobbyID);
-                for (int i=0; i<lobbyCount; i++)
+                for (int i = 0; i < lobbyCount; i++)
                 {
                     CSteamID lobbyMember = SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, i);
                     SteamUI.GenerateLobbyClient(GetSteamFriend(lobbyMember), false);
@@ -169,26 +186,26 @@ namespace Illu.Steam {
         {
             SteamUserRecord steamUserMakingChange = GetSteamFriend(new CSteamID(callback.m_ulSteamIDMakingChange));
             SteamUserRecord steamUserChanged = GetSteamFriend(new CSteamID(callback.m_ulSteamIDUserChanged));
-            
+
             switch (callback.m_rgfChatMemberStateChange)
             {
                 // Entered
-                case (uint) EChatMemberStateChange.k_EChatMemberStateChangeEntered:
+                case (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered:
                     UIConsole.Log(string.Format("[Lobby]: {0} has joined.", steamUserChanged.name));
                     SteamUI.GenerateLobbyClient(steamUserChanged, true);
                     break;
                 // Left
-                case (uint) EChatMemberStateChange.k_EChatMemberStateChangeLeft:
+                case (uint)EChatMemberStateChange.k_EChatMemberStateChangeLeft:
                     UIConsole.Log(string.Format("[Lobby]: {0} has left.", steamUserChanged.name));
                     SteamUI.RemoveLobbyClient();
                     break;
                 // Kicked
-                case (uint) EChatMemberStateChange.k_EChatMemberStateChangeKicked:
+                case (uint)EChatMemberStateChange.k_EChatMemberStateChangeKicked:
                     UIConsole.Log(string.Format("[Lobby]: {0} was kicked by {1}.", steamUserChanged.name, steamUserMakingChange.name));
                     SteamUI.RemoveLobbyClient();
                     break;
                 // Disconnected
-                case (uint) EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
+                case (uint)EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
                     UIConsole.Log(string.Format("[Lobby]: {0} disconnected.", steamUserChanged.name));
                     SteamUI.RemoveLobbyClient();
                     break;
@@ -241,7 +258,7 @@ namespace Illu.Steam {
                     //UIManager.Error("Lobby Left", "You somehow left the lobby");
                     break;
             }
-            
+
             // Leave the steam lobby
             SteamMatchmaking.LeaveLobby(lobbyID);
             lobbyID.Clear();
@@ -254,7 +271,7 @@ namespace Illu.Steam {
             {
                 GameManager.TriggerEvent("ServerStop");
             }
-            else 
+            else
             {
                 GameManager.TriggerEvent("ClientStop");
             }
@@ -286,7 +303,7 @@ namespace Illu.Steam {
         *        Helper functions
         *   -------------------------- */
 
-        private static Dictionary<EPersonaState, string> steamStatus = new Dictionary<EPersonaState, string> 
+        private static Dictionary<EPersonaState, string> steamStatus = new Dictionary<EPersonaState, string>
         {
             {EPersonaState.k_EPersonaStateOffline, "Offline"},
             {EPersonaState.k_EPersonaStateOnline, "Online"},
@@ -302,7 +319,7 @@ namespace Illu.Steam {
             int friendAvatar = SteamFriends.GetMediumFriendAvatar(steamID);
             string friendName = SteamFriends.GetFriendPersonaName(steamID);
             string friendStatus = steamStatus[SteamFriends.GetFriendPersonaState(steamID)];
-            
+
             bool friendPlaying = SteamFriends.GetFriendGamePlayed(steamID, out FriendGameInfo_t gameInfo_T);
             bool playingIllu = friendPlaying ? (gameInfo_T.m_gameID.m_GameID == SteamAppID.m_GameID) : false;
             if (playingIllu) friendStatus = "Playing Illu";
