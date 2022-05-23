@@ -6,6 +6,10 @@ public class PlayerMotor : MonoBehaviour
 {
     [Header("Animation Modifiers")]
     [SerializeField] private Animator animator;
+    [SerializeField, Tooltip("Player \"Landing Flat\" animation clip")]
+    private AnimationClip landingFlatAnimationClip;
+    [SerializeField, Tooltip("Player \"Stand Up\" animation clip")]
+    private AnimationClip standUpAnimationClip;
     private int isGroundedHash;
     private int isMovingHash;
     private int isJumpingHash; 
@@ -58,10 +62,6 @@ public class PlayerMotor : MonoBehaviour
     private float safeVelocity = 20f;
     [SerializeField, Tooltip("Velocity or higher that causes a harmful landing")] 
     private float harmfulVelocity = 24f;
-    [SerializeField, Tooltip("Player \"Landing Flat Impact\" animation clip")]
-    private AnimationClip landingFlatImpactAnimationClip;
-    [SerializeField, Tooltip("Player \"Stand Up\" animation clip")]
-    private AnimationClip standUpAnimationClip;
     private bool isFalling = false;
     private bool isSafeLanding = true;
 
@@ -216,7 +216,7 @@ public class PlayerMotor : MonoBehaviour
         Freeze();
         animator.SetTrigger(hasLandedHash);
 
-        yield return new WaitForSeconds(standUpAnimationClip.length + landingFlatImpactAnimationClip.length);
+        yield return new WaitForSeconds(standUpAnimationClip.length + landingFlatAnimationClip.length);
 
         Unfreeze();
     }

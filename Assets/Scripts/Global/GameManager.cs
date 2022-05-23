@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
-using Illu.Utility;
 
 public class GameManager : MonoBehaviour
 {
@@ -52,11 +51,6 @@ public class GameManager : MonoBehaviour
     public void Resume()
     {
         InputManager.ToggleActionMap(InputManager.playerControls.Land);
-        
-        // Temporary solution
-        // Cinemachine doesn't ignore NEW Input System action maps when disabled
-        CameraUtility.singleton.LockCinemachine(false);
-        
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -64,11 +58,6 @@ public class GameManager : MonoBehaviour
     public void Pause()
     {
         InputManager.ToggleActionMap(InputManager.playerControls.Menu);
-        
-        // Temporary solution
-        // Cinemachine doesn't ignore NEW Input System action maps when disabled
-        CameraUtility.singleton.LockCinemachine(true);
-        
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }

@@ -5,18 +5,19 @@ public class PlayerHUD : MonoBehaviour
 {
     [Header("Crosshair")]
     [SerializeField] Animator crosshairAnimator;
+    [SerializeField] private TextMeshProUGUI crosshairMessage;
 
-    [Header("Interaction Message")]
-    [SerializeField] private TextMeshProUGUI interactionMessageUI;
-    [SerializeField] private StringVariable interactionMessage;
-
-    public void UpdateInteractMessage()
+    public void SetCrosshairText(string message)
     {
-        interactionMessageUI.text = interactionMessage.Value;
+        crosshairMessage.text = message;
     }
 
-    public void AnimationCrosshairInteraction()
+    public void ClearCrosshairText() => SetCrosshairText("");
+
+    public void RotateCrosshair() => crosshairAnimator.SetTrigger("interaction");
+
+    public bool CrosshairTextEqual(string message)
     {
-        crosshairAnimator.SetTrigger("interaction");
+        return crosshairMessage.text == message;
     }
 }

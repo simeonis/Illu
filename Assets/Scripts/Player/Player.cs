@@ -4,8 +4,8 @@ public class Player : Interactor
 {
     [Header("Player Interaction")]
     public Transform playerCamera;
+    [SerializeField] private PlayerHUD playerHUD;
     [SerializeField] private float raycastRange;
-    [SerializeField] private StringVariable message;
 
     [Header("Equipment Slots")]
     [SerializeField] private Transform rightHand;
@@ -49,8 +49,9 @@ public class Player : Interactor
 
     protected override void Interact()
     {
-        GameManager.TriggerEvent("PlayerInteracting");
-        
+        // GameManager.TriggerEvent("PlayerInteracting");
+        playerHUD.RotateCrosshair();
+
         // Interactable in range
         if (GetInteractable(out var interactable))
         {
@@ -97,15 +98,15 @@ public class Player : Interactor
 
     private void UpdateUI()
     {
-        if (GetInteractable(out var interactable) && message.Value != interactable.interactMessage)
+        if (GetInteractable(out var interactable) && !playerHUD.CrosshairTextEqual(interactable.interactMessage))
         {
-            message.Value = interactable.interactMessage;
-            GameManager.TriggerEvent("PlayerLookingAtInteractable");
+            // GameManager.TriggerEvent("PlayerLookingAtInteractable");
+            playerHUD.SetCrosshairText(interactable.interactMessage);
         }
-        else if (!GetInteractable(out _) && message.Value != "")
+        else if (!GetInteractable(out _) && !playerHUD.CrosshairTextEqual(""))
         {
-            message.Value = "";
-            GameManager.TriggerEvent("PlayerNotLookingAtInteractable");
+            // GameManager.TriggerEvent("PlayerNotLookingAtInteractable");
+            playerHUD.ClearCrosshairText();
         }
     }
 
