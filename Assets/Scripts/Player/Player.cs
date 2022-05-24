@@ -14,31 +14,31 @@ public class Player : Interactor
     protected void OnEnable()
     {
         // Interact
-        InputManager.playerControls.Land.Interact.performed += context => Interact();
-        InputManager.playerControls.Land.Interact.canceled += context => InteractCanceled();
+        InputManager.Instance.playerControls.Land.Interact.performed += context => Interact();
+        InputManager.Instance.playerControls.Land.Interact.canceled += context => InteractCanceled();
 
         // Fire
-        InputManager.playerControls.Land.Fire.performed += context => FirePressed();
-        InputManager.playerControls.Land.Fire.canceled += context => FireReleased();
+        InputManager.Instance.playerControls.Land.Fire.performed += context => FirePressed();
+        InputManager.Instance.playerControls.Land.Fire.canceled += context => FireReleased();
 
         // Alternate Fire
-        InputManager.playerControls.Land.AlternateFire.performed += context => AlternateFirePressed();
-        InputManager.playerControls.Land.AlternateFire.canceled += context => AlternateFireReleased();
+        InputManager.Instance.playerControls.Land.AlternateFire.performed += context => AlternateFirePressed();
+        InputManager.Instance.playerControls.Land.AlternateFire.canceled += context => AlternateFireReleased();
     }
 
     protected void OnDisable()
     {
         // Interact
-        InputManager.playerControls.Land.Interact.performed -= context => Interact();
-        InputManager.playerControls.Land.Interact.canceled -= context => InteractCanceled();
+        InputManager.Instance.playerControls.Land.Interact.performed -= context => Interact();
+        InputManager.Instance.playerControls.Land.Interact.canceled -= context => InteractCanceled();
 
-        // Fire
-        InputManager.playerControls.Land.Fire.performed -= context => FirePressed();
-        InputManager.playerControls.Land.Fire.canceled -= context => FireReleased();
+        // Fires
+        InputManager.Instance.playerControls.Land.Fire.performed -= context => FirePressed();
+        InputManager.Instance.playerControls.Land.Fire.canceled -= context => FireReleased();
 
         // Alternate Fire
-        InputManager.playerControls.Land.AlternateFire.performed -= context => AlternateFirePressed();
-        InputManager.playerControls.Land.AlternateFire.canceled -= context => AlternateFireReleased();
+        InputManager.Instance.playerControls.Land.AlternateFire.performed -= context => AlternateFirePressed();
+        InputManager.Instance.playerControls.Land.AlternateFire.canceled -= context => AlternateFireReleased();
     }
 
     protected override void Update()

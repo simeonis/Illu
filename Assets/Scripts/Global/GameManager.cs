@@ -4,60 +4,41 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private string rootScene;
-
-    private static Dictionary<string, Event> _events = new Dictionary<string, Event>();
+    public static GameManager Instance { get; private set; }
+    private Dictionary<string, Event> _events = new Dictionary<string, Event>();
 
     void Awake()
     {
-        // Load all Events into static dictionary for easy access
-        var events = Resources.LoadAll<Event>("ScriptableObjects/Event");
-        foreach (var e in events)
+        if (Instance != null) 
         {
-            _events.Add(e.name, e);
+            // There exist an instance, and it is not me, kill...
+            if (Instance != this) 
+                Destroy(gameObject);
+            return;
         }
 
-        DontDestroyOnLoad(this);
-        SceneManager.LoadScene(rootScene);
+        // There does not exist an instance, create...
+        Instance = this;
+        Event[] events = Resources.LoadAll<Event>("ScriptableObjects/Event");
+        foreach (var e in events) { _events.Add(e.name, e); }
+        DontDestroyOnLoad(gameObject);
     }
 
-    public static void TriggerEvent(string name)
+    public void TriggerEvent(string name)
     {
         _events[name].Trigger();
     }
 
-    void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnLevelFinishedLoading;
-    }
-
-    void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode) {
-        TriggerEvent("SceneChanged");
-        switch(scene.name)
-        {
-            case "Main Menu":
-                TriggerEvent("SceneMenu");
-                break;
-            default:
-                break;
-        }
-    }
-
-    void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnLevelFinishedLoading;
-    }
-
     public void Resume()
     {
-        InputManager.ToggleActionMap(InputManager.playerControls.Land);
+        InputManager.Instance.ToggleLand();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     public void Pause()
     {
-        InputManager.ToggleActionMap(InputManager.playerControls.Menu);
+        InputManager.Instance.ToggleMenu();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
