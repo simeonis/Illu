@@ -1,13 +1,12 @@
 using UnityEngine;
 
-[RequireComponent(typeof(SpringJoint))]
 public class GrapplingHook : Equipment
 {
     [Header("Grappling Hook")]
     [SerializeField] private Transform hook;
     [SerializeField] private Transform exitPoint;
     [SerializeField] private LayerMask hookableLayers;
-    private Transform source;
+    private Transform playerViewpoint;
     private Transform defaultHookParent;
     private GrapplingState state = GrapplingState.Idle;
     private enum GrapplingState
@@ -28,33 +27,36 @@ public class GrapplingHook : Equipment
 
     private Vector3 target;
     private RaycastHit grappleHit;
-    private float distanceFromPlayerToCam;
     public override void EquipmentPrimaryPressed() 
     { 
-        source = player.playerCamera;
         if (state == GrapplingState.Idle)
         {
-            distanceFromPlayerToCam = Vector3.Distance(source.position, FindNearestPointOnLine(source.position, source.forward, exitPoint.position));
-            if (Physics.Raycast(exitPoint.position, source.forward, out grappleHit, distanceFromPlayerToCam + ropeLength, hookableLayers))
+            playerViewpoint = player.GetViewpoint();
+            float distanceFromPlayerToCam = DistanceFromCameraToExitPoint();
+            if (Physics.Raycast(playerViewpoint.position, playerViewpoint.forward, out RaycastHit hit, distanceFromPlayerToCam + ropeLength, hookableLayers))
             {
-                state = GrapplingState.Hit;
-                hook.parent = null;
-                hook.position = grappleHit.point;
+            }
+            else
+            {
             }
         }
     }
+
     public override void EquipmentPrimaryReleased() 
     {  
-        if (state == GrapplingState.Hit)
-        {
-            state = GrapplingState.Idle;
-            hook.position = Vector3.zero;
-            hook.SetParent(defaultHookParent, false);
-        }
     }
 
     public override void EquipmentSecondaryPressed() { Debug.Log("Grappling Hook Secondary Pressed"); }
     public override void EquipmentSecondaryReleased() { Debug.Log("Grappling Hook Secondary Released"); }
+
+    /// <summary>
+    /// Calculates 
+    /// </summary>
+    private float DistanceFromCameraToExitPoint()
+    {
+        Vector3 nearestPointOnLine = FindNearestPointOnLine(playerViewpoint.position, playerViewpoint.forward, exitPoint.position);
+        return Vector3.Distance(playerViewpoint.position, nearestPointOnLine);
+    }
 
     private Vector3 FindNearestPointOnLine(Vector3 origin, Vector3 direction, Vector3 point)
     {
@@ -72,9 +74,9 @@ public class GrapplingHook : Equipment
     {
         if (enable && player)
         {
-            source = player.playerCamera;
-            float distanceFromPlayerToCam = Vector3.Distance(source.position, FindNearestPointOnLine(source.position, source.forward, exitPoint.position));
-            if (Physics.Raycast(source.position, source.forward, out RaycastHit hit, distanceFromPlayerToCam + ropeLength, hookableLayers))
+            playerViewpoint = player.GetViewpoint();
+            float distanceFromPlayerToCam = DistanceFromCameraToExitPoint();
+            if (Physics.Raycast(playerViewpoint.position, playerViewpoint.forward, out RaycastHit hit, distanceFromPlayerToCam + ropeLength, hookableLayers))
             {
                 Gizmos.color = Color.green;
                 Vector3 direction = hit.point - exitPoint.position;
@@ -84,7 +86,7 @@ public class GrapplingHook : Equipment
             else
             {
                 Gizmos.color = Color.red;
-                Gizmos.DrawRay(exitPoint.position, source.forward * (distanceFromPlayerToCam + ropeLength));
+                Gizmos.DrawRay(exitPoint.position, playerViewpoint.forward * (distanceFromPlayerToCam + ropeLength));
             }
         }
     }

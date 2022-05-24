@@ -27,6 +27,7 @@ public class Equipment : Interactable
                 player.Drop(this);
                 // 2. Enable rigidbody
                 equipmentBody.isKinematic = false;
+                equipmentBody.useGravity = true;
                 // 3. Enable collider
                 equipmentCollider.enabled = true;
                 // 4. Remove reference to player
@@ -37,6 +38,7 @@ public class Equipment : Interactable
             {
                 // 1. Disable rigidbody
                 equipmentBody.isKinematic = true;
+                equipmentBody.useGravity = false;
                 // 2. Disable collider
                 equipmentCollider.enabled = false;
                 // 3. Move equipment to interactor's hand

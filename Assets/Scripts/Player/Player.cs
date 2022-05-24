@@ -1,44 +1,52 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : Interactor
 {
     [Header("Player Interaction")]
-    public Transform playerCamera;
-    [SerializeField] private PlayerHUD playerHUD;
+    [SerializeField] private Transform playerCamera;
     [SerializeField] private float raycastRange;
+    private PlayerHUD playerHUD;
 
     [Header("Equipment Slots")]
     [SerializeField] private Transform rightHand;
     private Equipment equipment = null;
 
+    void Start()
+    {
+        playerHUD = FindObjectOfType<PlayerHUD>();
+        if (!playerHUD)
+            Debug.Log("No PlayerHUD could be found");
+    }
+
     protected void OnEnable()
     {
         // Interact
-        InputManager.playerControls.Land.Interact.performed += context => Interact();
-        InputManager.playerControls.Land.Interact.canceled += context => InteractCanceled();
+        InputManager.playerControls.Land.Interact.started += Interact;
+        InputManager.playerControls.Land.Interact.canceled += InteractCanceled;
 
         // Fire
-        InputManager.playerControls.Land.Fire.performed += context => FirePressed();
-        InputManager.playerControls.Land.Fire.canceled += context => FireReleased();
+        InputManager.playerControls.Land.Fire.started += FirePressed;
+        InputManager.playerControls.Land.Fire.canceled += FireReleased;
 
         // Alternate Fire
-        InputManager.playerControls.Land.AlternateFire.performed += context => AlternateFirePressed();
-        InputManager.playerControls.Land.AlternateFire.canceled += context => AlternateFireReleased();
+        InputManager.playerControls.Land.AlternateFire.started += AlternateFirePressed;
+        InputManager.playerControls.Land.AlternateFire.canceled += AlternateFireReleased;
     }
 
     protected void OnDisable()
     {
         // Interact
-        InputManager.playerControls.Land.Interact.performed -= context => Interact();
-        InputManager.playerControls.Land.Interact.canceled -= context => InteractCanceled();
+        InputManager.playerControls.Land.Interact.started -= Interact;
+        InputManager.playerControls.Land.Interact.canceled -= InteractCanceled;
 
         // Fire
-        InputManager.playerControls.Land.Fire.performed -= context => FirePressed();
-        InputManager.playerControls.Land.Fire.canceled -= context => FireReleased();
+        InputManager.playerControls.Land.Fire.started -= FirePressed;
+        InputManager.playerControls.Land.Fire.canceled -= FireReleased;
 
         // Alternate Fire
-        InputManager.playerControls.Land.AlternateFire.performed -= context => AlternateFirePressed();
-        InputManager.playerControls.Land.AlternateFire.canceled -= context => AlternateFireReleased();
+        InputManager.playerControls.Land.AlternateFire.started -= AlternateFirePressed;
+        InputManager.playerControls.Land.AlternateFire.canceled -= AlternateFireReleased;
     }
 
     protected override void Update()
@@ -47,7 +55,8 @@ public class Player : Interactor
         UpdateUI();
     }
 
-    protected override void Interact()
+    // OVERRIDE
+    void Interact(InputAction.CallbackContext context)
     {
         // GameManager.TriggerEvent("PlayerInteracting");
         playerHUD.RotateCrosshair();
@@ -69,6 +78,8 @@ public class Player : Interactor
         }
     }
 
+    void InteractCanceled(InputAction.CallbackContext context) => base.InteractCanceled();
+
     public void Equip(Equipment equipment)
     {
         equipment.transform.SetParent(rightHand, false);
@@ -86,15 +97,14 @@ public class Player : Interactor
         }
     }
 
-    public bool IsEquipped()
-    {
-        return equipment != null;
-    }
+    public bool IsEquipped() => equipment != null;
 
-    private void FirePressed() => equipment?.EquipmentPrimaryPressed();
-    private void FireReleased() => equipment?.EquipmentPrimaryReleased();
-    private void AlternateFirePressed() => equipment?.EquipmentSecondaryPressed();
-    private void AlternateFireReleased() => equipment?.EquipmentSecondaryReleased();
+    public Transform GetViewpoint() => playerCamera;
+
+    private void FirePressed(InputAction.CallbackContext context) => equipment?.EquipmentPrimaryPressed();
+    private void FireReleased(InputAction.CallbackContext context) => equipment?.EquipmentPrimaryReleased();
+    private void AlternateFirePressed(InputAction.CallbackContext context) => equipment?.EquipmentSecondaryPressed();
+    private void AlternateFireReleased(InputAction.CallbackContext context) => equipment?.EquipmentSecondaryReleased();
 
     private void UpdateUI()
     {
