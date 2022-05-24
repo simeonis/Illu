@@ -16,7 +16,6 @@ public class EventListenerManager : MonoBehaviour
         {
             listener.Event.RegisterListener(listener);
         }
-
     }
 
     private void OnDisable()

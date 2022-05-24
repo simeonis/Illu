@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 8430.397, g: 4072.658, b: 906.7303, a: 1}
+  m_IndirectSpecularColor: {r: 9820.141, g: 4785.1836, b: 1068.7598, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -8058,7 +8058,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh43980
+  m_Name: pb_Mesh206728
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -9327,7 +9327,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sensitivity: 5
   cinemachineCamera: {fileID: 5682371787303505142}
-  playerMotor: {fileID: 4642921150948796516}
 --- !u!54 &4642921150948796518
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -9374,7 +9373,7 @@ MonoBehaviour:
   offset: {x: 0, y: 0.9, z: 0}
   layers:
     serializedVersion: 2
-    m_Bits: 2176
+    m_Bits: 3072
   enable: 0
   playerCamera: {fileID: 4642921151095891630}
   playerHUD: {fileID: 1182243464}

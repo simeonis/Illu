@@ -32,16 +32,18 @@ namespace Illu.Steam
 
         void Awake()
         {
-            if (Instance != null && Instance != this)
+            if (Instance != null) 
             {
-                Destroy(this);
+                // There exist an instance, and it is not me, kill...
+                if (Instance != this) 
+                    Destroy(gameObject);
+                return;
             }
-            else
-            {
-                Instance = this;
-            }
-        }
 
+            // There does not exist an instance, create...
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
 
         void Start()
         {
@@ -58,16 +60,6 @@ namespace Illu.Steam
             lobbyInvited = Callback<LobbyInvite_t>.Create(OnLobbyInvited);
             lobbyChatMessage = Callback<LobbyChatMsg_t>.Create(OnLobbyChatMessage);
             lobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
-        }
-
-        void OnDisable()
-        {
-            lobbyCreated.Dispose();
-            gameLobbyJoinRequested.Dispose();
-            lobbyEntered.Dispose();
-            lobbyInvited.Dispose();
-            lobbyChatMessage.Dispose();
-            lobbyChatUpdate.Dispose();
         }
 
         /*  --------------------------
@@ -87,11 +79,11 @@ namespace Illu.Steam
             // Successfully created lobby
             if (callback.m_eResult == EResult.k_EResultOK)
             {
-                GameManager.TriggerEvent("SteamLobbyCreated");
+                GameManager.Instance.TriggerEvent("SteamLobbyCreated");
                 UIConsole.Log("Steam lobby created successfully.\nAttempting to host...");
 
                 // Creating HOST
-                GameManager.TriggerEvent("ServerStart");
+                GameManager.Instance.TriggerEvent("ServerStart");
 
                 // Setting HostAddress in Lobby Metadata
                 lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
@@ -106,7 +98,7 @@ namespace Illu.Steam
             if (callback.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
             {
                 // Successfully joined host
-                GameManager.TriggerEvent("SteamLobbyEntered");
+                GameManager.Instance.TriggerEvent("SteamLobbyEntered");
 
                 // Host is already connected to the server
                 // No further networking work is needed
@@ -122,7 +114,7 @@ namespace Illu.Steam
                 // Creating CLIENT
                 string hostAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey);
                 Illu.Networking.NetworkManager.HostAddress = hostAddress;
-                GameManager.TriggerEvent("ClientStart");
+                GameManager.Instance.TriggerEvent("ClientStart");
 
                 // Lobby ID
                 lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
@@ -145,7 +137,7 @@ namespace Illu.Steam
         {
             if (callback.m_ulGameID == SteamAppID.m_GameID)
             {
-                GameManager.TriggerEvent("SteamLobbyInvited");
+                GameManager.Instance.TriggerEvent("SteamLobbyInvited");
                 SteamUserRecord steamFriend = GetSteamFriend(new CSteamID(callback.m_ulSteamIDUser));
                 UIConsole.Log("Invite received from: " + steamFriend.name);
                 SteamUI.GenerateInvite(new CSteamID(callback.m_ulSteamIDLobby), steamFriend);
@@ -176,7 +168,7 @@ namespace Illu.Steam
                     // The lobby owner has kicked you!
                     if (SteamMatchmaking.GetLobbyOwner(lobbyID) == new CSteamID(callback.m_ulSteamIDUser))
                     {
-                        GameManager.TriggerEvent("SteamLobbyKicked");
+                        GameManager.Instance.TriggerEvent("SteamLobbyKicked");
                     }
                 }
             }
@@ -269,11 +261,11 @@ namespace Illu.Steam
             // Disconnect from any network connection (and close server if host)
             if (lobbyOwner)
             {
-                GameManager.TriggerEvent("ServerStop");
+                GameManager.Instance.TriggerEvent("ServerStop");
             }
             else
             {
-                GameManager.TriggerEvent("ClientStop");
+                GameManager.Instance.TriggerEvent("ClientStop");
             }
         }
 
