@@ -11,6 +11,11 @@ public class Player : Interactor
     [SerializeField] private Transform rightHand;
     private Equipment equipment = null;
 
+    void Awake()
+    {
+
+    }
+
     protected void OnEnable()
     {
         // Interact
@@ -56,7 +61,7 @@ public class Player : Interactor
         if (GetInteractable(out var interactable))
         {
             if (IsEquipped() && (interactable as Equipment)) equipment.Interact(this);
-            else 
+            else
             {
                 state = InteractorState.Interacting;
                 interactable.Interact(this);
@@ -117,7 +122,7 @@ public class Player : Interactor
 
         int validIndex = 0;
         int validAmount = 0;
-        for (int i=0; i < collidersFound; i++)
+        for (int i = 0; i < collidersFound; i++)
         {
             Vector3 playerToCollision = colliders[i].transform.position - transform.position;
             if (Vector3.Angle(playerToCollision, playerCamera.forward) <= 90f)
@@ -146,7 +151,7 @@ public class Player : Interactor
         }
     }
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
@@ -156,5 +161,5 @@ public class Player : Interactor
             Gizmos.DrawRay(playerCamera.position, playerCamera.forward * raycastDistance);
         }
     }
-    #endif
+#endif
 }
