@@ -104,7 +104,7 @@ namespace Illu.Steam {
             SteamEmptyLobby lobbyEmptyDetails = lobbyEmpty.GetComponent<SteamEmptyLobby>();
             lobbyEmptyDetails.addButton.onClick.AddListener(delegate { 
                 GenerateFriendList(SteamManager.GetSteamFriends());
-                GameManager.TriggerEvent("SteamFriendsRequested");
+                GameManager.Instance.TriggerEvent("SteamFriendsRequested");
             });
         }
 

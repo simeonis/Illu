@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace Illu.Networking
 {
+
     public struct CreateCharacterMessage : NetworkMessage
     {
         public string name;
@@ -32,6 +33,24 @@ namespace Illu.Networking
         [HideInInspector] public static string HostAddress = "";
 
         private bool isLanConnection = false;
+
+
+        public static NetworkManager Instance { get; private set; }
+
+        override public void Awake()
+        {
+            base.Awake();
+            // If there is an instance, and it's not me, delete myself.
+            if (Instance != null && Instance != this)
+            {
+                Destroy(this);
+            }
+            else
+            {
+                Instance = this;
+            }
+        }
+
 
         /*  --------------------------
         *       Callback functions
@@ -88,7 +107,7 @@ namespace Illu.Networking
         {
             base.OnClientConnect(conn);
 
-            GameManager.TriggerEvent("ClientConnected");
+            GameManager.Instance.TriggerEvent("ClientConnected");
 
             // you can send the message here, or wherever else you want
             CreateCharacterMessage characterMessage = new CreateCharacterMessage
@@ -106,7 +125,7 @@ namespace Illu.Networking
         {
             base.OnClientDisconnect(conn);
 
-            GameManager.TriggerEvent("ClientDisconnected");
+            GameManager.Instance.TriggerEvent("ClientDisconnected");
 
             if (SceneManager.GetActiveScene().name != menuScene)
             {
@@ -149,7 +168,7 @@ namespace Illu.Networking
             // Game Started
             if (previousScene == menuScene && sceneName != menuScene)
             {
-                GameManager.TriggerEvent("GameStarted");
+                GameManager.Instance.TriggerEvent("GameStarted");
                 UIConsole.Log("[Client]: Server has started the game");
             }
 
