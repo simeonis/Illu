@@ -2,25 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DeathManager : MonoBehaviour
+public class DeathManager : MonoBehaviourSingleton<DeathManager>
 {
     [SerializeField] private Transform respawnLocation;
     private float offset;
-
-    public static DeathManager Instance { get; private set; }
-
-    private void Awake()
-    {
-        // If there is an instance, and it's not me, delete myself.
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this);
-        }
-        else
-        {
-            Instance = this;
-        }
-    }
 
     void Start()
     {

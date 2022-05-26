@@ -6,9 +6,8 @@ using System.Collections.Generic;
 
 namespace Illu.Steam
 {
-    public class SteamManager : MonoBehaviour
+    public class SteamManager : MonoBehaviourSingleton<SteamManager>
     {
-        public static SteamManager Instance { get; private set; }
 
         // SteamUI
         [SerializeField] private SteamUI SteamUI;
@@ -29,21 +28,6 @@ namespace Illu.Steam
         private const string HostAddressKey = "Host Address Key";
         //public Networking.NetworkManager networkManager;
 
-
-        void Awake()
-        {
-            if (Instance != null) 
-            {
-                // There exist an instance, and it is not me, kill...
-                if (Instance != this) 
-                    Destroy(gameObject);
-                return;
-            }
-
-            // There does not exist an instance, create...
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
 
         void Start()
         {

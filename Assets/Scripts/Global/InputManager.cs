@@ -2,24 +2,12 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class InputManager : MonoBehaviour
+public class InputManager : MonoBehaviourSingleton<InputManager>
 {
-    public static InputManager Instance { get; private set; }
     public PlayerControls playerControls;
 
     void Awake()
     {
-        if (Instance != null) 
-        {
-            // There exist an instance, and it is not me, kill...
-            if (Instance != this) 
-                Destroy(gameObject);
-            return;
-        }
-
-        // There does not exist an instance, create...
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
         playerControls = new PlayerControls();
 
         playerControls.Land.Menu.performed += context => GameManager.Instance.TriggerEvent("GamePaused");

@@ -32,7 +32,9 @@ namespace Illu.Networking
 
         [HideInInspector] public static string HostAddress = "";
 
-        private bool isLanConnection = false;
+        //private bool isLanConnection = false;
+
+        [SerializeField] private BoolVariable isLanConnection;
 
 
         public static NetworkManager Instance { get; private set; }
@@ -49,6 +51,20 @@ namespace Illu.Networking
             {
                 Instance = this;
             }
+        }
+        void OnEnable()
+        {
+            isLanConnection.Updated += testBool;
+        }
+
+        void OnDiable()
+        {
+            isLanConnection.Updated -= testBool;
+        }
+
+        public void testBool()
+        {
+            Debug.Log("NM Testing Bool");
         }
 
 
@@ -232,22 +248,67 @@ namespace Illu.Networking
             base.StartClient();
         }
 
-        public void StartLan()
+        //
+        //  Entry point for starting networking 
+        //
+        public void HostStartServer()
         {
+            //Holds all the different Transports for different connection types
             var switchTransport = (SwitchTransport)transport;
-            switchTransport.PickTransport(1);
-            isLanConnection = true;
+
+            if (!isLanConnection)
+            {
+                switchTransport.PickTransport(0);
+                //HostAddress = "localhost";  ??
+            }
+            else
+            {
+                switchTransport.PickTransport(1);
+                HostAddress = "localhost";
+            }
+
             StartHost();
         }
 
-        public void JoinLan()
+        //
+        //  Entry point for joining a server  
+        //
+        public void ClientJoinServer()
         {
+            //Holds all the different Transports for different connection types
             var switchTransport = (SwitchTransport)transport;
-            switchTransport.PickTransport(1);
-            HostAddress = "localhost";
-            isLanConnection = true;
+
+            if (!isLanConnection)
+            {
+                switchTransport.PickTransport(0);
+                //HostAddress = "localhost";
+            }
+            else
+            {
+                switchTransport.PickTransport(1);
+                HostAddress = "localhost";
+            }
+
             StartClient();
         }
+
+
+        // public void StartLan()
+        // {
+        //     var switchTransport = (SwitchTransport)transport;
+        //     switchTransport.PickTransport(1);
+        //     isLanConnection.Value = true;
+        //     StartHost();
+        // }
+
+        // public void JoinLan()
+        // {
+        //     var switchTransport = (SwitchTransport)transport;
+        //     switchTransport.PickTransport(1);
+        //     HostAddress = "localhost";
+        //     isLanConnection.Value = true;
+        //     StartClient();
+        // }
 
         /*  --------------------------
         *        Helper functions

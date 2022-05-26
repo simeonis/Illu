@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class EventListenerManager : MonoBehaviour
 {
     [SerializeField]
-    protected List<EventListener> listeners = new List<EventListener>();
+    protected List<EventListener> listeners = new List<EventListener> { new EventListener() };
 
     private void OnEnable()
     {
