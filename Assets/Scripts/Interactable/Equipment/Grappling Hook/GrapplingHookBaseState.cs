@@ -53,26 +53,59 @@ public abstract class GrapplingHookBaseState
         _ctx.CurrentState = newState;
     }
 
-    protected void AttachGrapple()
+    /// <summary>
+    /// Resets the hook's transform.
+    /// </summary>
+    protected void RetractHook()
     {
-        _ctx.Hook.Disable();
-        _ctx.HookTransform.localPosition = Vector3.zero;
-        _ctx.HookTransform.localRotation = Quaternion.identity;
+        _ctx.Hook.SetParent(_ctx.HookParent, false);
+        _ctx.Hook.localPosition = Vector3.zero;
+        _ctx.Hook.localRotation = Quaternion.identity;
     }
 
-    protected void DetatchGrapple()
+    /// <summary>
+    /// Resets the hook's transform.
+    /// </summary>
+    protected void ReleaseHook()
     {
-        _ctx.Hook.Enable();
+        _ctx.Hook.parent = null;
+    }
+
+    /// <summary>
+    /// 1. Shoots a raycast from the player's viewpoint forward until out of rope.
+    /// <br/>
+    /// 2. Calculates the new grapple target and sets the grapple distance.
+    /// <br/>
+    /// Returns true if a collision occured, otherwise false.
+    /// </summary>
+    protected bool CalculateGrappleTarget(out RaycastHit hit)
+    {
+        Vector3 startPos = NearestExitPointOnAimVector();
+        if (Physics.Raycast(startPos, _ctx.Viewpoint.forward, out hit, _ctx.RopeRemaining, _ctx.HookableLayers))
+        {
+            _ctx.GrappleDistance = hit.distance;
+            _ctx.GrappleTarget = hit.point;
+            return true;
+        }
+        else
+        {
+            _ctx.GrappleDistance = _ctx.RopeRemaining;
+            _ctx.GrappleTarget = startPos + _ctx.Viewpoint.forward * _ctx.RopeRemaining;
+            return false;
+        }
     }
 
     /// <summary>
     /// Returns the grappling hook's exit point projected on the aim vector.
     /// </summary>
-    protected Vector3 NearestExitPointOnAimVector()
+    private Vector3 NearestExitPointOnAimVector()
     {
-        return FindNearestPointOnLine(_ctx.Viewpoint.position, _ctx.Viewpoint.forward, _ctx.ExitPoint.position);
+        return FindNearestPointOnLine(_ctx.Viewpoint.position, _ctx.Viewpoint.forward, _ctx.ExitPoint);
     }
 
+    /// <summary>
+    /// Returns the nearest point on a line for a target point.
+    /// </summary>
     private Vector3 FindNearestPointOnLine(Vector3 origin, Vector3 direction, Vector3 point)
     {
         direction.Normalize();

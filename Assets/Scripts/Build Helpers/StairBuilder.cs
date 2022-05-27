@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class StairBuilder : MonoBehaviour
 {
     [Header("Options")]
@@ -41,7 +42,6 @@ public class StairBuilder : MonoBehaviour
         }
     }
 
-    [ExecuteInEditMode]
     void OnDrawGizmos()
     {
         if (visualize)

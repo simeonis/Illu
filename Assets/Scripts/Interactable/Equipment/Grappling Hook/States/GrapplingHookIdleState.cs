@@ -7,21 +7,16 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
     
     RaycastHit hit, gizmosHit;
     float distance = 0f;
-    bool didHit = false;
 
     public override void EnterState()
     {
-        // Setter prevents value from being set to true
-        _ctx.IsPrimaryPressed = false;
+        _ctx.IsPrimaryPressed = false; // Setter prevents value from being set to true
+        _ctx.RopeRemaining = _ctx.MaxRopeLength;
+        _ctx.RopeRenderer.positionCount = 0;
+        RetractHook();
     }
 
-    public override void UpdateState()
-    {
-        distance = RopeLengthWithCameraOffset();
-        didHit = Physics.Raycast(_ctx.Viewpoint.position, _ctx.Viewpoint.forward, out hit, distance, _ctx.HookableLayers);
-        _ctx.GrappleDistance = didHit ? hit.distance : _ctx.RopeRemaining;
-        _ctx.GrappleTarget = _ctx.Viewpoint.position + _ctx.Viewpoint.forward * distance;
-    }
+    public override void UpdateState() => CalculateGrappleTarget(out _);
 
     public override void CheckSwitchState()
     {
@@ -34,25 +29,18 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
     #if UNITY_EDITOR
     public override void GizmosState()
     {
-        float distance = RopeLengthWithCameraOffset();
-        if (Physics.Raycast(_ctx.Viewpoint.position, _ctx.Viewpoint.forward, out gizmosHit, distance, _ctx.HookableLayers))
+        if (CalculateGrappleTarget(out gizmosHit))
         {
             Gizmos.color = Color.green;
-            Vector3 direction = hit.point - _ctx.ExitPoint.position;
-            Gizmos.DrawRay(_ctx.ExitPoint.position, direction);
-            Gizmos.DrawSphere(hit.point, 0.125f);
+            Vector3 direction = gizmosHit.point - _ctx.ExitPoint;
+            Gizmos.DrawRay(_ctx.ExitPoint, direction);
+            Gizmos.DrawSphere(gizmosHit.point, 0.125f);
         }
         else
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawRay(_ctx.ExitPoint.position, _ctx.Viewpoint.forward * distance);
+            Gizmos.DrawRay(_ctx.ExitPoint, _ctx.Viewpoint.forward * distance);
         }
     }
     #endif
-
-    private float RopeLengthWithCameraOffset()
-    {
-        Vector3 nearestPointOnLine = NearestExitPointOnAimVector();
-        return _ctx.RopeRemaining + Vector3.Distance(_ctx.Viewpoint.position, nearestPointOnLine);
-    }
 }

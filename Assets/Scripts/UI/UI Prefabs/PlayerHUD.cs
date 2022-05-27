@@ -14,12 +14,14 @@ public class PlayerHUD : MonoBehaviour
     [Header("Scriptable Object")]
     [SerializeField] StringVariable _interactMessage;
     [SerializeField] TriggerVariable _rotateCrosshair;
+    [SerializeField] FloatVariable _ropeRemaining;
     [SerializeField] FloatVariable _grappleDistance;
 
     void Start()
     {
         _interactMessage.AddListener(SetCrosshairText);
         _rotateCrosshair.AddListener(RotateCrosshair);
+        _ropeRemaining.AddListener(SetRopeRemaining);
         _grappleDistance.AddListener(SetGrappleDistance);
     }
 
@@ -28,5 +30,6 @@ public class PlayerHUD : MonoBehaviour
     void RotateCrosshair() => crosshairAnimator.SetTrigger("interaction");
 
     // Ammo
+    void SetRopeRemaining() => ropeRemainingText.text = $"{_ropeRemaining.Value.ToString("0.#")}m";
     void SetGrappleDistance() => grappleDistanceText.text = $"({_grappleDistance.Value.ToString("0.#")}m)";
 }
