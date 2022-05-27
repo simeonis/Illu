@@ -15,7 +15,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     ""name"": ""PlayerControls"",
     ""maps"": [
         {
-            ""name"": ""Land"",
+            ""name"": ""Player"",
             ""id"": ""b86d038c-082b-4caa-91a1-c8fc05197238"",
             ""actions"": [
                 {
@@ -542,18 +542,18 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         }
     ]
 }");
-        // Land
-        m_Land = asset.FindActionMap("Land", throwIfNotFound: true);
-        m_Land_Look = m_Land.FindAction("Look", throwIfNotFound: true);
-        m_Land_Movement = m_Land.FindAction("Movement", throwIfNotFound: true);
-        m_Land_Jump = m_Land.FindAction("Jump", throwIfNotFound: true);
-        m_Land_Sprint = m_Land.FindAction("Sprint", throwIfNotFound: true);
-        m_Land_Crouch = m_Land.FindAction("Crouch", throwIfNotFound: true);
-        m_Land_Fire = m_Land.FindAction("Fire", throwIfNotFound: true);
-        m_Land_AlternateFire = m_Land.FindAction("Alternate Fire", throwIfNotFound: true);
-        m_Land_Interact = m_Land.FindAction("Interact", throwIfNotFound: true);
-        m_Land_Menu = m_Land.FindAction("Menu", throwIfNotFound: true);
-        m_Land_Console = m_Land.FindAction("Console", throwIfNotFound: true);
+        // Player
+        m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
+        m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
+        m_Player_Movement = m_Player.FindAction("Movement", throwIfNotFound: true);
+        m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
+        m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
+        m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
+        m_Player_AlternateFire = m_Player.FindAction("Alternate Fire", throwIfNotFound: true);
+        m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
+        m_Player_Menu = m_Player.FindAction("Menu", throwIfNotFound: true);
+        m_Player_Console = m_Player.FindAction("Console", throwIfNotFound: true);
         // Menu
         m_Menu = asset.FindActionMap("Menu", throwIfNotFound: true);
         m_Menu_Menu = m_Menu.FindAction("Menu", throwIfNotFound: true);
@@ -604,74 +604,74 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         asset.Disable();
     }
 
-    // Land
-    private readonly InputActionMap m_Land;
-    private ILandActions m_LandActionsCallbackInterface;
-    private readonly InputAction m_Land_Look;
-    private readonly InputAction m_Land_Movement;
-    private readonly InputAction m_Land_Jump;
-    private readonly InputAction m_Land_Sprint;
-    private readonly InputAction m_Land_Crouch;
-    private readonly InputAction m_Land_Fire;
-    private readonly InputAction m_Land_AlternateFire;
-    private readonly InputAction m_Land_Interact;
-    private readonly InputAction m_Land_Menu;
-    private readonly InputAction m_Land_Console;
-    public struct LandActions
+    // Player
+    private readonly InputActionMap m_Player;
+    private IPlayerActions m_PlayerActionsCallbackInterface;
+    private readonly InputAction m_Player_Look;
+    private readonly InputAction m_Player_Movement;
+    private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_Sprint;
+    private readonly InputAction m_Player_Crouch;
+    private readonly InputAction m_Player_Fire;
+    private readonly InputAction m_Player_AlternateFire;
+    private readonly InputAction m_Player_Interact;
+    private readonly InputAction m_Player_Menu;
+    private readonly InputAction m_Player_Console;
+    public struct PlayerActions
     {
         private @PlayerControls m_Wrapper;
-        public LandActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Look => m_Wrapper.m_Land_Look;
-        public InputAction @Movement => m_Wrapper.m_Land_Movement;
-        public InputAction @Jump => m_Wrapper.m_Land_Jump;
-        public InputAction @Sprint => m_Wrapper.m_Land_Sprint;
-        public InputAction @Crouch => m_Wrapper.m_Land_Crouch;
-        public InputAction @Fire => m_Wrapper.m_Land_Fire;
-        public InputAction @AlternateFire => m_Wrapper.m_Land_AlternateFire;
-        public InputAction @Interact => m_Wrapper.m_Land_Interact;
-        public InputAction @Menu => m_Wrapper.m_Land_Menu;
-        public InputAction @Console => m_Wrapper.m_Land_Console;
-        public InputActionMap Get() { return m_Wrapper.m_Land; }
+        public PlayerActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Look => m_Wrapper.m_Player_Look;
+        public InputAction @Movement => m_Wrapper.m_Player_Movement;
+        public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
+        public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
+        public InputAction @Fire => m_Wrapper.m_Player_Fire;
+        public InputAction @AlternateFire => m_Wrapper.m_Player_AlternateFire;
+        public InputAction @Interact => m_Wrapper.m_Player_Interact;
+        public InputAction @Menu => m_Wrapper.m_Player_Menu;
+        public InputAction @Console => m_Wrapper.m_Player_Console;
+        public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(LandActions set) { return set.Get(); }
-        public void SetCallbacks(ILandActions instance)
+        public static implicit operator InputActionMap(PlayerActions set) { return set.Get(); }
+        public void SetCallbacks(IPlayerActions instance)
         {
-            if (m_Wrapper.m_LandActionsCallbackInterface != null)
+            if (m_Wrapper.m_PlayerActionsCallbackInterface != null)
             {
-                @Look.started -= m_Wrapper.m_LandActionsCallbackInterface.OnLook;
-                @Look.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnLook;
-                @Look.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnLook;
-                @Movement.started -= m_Wrapper.m_LandActionsCallbackInterface.OnMovement;
-                @Movement.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnMovement;
-                @Movement.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnMovement;
-                @Jump.started -= m_Wrapper.m_LandActionsCallbackInterface.OnJump;
-                @Jump.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnJump;
-                @Jump.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnJump;
-                @Sprint.started -= m_Wrapper.m_LandActionsCallbackInterface.OnSprint;
-                @Sprint.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnSprint;
-                @Sprint.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnSprint;
-                @Crouch.started -= m_Wrapper.m_LandActionsCallbackInterface.OnCrouch;
-                @Crouch.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnCrouch;
-                @Crouch.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnCrouch;
-                @Fire.started -= m_Wrapper.m_LandActionsCallbackInterface.OnFire;
-                @Fire.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnFire;
-                @Fire.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnFire;
-                @AlternateFire.started -= m_Wrapper.m_LandActionsCallbackInterface.OnAlternateFire;
-                @AlternateFire.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnAlternateFire;
-                @AlternateFire.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnAlternateFire;
-                @Interact.started -= m_Wrapper.m_LandActionsCallbackInterface.OnInteract;
-                @Interact.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnInteract;
-                @Interact.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnInteract;
-                @Menu.started -= m_Wrapper.m_LandActionsCallbackInterface.OnMenu;
-                @Menu.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnMenu;
-                @Menu.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnMenu;
-                @Console.started -= m_Wrapper.m_LandActionsCallbackInterface.OnConsole;
-                @Console.performed -= m_Wrapper.m_LandActionsCallbackInterface.OnConsole;
-                @Console.canceled -= m_Wrapper.m_LandActionsCallbackInterface.OnConsole;
+                @Look.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLook;
+                @Look.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLook;
+                @Look.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLook;
+                @Movement.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMovement;
+                @Movement.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMovement;
+                @Movement.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMovement;
+                @Jump.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
+                @Jump.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
+                @Jump.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
+                @Sprint.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSprint;
+                @Sprint.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSprint;
+                @Sprint.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSprint;
+                @Crouch.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
+                @Crouch.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
+                @Crouch.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
+                @Fire.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire;
+                @Fire.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire;
+                @Fire.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire;
+                @AlternateFire.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAlternateFire;
+                @AlternateFire.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAlternateFire;
+                @AlternateFire.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAlternateFire;
+                @Interact.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteract;
+                @Interact.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteract;
+                @Interact.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteract;
+                @Menu.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMenu;
+                @Menu.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMenu;
+                @Menu.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMenu;
+                @Console.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnConsole;
+                @Console.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnConsole;
+                @Console.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnConsole;
             }
-            m_Wrapper.m_LandActionsCallbackInterface = instance;
+            m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
             {
                 @Look.started += instance.OnLook;
@@ -707,7 +707,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
             }
         }
     }
-    public LandActions @Land => new LandActions(this);
+    public PlayerActions @Player => new PlayerActions(this);
 
     // Menu
     private readonly InputActionMap m_Menu;
@@ -767,7 +767,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
             return asset.controlSchemes[m_GamepadSchemeIndex];
         }
     }
-    public interface ILandActions
+    public interface IPlayerActions
     {
         void OnLook(InputAction.CallbackContext context);
         void OnMovement(InputAction.CallbackContext context);

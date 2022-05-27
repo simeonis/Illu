@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Event))]
+[CustomEditor(typeof(TriggerVariable))]
 public class TriggerEventEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        Event gameEvent = (Event) target;
+        TriggerVariable gameEvent = (TriggerVariable) target;
         if (GUILayout.Button("Trigger Event"))
         {
             gameEvent.Trigger();

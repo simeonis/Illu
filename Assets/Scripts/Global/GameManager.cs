@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviour
 
     public void Resume()
     {
-        InputManager.Instance.ToggleLand();
+        InputManager.Instance.TogglePlayer();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }

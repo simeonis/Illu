@@ -1,24 +1,23 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Equipment : Interactable
+public class Item : Interactable
 {
     [HideInInspector] public Rigidbody equipmentBody;
     [HideInInspector] public Collider equipmentCollider;
-    protected Player player;
 
     protected override void Start()
     {
+        base.Start();
         equipmentBody = GetComponent<Rigidbody>();
         equipmentCollider = GetComponent<Collider>();
-        ChangeChildrenLayerMask(transform, "Equipment", true);
     }
 
     public override void Interact(Interactor interactor)
     {
         if (interactor is Player)
         {
-            player = interactor as Player;
+            Player player = interactor as Player;
 
             // Drop
             if (player.IsEquipped())
@@ -48,9 +47,4 @@ public class Equipment : Interactable
     }
 
     public override void InteractCancel(Interactor interactor) {}
-
-    public virtual void EquipmentPrimaryPressed() { Debug.Log("Equipment Primary Pressed"); }
-    public virtual void EquipmentPrimaryReleased() { Debug.Log("Equipment Primary Released"); }
-    public virtual void EquipmentSecondaryPressed() { Debug.Log("Equipment Secondary Pressed"); }
-    public virtual void EquipmentSecondaryReleased() { Debug.Log("Equipment Secondary Released"); }
 }

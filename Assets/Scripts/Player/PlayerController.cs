@@ -26,33 +26,33 @@ public class PlayerController : MonoBehaviour
         cinemachinePOV.m_VerticalAxis.m_MaxSpeed = sensitivity / 100f * 1.2f;
 
         // Movement
-        inputMovement = InputManager.Instance.playerControls.Land.Movement;
+        inputMovement = InputManager.Instance.playerControls.Player.Movement;
     }
 
     void OnEnable() 
     {
-        InputManager.Instance.playerControls.Land.Enable();
+        InputManager.Instance.playerControls.Player.Enable();
 
         // Jump
-        InputManager.Instance.playerControls.Land.Jump.started += onJump;
-        InputManager.Instance.playerControls.Land.Jump.canceled += onJump;
+        InputManager.Instance.playerControls.Player.Jump.started += onJump;
+        InputManager.Instance.playerControls.Player.Jump.canceled += onJump;
 
         // Sprint
-        InputManager.Instance.playerControls.Land.Sprint.started += onSprint;
-        InputManager.Instance.playerControls.Land.Sprint.canceled += onSprint;
+        InputManager.Instance.playerControls.Player.Sprint.started += onSprint;
+        InputManager.Instance.playerControls.Player.Sprint.canceled += onSprint;
     }
 
     void OnDisable() 
     {
-        InputManager.Instance.playerControls.Land.Disable();
+        InputManager.Instance.playerControls.Player.Disable();
 
         // Jump
-        InputManager.Instance.playerControls.Land.Jump.started -= onJump;
-        InputManager.Instance.playerControls.Land.Jump.canceled -= onJump;
+        InputManager.Instance.playerControls.Player.Jump.started -= onJump;
+        InputManager.Instance.playerControls.Player.Jump.canceled -= onJump;
 
         // Sprint
-        InputManager.Instance.playerControls.Land.Sprint.started -= onSprint;
-        InputManager.Instance.playerControls.Land.Sprint.canceled -= onSprint;
+        InputManager.Instance.playerControls.Player.Sprint.started -= onSprint;
+        InputManager.Instance.playerControls.Player.Sprint.canceled -= onSprint;
     }
 
     void Update() {
