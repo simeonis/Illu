@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
     public void Resume()
     {
-        InputManager.Instance.ToggleLand();
+        InputManager.Instance.TogglePlayer();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }

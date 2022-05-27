@@ -10,7 +10,7 @@ public class InputManager : MonoBehaviourSingleton<InputManager>
     {
         playerControls = new PlayerControls();
 
-        playerControls.Land.Menu.performed += context => GameManager.Instance.TriggerEvent("GamePaused");
+        playerControls.Player.Menu.performed += context => GameManager.Instance.TriggerEvent("GamePaused");
         playerControls.Menu.Menu.performed += context => GameManager.Instance.TriggerEvent("GameResumed");
         // playerControls.Land.Console.performed += context => ShowConsole();
         // playerControls.Menu.Console.performed += context => HideConsole();
@@ -18,22 +18,20 @@ public class InputManager : MonoBehaviourSingleton<InputManager>
 
     void OnDisable()
     {
-        playerControls.Land.Menu.performed -= context => GameManager.Instance.TriggerEvent("GamePaused");
+        playerControls.Player.Menu.performed -= context => GameManager.Instance.TriggerEvent("GamePaused");
         playerControls.Menu.Menu.performed -= context => GameManager.Instance.TriggerEvent("GameResumed");
         // playerControls.Land.Console.performed -= context => ShowConsole();
         // playerControls.Menu.Console.performed -= context => HideConsole();
     }
 
-    public void ToggleLand()
+    public void TogglePlayer()
     {
-        ToggleActionMap(
-            playerControls.Land);
+        ToggleActionMap(playerControls.Player);
     }
 
     public void ToggleMenu()
     {
-        ToggleActionMap(
-            playerControls.Menu);
+        ToggleActionMap(playerControls.Menu);
     }
 
     private void ToggleActionMap(InputActionMap actionMap)
