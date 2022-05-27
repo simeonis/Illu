@@ -6,7 +6,7 @@ public class BoolVariable : Event
 {
     public delegate void BoolCallback();
     public BoolCallback Updated;
-    public bool _value = false;
+    private bool _value = false;
 
     public bool Value
     {

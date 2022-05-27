@@ -12,6 +12,11 @@ namespace Illu.Steam
         // SteamUI
         [SerializeField] private SteamUI SteamUI;
 
+        //Event
+
+
+
+
         // Callbacks
         protected Callback<LobbyCreated_t> lobbyCreated;
         protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
@@ -27,7 +32,6 @@ namespace Illu.Steam
         // Networking
         private const string HostAddressKey = "Host Address Key";
         //public Networking.NetworkManager networkManager;
-
 
         void Start()
         {
@@ -195,7 +199,7 @@ namespace Illu.Steam
         *   -------------------------- */
 
         // USER becomes HOST
-        public static void HostLobby()
+        public void HostLobby()
         {
             UIConsole.Log("Attempting to create steam lobby...");
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 2);
@@ -254,19 +258,19 @@ namespace Illu.Steam
         }
 
         // HOST invites CLIENT
-        public static void InviteToLobby(CSteamID friendID)
+        public void InviteToLobby(CSteamID friendID)
         {
             SteamMatchmaking.InviteUserToLobby(lobbyID, friendID);
         }
 
         // CLIENT joins HOST via invite
-        public static void JoinSteamLobby(CSteamID lobbyID)
+        public void JoinSteamLobby(CSteamID lobbyID)
         {
             SteamMatchmaking.JoinLobby(lobbyID);
         }
 
         // HOST kicks CLIENT
-        public static void KickUser(CSteamID steamID)
+        public void KickUser(CSteamID steamID)
         {
             byte[] bytes = System.Text.Encoding.ASCII.GetBytes(steamID.ToString());
             if (!SteamMatchmaking.SendLobbyChatMsg(lobbyID, bytes, bytes.Length))
@@ -279,7 +283,7 @@ namespace Illu.Steam
         *        Helper functions
         *   -------------------------- */
 
-        private static Dictionary<EPersonaState, string> steamStatus = new Dictionary<EPersonaState, string>
+        private Dictionary<EPersonaState, string> steamStatus = new Dictionary<EPersonaState, string>
         {
             {EPersonaState.k_EPersonaStateOffline, "Offline"},
             {EPersonaState.k_EPersonaStateOnline, "Online"},
@@ -290,7 +294,7 @@ namespace Illu.Steam
             {EPersonaState.k_EPersonaStateLookingToPlay, "Online"},
         };
 
-        public static SteamUserRecord GetSteamFriend(CSteamID steamID)
+        public SteamUserRecord GetSteamFriend(CSteamID steamID)
         {
             int friendAvatar = SteamFriends.GetMediumFriendAvatar(steamID);
             string friendName = SteamFriends.GetFriendPersonaName(steamID);
@@ -303,7 +307,7 @@ namespace Illu.Steam
             return new SteamUserRecord(steamID, friendName, friendStatus, friendAvatar);
         }
 
-        public static List<List<SteamUserRecord>> GetSteamFriends()
+        public List<List<SteamUserRecord>> GetSteamFriends()
         {
             List<List<SteamUserRecord>> steamFriends = new List<List<SteamUserRecord>>();
             List<SteamUserRecord> playingFriends = new List<SteamUserRecord>();

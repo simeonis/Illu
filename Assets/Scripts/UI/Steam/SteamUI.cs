@@ -3,7 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Steamworks;
 
-namespace Illu.Steam {
+namespace Illu.Steam
+{
     public class SteamUI : MonoBehaviour
     {
         [Header("Target Parent")]
@@ -19,21 +20,23 @@ namespace Illu.Steam {
         [SerializeField] private GameObject steamEmptyLobbyPrefab;
         [SerializeField] private GameObject steamInvitePrefab;
 
-        private static List<string> status = new List<string>() { "Playing Illu", "Online", "Offline" };
-        private static Dictionary<string, GameObject> invites = new Dictionary<string, GameObject>();
+        // Make a Enum
+        List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
+        Dictionary<string, GameObject> _invites = new Dictionary<string, GameObject>();
 
+        // Invited To lobby
         public void GenerateInvite(CSteamID lobbyID, SteamUserRecord steamFriend)
         {
             string steamIDstring = steamFriend.id.ToString();
 
             // Invite exists
-            if (invites.ContainsKey(steamIDstring))
+            if (_invites.ContainsKey(steamIDstring))
             {
                 // Re-arrange Order
-                invites[steamIDstring].transform.SetAsFirstSibling();
+                _invites[steamIDstring].transform.SetAsFirstSibling();
             }
             // New invite
-            else 
+            else
             {
                 // Create GameObject
                 GameObject invite = Instantiate(steamInvitePrefab, inviteList);
@@ -41,45 +44,68 @@ namespace Illu.Steam {
                 invite.transform.SetAsFirstSibling();
 
                 // Add to dictionary
-                invites.Add(invite.name, invite);
+                _invites.Add(invite.name, invite);
 
                 // Retrieve Prefab's Script and fill out details
                 SteamFriendInvite inviteDetails = invite.GetComponent<SteamFriendInvite>();
                 inviteDetails.Instantiate(steamFriend);
 
                 // Accept Button
-                inviteDetails.acceptButton.onClick.AddListener(delegate { 
-                    SteamManager.JoinSteamLobby(lobbyID);
+                inviteDetails.acceptButton.onClick.AddListener(delegate
+                {
+                    SteamManager.Instance.JoinSteamLobby(lobbyID);
                     DestroyInvite(invite);
                 });
 
                 // Decline Button
-                inviteDetails.declineButton.onClick.AddListener(delegate { 
+                inviteDetails.declineButton.onClick.AddListener(delegate
+                {
                     DestroyInvite(invite);
                 });
             }
         }
 
-        private void DestroyInvite(GameObject invite)
-        {
-            // Remove from dictionary
-            invites.Remove(invite.name);
-
-            // Destroy GameObject
-            Destroy(invite);
-        }
-
+        //triggered on Lobby Join Attempt
         public void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside)
         {
             GenerateLobbyFriend(steamFriend, serverside, true);
         }
 
-        public void GenerateLobbyClient(SteamUserRecord steamFriend, bool serverside)
+        // triggered on Lobby Join Attempt 
+        public void GenerateLobbyEmpty()
+        {
+            GameObject lobbyEmpty = Instantiate(steamEmptyLobbyPrefab, lobbyClient);
+            SteamEmptyLobby lobbyEmptyDetails = lobbyEmpty.GetComponent<SteamEmptyLobby>();
+            lobbyEmptyDetails.addButton.onClick.AddListener(delegate
+            {
+                GenerateFriendList();
+                GameManager.Instance.TriggerEvent("SteamFriendsRequested");
+            });
+        }
+
+        // Should be driven by event
+        public void RemoveLobbyClient()
+        {
+            DestroyLobbyClient();
+            GenerateLobbyEmpty();
+        }
+
+        //***********************************************************************************************************
+
+        void DestroyInvite(GameObject invite)
+        {
+            // Remove from dictionary
+            _invites.Remove(invite.name);
+            // Destroy GameObject
+            Destroy(invite);
+        }
+
+        void GenerateLobbyClient(SteamUserRecord steamFriend, bool serverside)
         {
             GenerateLobbyFriend(steamFriend, serverside, false);
         }
 
-        private void GenerateLobbyFriend(SteamUserRecord steamFriend, bool serverside, bool hostSlot)
+        void GenerateLobbyFriend(SteamUserRecord steamFriend, bool serverside, bool hostSlot)
         {
             GameObject lobbyUser = Instantiate(steamLobbyPrefab, hostSlot ? lobbyHost : lobbyClient);
             if (!hostSlot && lobbyClient.childCount > 0) Destroy(lobbyClient.GetChild(0).gameObject); // Destroy EmptyLobbyFriend
@@ -92,29 +118,20 @@ namespace Illu.Steam {
             lobbyUserDetails.removeButton.gameObject.SetActive(canKick);
             if (canKick)
             {
-                lobbyUserDetails.removeButton.onClick.AddListener(delegate {
-                    SteamManager.KickUser(steamFriend.id);
+                lobbyUserDetails.removeButton.onClick.AddListener(delegate
+                {
+                    SteamManager.Instance.KickUser(steamFriend.id);
                 });
             }
         }
 
-        public void GenerateLobbyEmpty()
-        {
-            GameObject lobbyEmpty = Instantiate(steamEmptyLobbyPrefab, lobbyClient);
-            SteamEmptyLobby lobbyEmptyDetails = lobbyEmpty.GetComponent<SteamEmptyLobby>();
-            lobbyEmptyDetails.addButton.onClick.AddListener(delegate { 
-                GenerateFriendList(SteamManager.GetSteamFriends());
-                GameManager.Instance.TriggerEvent("SteamFriendsRequested");
-            });
-        }
-
-        public void DestroyLobby()
+        void DestroyLobby()
         {
             DestroyLobbyHost();
             DestroyLobbyClient();
         }
 
-        public void DestroyLobbyHost()
+        void DestroyLobbyHost()
         {
             if (lobbyHost.childCount > 0)
             {
@@ -122,7 +139,7 @@ namespace Illu.Steam {
             }
         }
 
-        public void DestroyLobbyClient()
+        void DestroyLobbyClient()
         {
             if (lobbyClient.childCount > 0)
             {
@@ -130,23 +147,22 @@ namespace Illu.Steam {
             }
         }
 
-        public void RemoveLobbyClient()
-        {
-            DestroyLobbyClient();
-            GenerateLobbyEmpty();
-        }
 
-        private void GenerateFriendList(List<List<SteamUserRecord>> steamFriends)
+        void GenerateFriendList()
         {
             DestroyFriendList();
+
+            //access friend list 
+            var steamFriends = SteamManager.Instance.GetSteamFriends();
+
             GameObject subList = null;
             float numberOfTypes = steamFriends.Count;
             for (int i = 0; i < numberOfTypes; i++)
             {
                 // Create and position Title
                 GameObject titleUI = Instantiate(steamStatusTitlePrefab, friendList);
-                titleUI.GetComponent<SteamStatusTitle>().status.text = status[i];
-                
+                titleUI.GetComponent<SteamStatusTitle>().status.text = _status[i];
+
                 float numberOfItems = steamFriends[i].Count;
                 for (int j = 0; j < numberOfItems; j++)
                 {
@@ -155,7 +171,7 @@ namespace Illu.Steam {
                     {
                         subList = new GameObject("Horizontal Group #" + (j + 1));
                         subList.transform.SetParent(friendList, false);
-                        HorizontalLayoutGroup horizontalGroup  = subList.gameObject.AddComponent<HorizontalLayoutGroup>();
+                        HorizontalLayoutGroup horizontalGroup = subList.gameObject.AddComponent<HorizontalLayoutGroup>();
                         horizontalGroup.childForceExpandWidth = false;
                         horizontalGroup.childControlWidth = false;
                         horizontalGroup.childControlHeight = true;
@@ -170,7 +186,7 @@ namespace Illu.Steam {
             }
         }
 
-        private void DestroyFriendList()
+        void DestroyFriendList()
         {
             foreach (Transform child in friendList.transform)
             {
@@ -181,7 +197,7 @@ namespace Illu.Steam {
         // /*  --------------------------
         // *        Helper functions
         // *   -------------------------- */
-        public static Texture2D GetSteamImageAsTexture2D(int iImage)
+        Texture2D GetSteamImageAsTexture2D(int iImage)
         {
             Texture2D ret = null;
             uint ImageWidth;
@@ -200,7 +216,6 @@ namespace Illu.Steam {
                     ret.Apply();
                 }
             }
-
             return ret;
         }
     }

@@ -49,8 +49,9 @@ public class SteamFriendList : MonoBehaviour
         else status.color = statusPlaying;
 
         // Invite Button
-        inviteButton.onClick.AddListener(delegate { 
-            Illu.Steam.SteamManager.InviteToLobby(steamFriend.id);
+        inviteButton.onClick.AddListener(delegate
+        {
+            Illu.Steam.SteamManager.Instance.InviteToLobby(steamFriend.id);
         });
     }
 }
