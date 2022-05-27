@@ -3,36 +3,39 @@ using UnityEngine.Events;
 
 public class Hook : MonoBehaviour
 {
+    [HideInInspector] public UnityEvent<Collision> OnCollision;
+    public Rigidbody Rigidbody { get { return _rigidbody; } }
+    
+    [SerializeField] CollisionDetectionMode collisionMode = CollisionDetectionMode.Discrete;
     Rigidbody _rigidbody;
     Collider _collider;
-    UnityEvent<Collision> _event;
 
     void Start()
     {
+        OnCollision = new UnityEvent<Collision>();
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
-        _event = new UnityEvent<Collision>();
+        
+        _rigidbody.interpolation = RigidbodyInterpolation.None;
         Disable();
     }
 
-    void OnCollisionEnter(Collision collision) => _event.Invoke(collision);
+    void OnCollisionEnter(Collision collision) => OnCollision.Invoke(collision);
 
     public void Enable()
     {
         _rigidbody.isKinematic = false;
-        _rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        _rigidbody.collisionDetectionMode = collisionMode;
         _collider.enabled = true;
     }
 
     public void Disable()
     {
-        _rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         _rigidbody.isKinematic = true;
+        _rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+        _rigidbody.velocity = Vector3.zero;
         _collider.enabled = false;
     }
 
-    public void AddListener(UnityAction<Collision> action) => _event.AddListener(action);
-    public void RemoveListener(UnityAction<Collision> action) => _event.RemoveListener(action);
-    public void RemoveAllListener() => _event.RemoveAllListeners();
-    ~Hook() => _event.RemoveAllListeners();
+    ~Hook() => OnCollision.RemoveAllListeners();
 }

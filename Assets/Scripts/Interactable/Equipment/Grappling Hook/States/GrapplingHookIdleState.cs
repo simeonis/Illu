@@ -5,8 +5,9 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
     public GrapplingHookIdleState(GrapplingHookStateMachine currentContext, GrapplingHookStateFactory grapplingHookStateFactory)
     : base (currentContext, grapplingHookStateFactory) {}
     
-    private RaycastHit hit;
-    private RaycastHit gizmosHit;
+    RaycastHit hit, gizmosHit;
+    float distance = 0f;
+    bool didHit = false;
 
     public override void EnterState()
     {
@@ -16,16 +17,9 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
 
     public override void UpdateState()
     {
-        float distance = RopeLengthWithCameraOffset();
-        if (Physics.Raycast(_ctx.Viewpoint.position, _ctx.Viewpoint.forward, out hit, distance, _ctx.HookableLayers))
-        {
-            _ctx.GrappleDistance = hit.distance;
-            //_ctx.GrappleTarget = hit.point;
-        }
-        else
-        {
-            _ctx.GrappleDistance = _ctx.RopeRemaining;
-        }
+        distance = RopeLengthWithCameraOffset();
+        didHit = Physics.Raycast(_ctx.Viewpoint.position, _ctx.Viewpoint.forward, out hit, distance, _ctx.HookableLayers);
+        _ctx.GrappleDistance = didHit ? hit.distance : _ctx.RopeRemaining;
         _ctx.GrappleTarget = _ctx.Viewpoint.position + _ctx.Viewpoint.forward * distance;
     }
 

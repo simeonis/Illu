@@ -8,7 +8,6 @@ public class GrapplingHookStateMachine : MonoBehaviour
     [SerializeField] Transform exitPoint;
     [SerializeField] float projectileSpeed = 100f;
     [SerializeField] LayerMask hookableLayers;
-    Transform _defaultHookParent;
     Vector3 _grappleTarget;
 
     [Header("Rope")]
@@ -29,9 +28,8 @@ public class GrapplingHookStateMachine : MonoBehaviour
     GrapplingHookStateFactory _states;
 
     // Getters & Setters - Projectile
-    public Hook Hook { get { return Hook; } }
+    public Hook Hook { get { return _hook; } }
     public Transform HookTransform { get { return _hook.transform; } }
-    public Transform DefaultHookParent { get { return _defaultHookParent; } }
     public Transform ExitPoint { get { return exitPoint; } }
     public float ProjectileSpeed { get { return projectileSpeed; } }
     public LayerMask HookableLayers { get { return hookableLayers; } }
@@ -60,7 +58,6 @@ public class GrapplingHookStateMachine : MonoBehaviour
         _currentState = _states.Idle();
         _currentState.EnterState();
 
-        _defaultHookParent = _hook.transform.parent;
         _ropeRemaining = maxRopeLength;
     }
 

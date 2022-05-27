@@ -56,7 +56,6 @@ public abstract class GrapplingHookBaseState
     protected void AttachGrapple()
     {
         _ctx.Hook.Disable();
-        _ctx.HookTransform.SetParent(_ctx.DefaultHookParent);
         _ctx.HookTransform.localPosition = Vector3.zero;
         _ctx.HookTransform.localRotation = Quaternion.identity;
     }
@@ -64,7 +63,6 @@ public abstract class GrapplingHookBaseState
     protected void DetatchGrapple()
     {
         _ctx.Hook.Enable();
-        _ctx.HookTransform.SetParent(null);
     }
 
     /// <summary>

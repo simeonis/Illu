@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 public class GrapplingHookFiredState : GrapplingHookBaseState
@@ -6,16 +5,17 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
     public GrapplingHookFiredState(GrapplingHookStateMachine currentContext, GrapplingHookStateFactory grapplingHookStateFactory)
     : base (currentContext, grapplingHookStateFactory) {}
 
+    Rigidbody _rigidBody;
+    Vector3 projectileDirection;
     bool _outOfRope, _collisionOccured;
-    Vector3 _fakeProjectilePos;
 
     public override void EnterState()
     {
         DetatchGrapple();
-        _fakeProjectilePos = NearestExitPointOnAimVector();
-        _outOfRope = _collisionOccured = false;
+        _ctx.Hook.OnCollision.AddListener(OnCollision);
+        _rigidBody = _ctx.Hook.Rigidbody;
 
-        _ctx.Hook.AddListener(OnCollision);
+        projectileDirection = (_ctx.GrappleTarget - NearestExitPointOnAimVector()).normalized;
 
         // TEMPORARY
         _ctx.RopeRenderer.positionCount = 2;
@@ -24,8 +24,8 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
     void OnCollision(Collision collision)
     {
         _collisionOccured = true;
-        _ctx.HookTransform.position = _fakeProjectilePos;
-        _ctx.GrappleTarget = _fakeProjectilePos;
+        _ctx.Hook.Disable();
+        _ctx.GrappleTarget = collision.contacts[0].point;
     }
 
     public override void UpdateState()
@@ -38,20 +38,16 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
 
     public override void FixedUpdateState()
     {
-        if (_outOfRope) return;
+        _rigidBody.AddForce(projectileDirection * _ctx.ProjectileSpeed, ForceMode.Acceleration);
 
-        // Move projectile to target position
-        float step = _ctx.ProjectileSpeed * Time.deltaTime;
-        _fakeProjectilePos = Vector3.MoveTowards(_fakeProjectilePos, _ctx.GrappleTarget, step);
-        _ctx.HookTransform.position = Vector3.MoveTowards(_ctx.HookTransform.position, _ctx.GrappleTarget, step);
-
-        // Check if position of fake projectile and target is approximately equal
-        if (!_collisionOccured && Vector3.Distance(_fakeProjectilePos, _ctx.GrappleTarget) < 0.001f)
+        if (Vector3.Distance(_ctx.ExitPoint.position, _ctx.HookTransform.position) > _ctx.MaxRopeLength)
             _outOfRope = true;
     }
 
     public override void ExitState()
     {
+        _ctx.Hook.OnCollision.RemoveListener(OnCollision);
+        
         if (!_ctx.IsPrimaryPressed || _outOfRope)
         {
             _ctx.RopeRenderer.positionCount = 0;
