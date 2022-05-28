@@ -11,14 +11,7 @@ public class BoolListener : MonoBehaviour
 
     void OnEnable()
     {
-        boolVariable.Updated += handleUpdate;
-        Debug.Log("OnEnable");
-    }
-
-    void OnDisable()
-    {
-        boolVariable.Updated -= handleUpdate;
-        Debug.Log("OnEnableDisable");
+        boolVariable.AddListener(handleUpdate);
     }
 
     private void handleUpdate()

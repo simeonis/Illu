@@ -24,8 +24,30 @@ namespace Illu.Steam
         List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
         Dictionary<string, GameObject> _invites = new Dictionary<string, GameObject>();
 
+
+        void OnEnable()
+        {
+            SteamManager.Instance.clientJoined += GenerateLobbyClient;
+            SteamManager.Instance.onLobbyHost += GenerateLobbyHost;
+            SteamManager.Instance.onInviteReceived += GenerateInvite;
+            SteamManager.Instance.onClearLobby.AddListener(GenerateLobbyEmpty);
+            SteamManager.Instance.onDestroyLobby.AddListener(DestroyLobby);
+            SteamManager.Instance.OnLobbyClientRemoved.AddListener(RemoveLobbyClient);
+        }
+
+        void OnDisable()
+        {
+            SteamManager.Instance.clientJoined -= GenerateLobbyClient;
+            SteamManager.Instance.onLobbyHost -= GenerateLobbyHost;
+            SteamManager.Instance.onInviteReceived -= GenerateInvite;
+            SteamManager.Instance.onClearLobby.RemoveListener(GenerateLobbyEmpty);
+            SteamManager.Instance.onDestroyLobby.RemoveListener(DestroyLobby);
+            SteamManager.Instance.OnLobbyClientRemoved.RemoveListener(RemoveLobbyClient);
+        }
+
+
         // Invited To lobby
-        public void GenerateInvite(CSteamID lobbyID, SteamUserRecord steamFriend)
+        void GenerateInvite(CSteamID lobbyID, SteamUserRecord steamFriend)
         {
             string steamIDstring = steamFriend.id.ToString();
 
@@ -48,31 +70,46 @@ namespace Illu.Steam
 
                 // Retrieve Prefab's Script and fill out details
                 SteamFriendInvite inviteDetails = invite.GetComponent<SteamFriendInvite>();
-                inviteDetails.Instantiate(steamFriend);
 
-                // Accept Button
-                inviteDetails.acceptButton.onClick.AddListener(delegate
-                {
-                    SteamManager.Instance.JoinSteamLobby(lobbyID);
-                    DestroyInvite(invite);
-                });
+                Texture2D tex = GetSteamImageAsTexture2D(steamFriend.avatar);
 
-                // Decline Button
-                inviteDetails.declineButton.onClick.AddListener(delegate
-                {
-                    DestroyInvite(invite);
-                });
+                inviteDetails.Instantiate(
+                    steamFriend.name,
+                    tex,
+                    delegate
+                    {
+                        SteamManager.Instance.JoinSteamLobby(lobbyID);
+                        DestroyInvite(invite);
+                    },
+                    delegate
+                    {
+                        DestroyInvite(invite);
+                    }
+                 );
+
+                // // Accept Button
+                // inviteDetails.acceptButton.onClick.AddListener(delegate
+                // {
+                //     SteamManager.Instance.JoinSteamLobby(lobbyID);
+                //     DestroyInvite(invite);
+                // });
+
+                // // Decline Button
+                // inviteDetails.declineButton.onClick.AddListener(delegate
+                // {
+                //     DestroyInvite(invite);
+                // });
             }
         }
 
         //triggered on Lobby Join Attempt
-        public void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside)
+        void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside)
         {
             GenerateLobbyFriend(steamFriend, serverside, true);
         }
 
         // triggered on Lobby Join Attempt 
-        public void GenerateLobbyEmpty()
+        void GenerateLobbyEmpty()
         {
             GameObject lobbyEmpty = Instantiate(steamEmptyLobbyPrefab, lobbyClient);
             SteamEmptyLobby lobbyEmptyDetails = lobbyEmpty.GetComponent<SteamEmptyLobby>();
@@ -84,7 +121,7 @@ namespace Illu.Steam
         }
 
         // Should be driven by event
-        public void RemoveLobbyClient()
+        void RemoveLobbyClient()
         {
             DestroyLobbyClient();
             GenerateLobbyEmpty();
@@ -111,18 +148,29 @@ namespace Illu.Steam
             if (!hostSlot && lobbyClient.childCount > 0) Destroy(lobbyClient.GetChild(0).gameObject); // Destroy EmptyLobbyFriend
 
             SteamFriendLobby lobbyUserDetails = lobbyUser.GetComponent<SteamFriendLobby>();
-            lobbyUserDetails.Instantiate(steamFriend);
+            Texture2D tex = GetSteamImageAsTexture2D(steamFriend.avatar);
 
-            // Kick Button (Only visible server-side and only applies to clients)
-            bool canKick = serverside && !hostSlot;
-            lobbyUserDetails.removeButton.gameObject.SetActive(canKick);
-            if (canKick)
-            {
-                lobbyUserDetails.removeButton.onClick.AddListener(delegate
+            lobbyUserDetails.Instantiate(
+                steamFriend,
+                tex,
+                (serverside && !hostSlot),
+                delegate
                 {
                     SteamManager.Instance.KickUser(steamFriend.id);
-                });
-            }
+                }
+            );
+
+            // //Could refactor like the other one 
+            // // Kick Button (Only visible server-side and only applies to clients)
+            // bool canKick = serverside && !hostSlot;
+            // lobbyUserDetails.removeButton.gameObject.SetActive(canKick);
+            // if (canKick)
+            // {
+            //     lobbyUserDetails.removeButton.onClick.AddListener(delegate
+            //     {
+            //         SteamManager.Instance.KickUser(steamFriend.id);
+            //     });
+            // }
         }
 
         void DestroyLobby()
@@ -148,12 +196,14 @@ namespace Illu.Steam
         }
 
 
-        void GenerateFriendList()
+        public void GenerateFriendList()
         {
             DestroyFriendList();
 
             //access friend list 
             var steamFriends = SteamManager.Instance.GetSteamFriends();
+
+            Debug.Log("steamFriends length " + steamFriends);
 
             GameObject subList = null;
             float numberOfTypes = steamFriends.Count;
@@ -181,7 +231,9 @@ namespace Illu.Steam
                     SteamUserRecord steamFriend = steamFriends[i][j];
                     GameObject friendUI = Instantiate(steamFriendListPrefab, subList.transform);
                     SteamFriendList steamFriendDetails = friendUI.GetComponent<SteamFriendList>();
-                    steamFriendDetails.Instantiate(steamFriend, (j % 2 == 0));
+
+                    Texture2D avatar = GetSteamImageAsTexture2D(steamFriend.avatar);
+                    steamFriendDetails.Instantiate(steamFriend, avatar, (j % 2 == 0));
                 }
             }
         }

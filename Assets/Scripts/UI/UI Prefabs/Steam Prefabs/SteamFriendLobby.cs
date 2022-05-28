@@ -3,28 +3,29 @@ using UnityEngine.UI;
 using TMPro;
 using Illu.Steam;
 
+[System.Serializable]
 public class SteamFriendLobby : MonoBehaviour
 {
     // Background Color
-    public Image background;
+    Image background;
 
     // Steam Avatar
-    public Image avatar;
+    Image avatar;
 
     // Steam Name
-    public TMP_Text steamName;
+    TMP_Text steamName;
 
     // Kick Button
     public Button removeButton;
 
-    public void Instantiate(SteamUserRecord user)
+    private bool canKick = true;
+
+    public void Instantiate(SteamUserRecord user, Texture2D avatarTex, bool canKick, UnityEngine.Events.UnityAction kick)
     {
         // Prefab name
         this.name = user.id.ToString();
 
-        // Steam Avatar
-        Texture2D tex = SteamUI.GetSteamImageAsTexture2D(user.avatar);
-        avatar.sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, -tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        avatar.sprite = Sprite.Create(avatarTex, new Rect(0.0f, 0.0f, avatarTex.width, -avatarTex.height), new Vector2(0.5f, 0.5f), 100.0f);
 
         // Steam Name
         steamName.text = user.name;

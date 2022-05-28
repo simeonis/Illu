@@ -28,14 +28,14 @@ public class SteamFriendList : MonoBehaviour
     [SerializeField] private Color evenFriend;
     [SerializeField] private Color oddFriend;
 
-    public void Instantiate(SteamUserRecord steamFriend, bool even)
+    public void Instantiate(SteamUserRecord steamFriend, Texture2D avatarTex, bool even)
     {
         // Background Color
         background.color = even ? evenFriend : oddFriend;
 
         // Steam Avatar
-        Texture2D tex = Illu.Steam.SteamUI.GetSteamImageAsTexture2D(steamFriend.avatar);
-        avatar.sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, -tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        //Texture2D tex = Illu.Steam.SteamUI.GetSteamImageAsTexture2D(steamFriend.avatar);
+        avatar.sprite = Sprite.Create(avatarTex, new Rect(0.0f, 0.0f, avatarTex.width, -avatarTex.height), new Vector2(0.5f, 0.5f), 100.0f);
 
         // Steam Name
         steamName.text = steamFriend.name;

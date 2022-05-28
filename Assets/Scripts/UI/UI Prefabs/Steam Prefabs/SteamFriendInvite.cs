@@ -1,33 +1,33 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Illu.Steam;
-using Steamworks;
+// using Illu.Steam;
+// using Steamworks;
 
+[System.Serializable]
 public class SteamFriendInvite : MonoBehaviour
 {
     // Background Color
-    public Image background;
+    Image background;
 
     // Steam Avatar
-    public Image avatar;
+    Image avatar;
 
     // Steam Name
-    public TMP_Text steamName;
+    TMP_Text steamName;
 
     // Accept Button
-    public Button acceptButton;
+    Button acceptButton;
 
     // Decline Button
-    public Button declineButton;
+    Button declineButton;
 
-    public void Instantiate(SteamUserRecord user)
+    public void Instantiate(string name, Texture2D avatarTex, UnityEngine.Events.UnityAction accept, UnityEngine.Events.UnityAction decline)
     {
-        // Steam Avatar
-        Texture2D tex = SteamUI.GetSteamImageAsTexture2D(user.avatar);
-        avatar.sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, -tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-
+        avatar.sprite = Sprite.Create(avatarTex, new Rect(0.0f, 0.0f, avatarTex.width, -avatarTex.height), new Vector2(0.5f, 0.5f), 100.0f);
         // Steam Name
-        steamName.text = user.name;
+        steamName.text = name;
+        acceptButton.onClick.AddListener(accept);
+        declineButton.onClick.AddListener(decline);
     }
 }

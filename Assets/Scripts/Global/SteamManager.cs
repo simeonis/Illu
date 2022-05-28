@@ -3,6 +3,7 @@ using Steamworks;
 using Mirror;
 using Mirror.FizzySteam;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 namespace Illu.Steam
 {
@@ -10,14 +11,23 @@ namespace Illu.Steam
     {
 
         // SteamUI
-        [SerializeField] private SteamUI SteamUI;
+        //[SerializeField] private SteamUI SteamUI;
 
-        //Event
+        //Events raised by Steam Manager 
+        public delegate void OnLobbyClientJoined(SteamUserRecord user, bool serverside);
+        public OnLobbyClientJoined clientJoined;
 
+        public delegate void OnLobbyHost(SteamUserRecord user, bool serverside);
+        public OnLobbyHost onLobbyHost;
 
+        public delegate void OnInviteReceived(CSteamID id, SteamUserRecord user);
+        public OnInviteReceived onInviteReceived;
 
+        public UnityEvent onClearLobby = new UnityEvent();
+        public UnityEvent onDestroyLobby = new UnityEvent();
+        public UnityEvent OnLobbyClientRemoved = new UnityEvent();
 
-        // Callbacks
+        // Callbacks handled by steam Manager 
         protected Callback<LobbyCreated_t> lobbyCreated;
         protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
         protected Callback<LobbyEnter_t> lobbyEntered;
@@ -32,6 +42,8 @@ namespace Illu.Steam
         // Networking
         private const string HostAddressKey = "Host Address Key";
         //public Networking.NetworkManager networkManager;
+
+        private SteamUserRecord _steamLobbyClientMember;
 
         void Start()
         {
@@ -94,8 +106,10 @@ namespace Illu.Steam
                 if (NetworkServer.active)
                 {
                     // Adds Host UI to Host Lobby
-                    SteamUI.GenerateLobbyHost(GetSteamFriend(SteamUser.GetSteamID()), true);
-                    SteamUI.GenerateLobbyEmpty();
+                    //SteamUI.GenerateLobbyHost(GetSteamFriend(SteamUser.GetSteamID()), true);
+                    onLobbyHost?.Invoke(GetSteamFriend(SteamUser.GetSteamID()), true);
+                    //SteamUI.GenerateLobbyEmpty();
+                    onClearLobby?.Invoke();
                     return;
                 }
 
@@ -108,14 +122,17 @@ namespace Illu.Steam
                 lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
 
                 // Adds Host UI to Client Lobby
-                SteamUI.GenerateLobbyHost(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID)), false);
+                //SteamUI.GenerateLobbyHost(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID)), false);
+
+                onLobbyHost?.Invoke(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID)), false);
 
                 // Adds Clients UI to Client Lobby
                 int lobbyCount = SteamMatchmaking.GetNumLobbyMembers(lobbyID);
                 for (int i = 0; i < lobbyCount; i++)
                 {
                     CSteamID lobbyMember = SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, i);
-                    SteamUI.GenerateLobbyClient(GetSteamFriend(lobbyMember), false);
+
+                    clientJoined?.Invoke(GetSteamFriend(lobbyMember), false);
                 }
             }
         }
@@ -128,7 +145,8 @@ namespace Illu.Steam
                 GameManager.Instance.TriggerEvent("SteamLobbyInvited");
                 SteamUserRecord steamFriend = GetSteamFriend(new CSteamID(callback.m_ulSteamIDUser));
                 UIConsole.Log("Invite received from: " + steamFriend.name);
-                SteamUI.GenerateInvite(new CSteamID(callback.m_ulSteamIDLobby), steamFriend);
+                //SteamUI.GenerateInvite(new CSteamID(callback.m_ulSteamIDLobby), steamFriend);
+                onInviteReceived?.Invoke(new CSteamID(callback.m_ulSteamIDLobby), steamFriend);
             }
         }
 
@@ -172,22 +190,29 @@ namespace Illu.Steam
                 // Entered
                 case (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered:
                     UIConsole.Log(string.Format("[Lobby]: {0} has joined.", steamUserChanged.name));
-                    SteamUI.GenerateLobbyClient(steamUserChanged, true);
+                    _steamLobbyClientMember = steamUserChanged;
+                    //SteamUI.GenerateLobbyClient(steamUserChanged, true);
+                    // OnLobbyClientJoined EVENT //
+                    clientJoined?.Invoke(steamUserChanged, true);
                     break;
                 // Left
                 case (uint)EChatMemberStateChange.k_EChatMemberStateChangeLeft:
                     UIConsole.Log(string.Format("[Lobby]: {0} has left.", steamUserChanged.name));
-                    SteamUI.RemoveLobbyClient();
+                    //SteamUI.RemoveLobbyClient();
+                    // OnLobbyClientRemoved EVENT //
+                    OnLobbyClientRemoved?.Invoke();
                     break;
                 // Kicked
                 case (uint)EChatMemberStateChange.k_EChatMemberStateChangeKicked:
                     UIConsole.Log(string.Format("[Lobby]: {0} was kicked by {1}.", steamUserChanged.name, steamUserMakingChange.name));
-                    SteamUI.RemoveLobbyClient();
+                    //SteamUI.RemoveLobbyClient();
+                    OnLobbyClientRemoved?.Invoke();
                     break;
                 // Disconnected
                 case (uint)EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
                     UIConsole.Log(string.Format("[Lobby]: {0} disconnected.", steamUserChanged.name));
-                    SteamUI.RemoveLobbyClient();
+                    //SteamUI.RemoveLobbyClient();
+                    OnLobbyClientRemoved?.Invoke();
                     break;
                 default:
                     break;
@@ -244,7 +269,8 @@ namespace Illu.Steam
             lobbyID.Clear();
 
             // Destroy LobbyUI
-            SteamUI.DestroyLobby();
+            //SteamUI.DestroyLobby();
+            onDestroyLobby?.Invoke();
 
             // Disconnect from any network connection (and close server if host)
             if (lobbyOwner)

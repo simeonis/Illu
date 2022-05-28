@@ -2,28 +2,16 @@ using UnityEngine;
 
 
 [CreateAssetMenu(fileName = "Bool Variable", menuName = "Scriptable Object/Generic Type/Bool")]
-public class BoolVariable : Event
+public class BoolVariable : Variable
 {
-    public delegate void BoolCallback();
-    public BoolCallback Updated;
-    private bool _value = false;
-
+    [SerializeField] bool _value = false;
     public bool Value
     {
+        get { return _value; }
         set
         {
             _value = value;
-            this.Trigger();
-            Updated?.Invoke();
+            _event.Invoke();
         }
-        get
-        {
-            return _value;
-        }
-    }
-
-    public void ToggleValue()
-    {
-        Value = !Value;
     }
 }

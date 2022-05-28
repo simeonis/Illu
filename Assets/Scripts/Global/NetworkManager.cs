@@ -54,12 +54,7 @@ namespace Illu.Networking
         }
         void OnEnable()
         {
-            isLanConnection.Updated += testBool;
-        }
-
-        void OnDiable()
-        {
-            isLanConnection.Updated -= testBool;
+            isLanConnection.AddListener(testBool);
         }
 
         public void testBool()
