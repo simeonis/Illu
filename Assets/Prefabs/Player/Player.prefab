@@ -220,9 +220,7 @@ GameObject:
   - component: {fileID: 3793000192300384056}
   - component: {fileID: 2045196033816706048}
   - component: {fileID: 6642347861924518962}
-  - component: {fileID: 1124171219}
-  - component: {fileID: 1124171218}
-  m_Layer: 11
+  m_Layer: 10
   m_Name: Hook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -292,35 +290,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!54 &1124171219
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2199069980676110729}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!135 &1124171218
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2199069980676110729}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.50000036
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.0000009536743}
 --- !u!1 &2700360169364725540
 GameObject:
   m_ObjectHideFlags: 0
@@ -1118,20 +1087,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24df71576a73d664eabed41e43ef9e3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hook: {fileID: 3793000192300384056}
-  exitPoint: {fileID: 5161085210209974595}
-  projectileSpeed: 100
-  hookableLayers:
+  _hook: {fileID: 3793000192300384056}
+  _exitPoint: {fileID: 5161085210209974595}
+  _projectileSpeed: 100
+  _hookableLayers:
     serializedVersion: 2
     m_Bits: 8
-  maxRopeLength: 200
+  _maxRopeLength: 200
+  _resolution: 100
+  _wobbleCount: 3
+  _waveCount: 2
+  _waveHeight: 0.5
+  _ropeRenderer: {fileID: 203225506}
+  _viewpoint: {fileID: 4333712776587452003}
+  _ropeRemaining: {fileID: 11400000, guid: b5e89818a6a60e44e8b76ef1c46dc42b, type: 2}
   _grappleDistance: {fileID: 11400000, guid: 29df79c1765f9b34793d780b4de929a4, type: 2}
-  resolution: 100
-  wobbleCount: 3
-  waveCount: 2
-  waveHeight: 0.5
-  ropeRenderer: {fileID: 203225506}
-  viewpoint: {fileID: 4333712776587452003}
   enable: 1
 --- !u!1 &8681602193459440914
 GameObject:

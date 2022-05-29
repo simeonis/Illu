@@ -1,13 +1,13 @@
 using UnityEngine;
 
-public class InertialPlatform : MonoBehaviour
+public abstract class InertialPlatform : MonoBehaviour
 {
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player" && isOntop(-collision.GetContact(0).normal))
         {
-            Debug.Log(collision.gameObject.name + " got on a rotating bridge.");
             collision.transform.SetParent(transform);
+            PlayerEnter();
         }
     }
 
@@ -15,9 +15,16 @@ public class InertialPlatform : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
-            Debug.Log(collision.gameObject.name + " got off a rotating bridge.");
             collision.transform.SetParent(null);
+            PlayerExit();
         }
     }
-    
+
+    protected virtual void PlayerEnter() {}
+    protected virtual void PlayerExit() {}
+
+    bool isOntop(Vector3 collisionNormal)
+    {
+        return Vector3.Dot(collisionNormal, transform.up) > 0f;
+    }
 }

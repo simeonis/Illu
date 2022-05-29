@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class GrapplingHookFiredState : GrapplingHookBaseState
@@ -5,59 +6,73 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
     public GrapplingHookFiredState(GrapplingHookStateMachine currentContext, GrapplingHookStateFactory grapplingHookStateFactory)
     : base (currentContext, grapplingHookStateFactory) {}
 
-    Rigidbody _rigidBody;
-    Vector3 projectileDirection;
-    bool _outOfRope, _collisionOccured;
+    RaycastHit recalcHit;
+    float _ropeRemaining;
+    bool _grappled;
+    bool _outOfRope;
 
     public override void EnterState()
     {
-        DetatchGrapple();
-        _ctx.Hook.OnCollision.AddListener(OnCollision);
-        _rigidBody = _ctx.Hook.Rigidbody;
-
-        projectileDirection = (_ctx.GrappleTarget - NearestExitPointOnAimVector()).normalized;
+        _ropeRemaining = _ctx.RopeRemaining;
+        _grappled = false;
+        _outOfRope = false;
+        ReleaseHook();
 
         // TEMPORARY
         _ctx.RopeRenderer.positionCount = 2;
     }
 
-    void OnCollision(Collision collision)
-    {
-        _collisionOccured = true;
-        _ctx.Hook.Disable();
-        _ctx.GrappleTarget = collision.contacts[0].point;
-    }
-
     public override void UpdateState()
     {
         // TEMPORARY
-        _ctx.RopeRenderer.SetPosition(0, _ctx.ExitPoint.position);
-        _ctx.RopeRenderer.SetPosition(1, _ctx.HookTransform.position);
+        _ctx.RopeRenderer.SetPosition(0, _ctx.ExitPoint);
+        _ctx.RopeRenderer.SetPosition(1, _ctx.HookPosition);
         // TO-DO: ANIMATE ROPE
     }
 
     public override void FixedUpdateState()
     {
-        _rigidBody.AddForce(projectileDirection * _ctx.ProjectileSpeed, ForceMode.Acceleration);
+        // TO-DO: Check for unexpected collisions
 
-        if (Vector3.Distance(_ctx.ExitPoint.position, _ctx.HookTransform.position) > _ctx.MaxRopeLength)
+        // Move projectile to target position
+        float step = _ctx.ProjectileSpeed * Time.deltaTime;
+        _ctx.HookPosition = Vector3.MoveTowards(_ctx.HookPosition, _ctx.GrappleTarget, step);
+
+        // Update rope remaining
+        float currentDistance = Vector3.Distance(_ctx.HookPosition, _ctx.GrappleTarget);
+        _ctx.RopeRemaining = _ropeRemaining - (_ctx.GrappleDistance - currentDistance);
+        
+        // Check if out of rope
+        if (_ctx.RopeRemaining <= 0f)
+        {
             _outOfRope = true;
+            return;
+        }
+
+        // Arrived at target
+        if (currentDistance < 0.001f)
+        {
+            // Check if target is still here
+            if (CheckForCollision())
+            {
+                _grappled = true;
+            }
+            // Otherwise, recalculate target
+            else
+            {
+                CalculateGrappleTarget(out _);
+            }
+        }
     }
 
-    public override void ExitState()
+    bool CheckForCollision()
     {
-        _ctx.Hook.OnCollision.RemoveListener(OnCollision);
-        
-        if (!_ctx.IsPrimaryPressed || _outOfRope)
-        {
-            _ctx.RopeRenderer.positionCount = 0;
-            AttachGrapple();
-        }
+        return Physics.CheckSphere(_ctx.HookPosition, 0.25f, _ctx.HookableLayers);
     }
 
     public override void CheckSwitchState()
     {
-        if (_collisionOccured)
+        if (_grappled)
             SwitchState(_factory.Grappled());
         else if (!_ctx.IsPrimaryPressed || _outOfRope)
             SwitchState(_factory.Idle());
@@ -67,7 +82,7 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
     public override void GizmosState()
     {
         Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(_ctx.HookTransform.position, 0.125f);
+        Gizmos.DrawSphere(_ctx.HookPosition, 0.25f);
     }
     #endif
 

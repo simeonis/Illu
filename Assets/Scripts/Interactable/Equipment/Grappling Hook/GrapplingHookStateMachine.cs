@@ -4,49 +4,53 @@ using UnityEngine.InputSystem;
 public class GrapplingHookStateMachine : MonoBehaviour
 {
     [Header("Projectile")]
-    [SerializeField] Hook _hook;
-    [SerializeField] Transform exitPoint;
-    [SerializeField] float projectileSpeed = 100f;
-    [SerializeField] LayerMask hookableLayers;
+    [SerializeField] Transform _hook;
+    [SerializeField] Transform _exitPoint;
+    [SerializeField] float _projectileSpeed = 100f;
+    [SerializeField] LayerMask _hookableLayers;
+    Transform _defaultHookParent;
     Vector3 _grappleTarget;
 
     [Header("Rope")]
-    [SerializeField] float maxRopeLength = 200f;
-    [SerializeField] FloatVariable _grappleDistance;
-    [SerializeField, Range(1, 500)] int resolution = 100; 
-    [SerializeField, Range(1, 10)] int wobbleCount = 3;
-    [SerializeField, Range(1, 10f)] float waveCount = 2;
-    [SerializeField, Range(0, 5f)] float waveHeight = 0.5f;
-    [SerializeField] LineRenderer ropeRenderer;
-    float _ropeRemaining = 200f;
+    [SerializeField] float _maxRopeLength = 200f;
+    [SerializeField, Range(1, 500)] int _resolution = 100; 
+    [SerializeField, Range(1, 10)] int _wobbleCount = 3;
+    [SerializeField, Range(1, 10f)] float _waveCount = 2;
+    [SerializeField, Range(0, 5f)] float _waveHeight = 0.5f;
+    [SerializeField] LineRenderer _ropeRenderer;
 
     [Header("Player")]
-    [SerializeField] Transform viewpoint;
+    [SerializeField] Transform _viewpoint;
     bool _isPrimaryPressed = false;
+
+    [Header("Scriptable Objects")]
+    [SerializeField] FloatVariable _ropeRemaining;
+    [SerializeField] FloatVariable _grappleDistance;
 
     GrapplingHookBaseState _currentState;
     GrapplingHookStateFactory _states;
 
     // Getters & Setters - Projectile
-    public Hook Hook { get { return _hook; } }
-    public Transform HookTransform { get { return _hook.transform; } }
-    public Transform ExitPoint { get { return exitPoint; } }
-    public float ProjectileSpeed { get { return projectileSpeed; } }
-    public LayerMask HookableLayers { get { return hookableLayers; } }
+    public Transform Hook { get { return _hook; } }
+    public Transform HookParent { get { return _defaultHookParent; } }
+    public Vector3 HookPosition { get { return _hook.position; } set { _hook.position = value; } }
+    public Vector3 ExitPoint { get { return _exitPoint.position; } }
+    public float ProjectileSpeed { get { return _projectileSpeed; } }
+    public LayerMask HookableLayers { get { return _hookableLayers; } }
     public Vector3 GrappleTarget { get { return _grappleTarget; } set { _grappleTarget = value; } }
 
     // Getters & Setters - Rope
-    public float MaxRopeLength { get { return maxRopeLength; } }
-    public float RopeRemaining { get { return _ropeRemaining; } set { _ropeRemaining = value; } }
+    public float MaxRopeLength { get { return _maxRopeLength; } }
+    public float RopeRemaining { get { return _ropeRemaining.Value; } set { _ropeRemaining.Value = value; } }
     public float GrappleDistance { get { return _grappleDistance.Value; } set { _grappleDistance.Value = value; } }
-    public int Resolution { get { return resolution; } }
-    public int WobbleCount { get { return wobbleCount; } }
-    public float WaveCount { get { return waveCount; } }
-    public float WaveHeight { get { return waveHeight; } }
-    public LineRenderer RopeRenderer { get { return ropeRenderer; } }
+    public int Resolution { get { return _resolution; } }
+    public int WobbleCount { get { return _wobbleCount; } }
+    public float WaveCount { get { return _waveCount; } }
+    public float WaveHeight { get { return _waveHeight; } }
+    public LineRenderer RopeRenderer { get { return _ropeRenderer; } }
     
     // Getters & Setters - Player
-    public Transform Viewpoint { get { return viewpoint; } }
+    public Transform Viewpoint { get { return _viewpoint; } }
     public bool IsPrimaryPressed { get { return _isPrimaryPressed; } set { _isPrimaryPressed = false; } }
     
     // Getters & Setters - State
@@ -54,11 +58,12 @@ public class GrapplingHookStateMachine : MonoBehaviour
 
     void Start()
     {
+        _defaultHookParent = _hook.parent;
+        _ropeRemaining.Value = _maxRopeLength;
+
         _states = new GrapplingHookStateFactory(this);
         _currentState = _states.Idle();
         _currentState.EnterState();
-
-        _ropeRemaining = maxRopeLength;
     }
 
     void OnEnable()
