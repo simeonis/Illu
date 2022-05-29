@@ -1,30 +1,25 @@
 using UnityEngine;
 
 public abstract class InertialPlatform : MonoBehaviour
-{
-    void OnCollisionEnter(Collision collision)
+{ 
+    void OnTriggerEnter(Collider collider)
     {
-        if (collision.gameObject.tag == "Player" && isOntop(-collision.GetContact(0).normal))
+        if (collider.gameObject.tag == "Player")
         {
-            collision.transform.SetParent(transform);
+            collider.transform.SetParent(transform);
             PlayerEnter();
         }
     }
 
-    void OnCollisionExit(Collision collision)
+    void OnTriggerExit(Collider collider)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collider.gameObject.tag == "Player")
         {
-            collision.transform.SetParent(null);
+            collider.transform.SetParent(null);
             PlayerExit();
         }
     }
 
     protected virtual void PlayerEnter() {}
     protected virtual void PlayerExit() {}
-
-    bool isOntop(Vector3 collisionNormal)
-    {
-        return Vector3.Dot(collisionNormal, transform.up) > 0f;
-    }
 }

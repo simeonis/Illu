@@ -829,7 +829,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 3999
+    m_Bits: 8095
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -947,7 +947,7 @@ MonoBehaviour:
   clearDepth: 1
   volumeLayerMask:
     serializedVersion: 2
-    m_Bits: 3999
+    m_Bits: 8095
   volumeAnchorOverride: {fileID: 0}
   antialiasing: 0
   SMAAQuality: 2
@@ -975,7 +975,7 @@ MonoBehaviour:
   invertFaceCulling: 0
   probeLayerMask:
     serializedVersion: 2
-    m_Bits: 3999
+    m_Bits: 8095
   hasPersistentHistory: 0
   exposureTarget: {fileID: 0}
   m_RenderingPathCustomFrameSettings:
@@ -1092,13 +1092,14 @@ MonoBehaviour:
   _projectileSpeed: 100
   _hookableLayers:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 4104
   _maxRopeLength: 200
   _resolution: 100
   _wobbleCount: 3
   _waveCount: 2
   _waveHeight: 0.5
   _ropeRenderer: {fileID: 203225506}
+  _player: {fileID: 4333712776440942766}
   _viewpoint: {fileID: 4333712776587452003}
   _ropeRemaining: {fileID: 11400000, guid: b5e89818a6a60e44e8b76ef1c46dc42b, type: 2}
   _grappleDistance: {fileID: 11400000, guid: 29df79c1765f9b34793d780b4de929a4, type: 2}

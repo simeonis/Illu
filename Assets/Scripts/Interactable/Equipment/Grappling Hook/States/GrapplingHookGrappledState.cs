@@ -5,8 +5,20 @@ public class GrapplingHookGrappledState : GrapplingHookBaseState
     public GrapplingHookGrappledState(GrapplingHookStateMachine currentContext, GrapplingHookStateFactory grapplingHookStateFactory)
     : base (currentContext, grapplingHookStateFactory) {}
 
+    SpringJoint _springJoint;
+    float _springStrength = 4.5f;
+    float _damperAmount = 7f;
+
     public override void EnterState()
     {
+        _springJoint = _ctx.Player.AddComponent<SpringJoint>();
+        _springJoint.autoConfigureConnectedAnchor = false;
+        _springJoint.connectedAnchor = _ctx.GrappleTarget;
+        _springJoint.spring = _springStrength;
+        _springJoint.damper = _damperAmount;
+        _springJoint.maxDistance = Vector3.Distance(_ctx.ExitPoint, _ctx.GrappleTarget) * 0.8f;
+        _springJoint.minDistance = 0;
+
         _ctx.RopeRenderer.positionCount = 2;
     }
 
@@ -18,6 +30,7 @@ public class GrapplingHookGrappledState : GrapplingHookBaseState
 
     public override void ExitState()
     {
+        GrapplingHookStateMachine.Destroy(_springJoint);
         _ctx.RopeRenderer.positionCount = 0;
         RetractHook();
     }

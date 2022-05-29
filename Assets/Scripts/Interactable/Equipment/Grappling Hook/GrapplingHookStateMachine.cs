@@ -20,6 +20,7 @@ public class GrapplingHookStateMachine : MonoBehaviour
     [SerializeField] LineRenderer _ropeRenderer;
 
     [Header("Player")]
+    [SerializeField] GameObject _player;
     [SerializeField] Transform _viewpoint;
     bool _isPrimaryPressed = false;
 
@@ -50,6 +51,7 @@ public class GrapplingHookStateMachine : MonoBehaviour
     public LineRenderer RopeRenderer { get { return _ropeRenderer; } }
     
     // Getters & Setters - Player
+    public GameObject Player { get { return _player; } }
     public Transform Viewpoint { get { return _viewpoint; } }
     public bool IsPrimaryPressed { get { return _isPrimaryPressed; } set { _isPrimaryPressed = false; } }
     

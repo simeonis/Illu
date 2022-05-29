@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(MovingPlatform))]
+[CustomEditor(typeof(MovingPlatform)), CanEditMultipleObjects]
 public class MovingPlatformEditor : Editor
 {
     public override void OnInspectorGUI()
@@ -17,6 +17,19 @@ public class MovingPlatformEditor : Editor
         if (GUILayout.Button(projection.Visualize ? "Hide Visualization" : "Show Visualization"))
         {
             projection.Visualize = !projection.Visualize;
+        }
+    }
+
+    protected virtual void OnSceneGUI()
+    {
+        MovingPlatform projection = (MovingPlatform) target;
+        
+        EditorGUI.BeginChangeCheck();
+        Vector3 newTargetPosition = Handles.PositionHandle(projection.TargetPosition, Quaternion.identity);
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(projection, "Change Moving Platform Target Position");
+            projection.TargetPosition = newTargetPosition;
         }
     }
 }
