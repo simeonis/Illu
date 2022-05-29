@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour
     public event PlayerJumpedEventHandler playerJumped;
     public event PlayerSprintEventHandler playerSprint;
 
+    public Vector2 dir;
+
 
     void Start()
     {
@@ -66,18 +68,10 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (playerMotor != null)
-        {
-            playerMotor.UpdateMovement(
-                inputMovement.ReadValue<Vector2>()
-            );
-
-        }
-        else
-        {
-            Debug.Log("No motor");
-        }
-
+        dir = inputMovement.ReadValue<Vector2>();
+        playerMotor.UpdateMovement(
+            dir
+        );
 
     }
     void onJump(InputAction.CallbackContext context)

@@ -43,7 +43,7 @@ public class SyncPlayer : NetworkBehaviour
     public Transform controller;
 
     [Tooltip("Pass in the Player Camera")]
-    public Transform playerCamera;
+    public Transform playerCameraTransform;
 
     [Tooltip("Pass in Orientation")]
     public Transform orientation;
@@ -55,44 +55,91 @@ public class SyncPlayer : NetworkBehaviour
 
     // local authority send time
     float lastClientSendTime;
-    private PlayerMotor playerMotor;
-    [SerializeField] private PlayerController playerController;
+    [SerializeField] PlayerMotor playerMotor;
+    [SerializeField] PlayerController playerController;
+    [SerializeField] Camera playerCamera;
+
+    private string _netID;
+    private new string name;
+
+    [SyncVar] Vector2 dir;
+    [SyncVar] bool jump;
+
+    bool shouldSend = false;
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        _netID = GetComponent<NetworkIdentity>().netId.ToString();
+        name = GetComponent<NetworkIdentity>().name;
+    }
+
+
+    override public void OnStartAuthority()
+    {
+        base.OnStartAuthority();
+        //Enable everything on the active player 
+        playerCamera.enabled = true;
+        playerCamera.GetComponent<AudioListener>().enabled = true;
+        playerController.enabled = true;
+
+        playerController.playerJumped += playerJumped;
+        playerController.playerSprint += playerSprint;
+
+        shouldSend = true;
+
+        Debug.Log("OnStartAuthority " + name + " " + _netID);
+    }
 
     void Awake()
     {
-        playerMotor = GetComponent<PlayerMotor>();
-        //playerController = GetComponent<PlayerController>();
+        //Disable when script starts for both players
+        playerCamera.enabled = false;
+        playerCamera.GetComponent<AudioListener>().enabled = false;
+        playerController.enabled = false;
+    }
 
-        playerController.playerJumped += playerSprint;
-        playerController.playerSprint += playerJumped;
+    void regJMP()
+    {
+        playerMotor.SetJump(jump);
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
         // send to server if we are local player and have authority
-        if (isClient)
+
+        // if (isClient)
+        // {
+        if (shouldSend)
         {
-            if (hasAuthority)
-            {
-                // check only each 'syncInterval'
-                if (Time.time - lastClientSendTime >= syncInterval)
-                {
-                    if (HasEitherMovedRotated())
-                    {
-                        PlayerSyncData playerSyncData = new PlayerSyncData(transform.position, playerCamera.rotation, orientation.rotation, transform.rotation);
-                        CMDSendPlayerSyncData(playerSyncData);
-                    }
-                    lastClientSendTime = Time.time;
-                }
-            }
-            else
-            {
-                HandleRemotePositionUpdates();
-                HandleRemoteRotationUpdates();
-            }
-            transPosition = transform.position;
+            // check only each 'syncInterval'
+            // if (Time.time - lastClientSendTime >= syncInterval)
+            // {
+            //     if (HasEitherMovedRotated())
+            //     {
+            //         PlayerSyncData playerSyncData = new PlayerSyncData(transform.position, playerCameraTransform.rotation, orientation.rotation, transform.rotation);
+            //         CMDSendPlayerSyncData(playerSyncData);
+            //     }
+            //     lastClientSendTime = Time.time;
+            // }
+            CMDSendDir(playerController.dir);
+            Debug.Log("Sending dir " + dir.x + " " + dir.y);
         }
+        else
+        {
+            // Debug.Log("Here ");
+            // HandleRemotePositionUpdates();
+            // HandleRemoteRotationUpdates();
+
+
+            Debug.Log("Updating dir " + dir.x + " " + dir.y);
+
+            playerMotor.UpdateMovement(dir);
+        }
+        transPosition = transform.position;
+        //  }
     }
 
     //return whether there's been a change in position or rotation 
@@ -102,14 +149,14 @@ public class SyncPlayer : NetworkBehaviour
         Quaternion RootRotation = transform.rotation;
         // moved or rotated?
         bool moved = Vector3.Distance(lastPlayerSyncData.position, transform.position) > moveTriggerSensitivity;
-        bool headRotated = Quaternion.Angle(lastPlayerSyncData.headRot, playerCamera.rotation) > moveTriggerSensitivity;
+        bool headRotated = Quaternion.Angle(lastPlayerSyncData.headRot, playerCameraTransform.rotation) > moveTriggerSensitivity;
         bool bodyRotated = Quaternion.Angle(lastPlayerSyncData.bodyRot, orientation.rotation) > moveTriggerSensitivity;
         bool rootRotated = Quaternion.Angle(lastPlayerSyncData.rootRot, RootRotation) > moveTriggerSensitivity;
 
         bool change = moved || headRotated || bodyRotated || rootRotated;
 
         if (change)
-            lastPlayerSyncData = new PlayerSyncData(transform.position, playerCamera.rotation, orientation.rotation, RootRotation);
+            lastPlayerSyncData = new PlayerSyncData(transform.position, playerCameraTransform.rotation, orientation.rotation, RootRotation);
 
         return change;
     }
@@ -155,10 +202,12 @@ public class SyncPlayer : NetworkBehaviour
 
         if (LagDistance.magnitude < maximumAcceptableDeviance)
         {   //Player is nearly at the point
+            Debug.Log("Under Lag Close Enough");
             playerMotor.UpdateMovement(Vector3.zero);
         }
         else //Player has to go to the point
         {
+            Debug.Log("Should Move Now");
             playerMotor.UpdateMovement(finalLagVector);
         }
     }
@@ -169,7 +218,7 @@ public class SyncPlayer : NetworkBehaviour
         // The step size is equal to speed times frame time.
         var step = correntRotSpeed * Time.deltaTime;
 
-        float camDiff = Quaternion.Dot(playerCamera.rotation, remotePlayerSyncData.headRot);
+        float camDiff = Quaternion.Dot(playerCameraTransform.rotation, remotePlayerSyncData.headRot);
         float bodyDiff = Quaternion.Dot(orientation.rotation, remotePlayerSyncData.bodyRot);
         float rootDiff = Quaternion.Dot(transform.rotation, remotePlayerSyncData.rootRot);
 
@@ -179,11 +228,11 @@ public class SyncPlayer : NetworkBehaviour
         if (smoothRot && camDiff <= allowRotLagAmount)
         {
             // Rotate our playerCamera a step closer to the target's.
-            playerCamera.rotation = Quaternion.RotateTowards(playerCamera.rotation, remotePlayerSyncData.headRot, step);
+            playerCameraTransform.rotation = Quaternion.RotateTowards(playerCameraTransform.rotation, remotePlayerSyncData.headRot, step);
         }
         else
         {
-            playerCamera.rotation = remotePlayerSyncData.headRot;
+            playerCameraTransform.rotation = remotePlayerSyncData.headRot;
         }
 
         if (smoothRot && bodyDiff <= allowRotLagAmount)
@@ -208,33 +257,18 @@ public class SyncPlayer : NetworkBehaviour
         }
     }
 
+
+    [Command(channel = Channels.Unreliable)]
+    private void CMDSendDir(Vector2 dir)
+    {
+        this.dir = dir;
+    }
+
     //Handle Sending Crouch, Jump, Sprint
     //--------------------------------------------------------------
-    // [Command(channel = Channels.Unreliable)]
-    // public void CmdHandleCrouch(bool CrouchState)
-    // {
-    //     RpcCrouch(CrouchState);
-    // }
-
-    // [ClientRpc]
-    // private void RpcCrouch(bool CrouchState)
-    // {
-    //     if (!hasAuthority)
-    //     {
-    //         if (CrouchState)
-    //         {
-    //             playerMotor.Crouch();
-    //         }
-    //         else
-    //         {
-    //             playerMotor.UnCrouch();
-    //         }
-    //     }
-    // }
-
     private void playerSprint(object sender, BoolEventArgs e)
     {
-        if (hasAuthority)
+        if (shouldSend)
             CmdHandleSprint(e.state);
     }
 
@@ -242,29 +276,20 @@ public class SyncPlayer : NetworkBehaviour
     private void CmdHandleSprint(bool SprintState) { RpcSprint(SprintState); }
 
     [ClientRpc]
-    private void RpcSprint(bool SprintState)
-    {
-        if (!hasAuthority)
-            playerMotor.SetSprint(SprintState);
-    }
+    private void RpcSprint(bool SprintState) { playerMotor.SetSprint(SprintState); }
 
     private void playerJumped(object sender, BoolEventArgs e)
     {
-        if (hasAuthority)
+        if (shouldSend)
             CmdSendJump(e.state);
     }
+
 
     [Command(channel = Channels.Unreliable)]
     public void CmdSendJump(bool jump) { RpcSendJump(jump); }
 
     [ClientRpc]
-    private void RpcSendJump(bool jump)
-    {
-        if (!hasAuthority)
-        {
-            playerMotor.SetJump(jump);
-        }
-    }
+    private void RpcSendJump(bool jump) { playerMotor.SetJump(jump); }
 
     //Static Draw Methods
     //--------------------------------------------------------------

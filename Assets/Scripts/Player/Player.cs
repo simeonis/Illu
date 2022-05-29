@@ -81,17 +81,17 @@ public class Player : Interactor
 
     private void UpdateUI()
     {
-        //Interact Message(Crosshair)
-        if (GetInteractable(out var interactable) && !_interactMessage.Equals(interactable.interactMessage))
-        {
-            _interactMessage.Value = interactable.interactMessage;
-            // GameManager.TriggerEvent("PlayerLookingAtInteractable");
-        }
-        else if (!GetInteractable(out _) && !_interactMessage.IsEmpty())
-        {
-            _interactMessage.Value = "";
-            // GameManager.TriggerEvent("PlayerNotLookingAtInteractable");
-        }
+        // //Interact Message(Crosshair)
+        // if (GetInteractable(out var interactable) && !_interactMessage.Equals(interactable.interactMessage))
+        // {
+        //     _interactMessage.Value = interactable.interactMessage;
+        //     // GameManager.TriggerEvent("PlayerLookingAtInteractable");
+        // }
+        // else if (!GetInteractable(out _) && !_interactMessage.IsEmpty())
+        // {
+        //     _interactMessage.Value = "";
+        //     // GameManager.TriggerEvent("PlayerNotLookingAtInteractable");
+        // }
     }
 
     // Validate colliders that are within 90 degrees of camera's forward vector
