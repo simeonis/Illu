@@ -14,4 +14,5 @@ public class BoolVariable : Variable
             _event.Invoke();
         }
     }
+    public void Toggle() { Value = !Value; }
 }

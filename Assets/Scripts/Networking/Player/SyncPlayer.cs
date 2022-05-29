@@ -56,12 +56,12 @@ public class SyncPlayer : NetworkBehaviour
     // local authority send time
     float lastClientSendTime;
     private PlayerMotor playerMotor;
-    private PlayerController playerController;
+    [SerializeField] private PlayerController playerController;
 
     void Awake()
     {
         playerMotor = GetComponent<PlayerMotor>();
-        playerController = GetComponent<PlayerController>();
+        //playerController = GetComponent<PlayerController>();
 
         playerController.playerJumped += playerSprint;
         playerController.playerSprint += playerJumped;

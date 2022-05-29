@@ -4,7 +4,7 @@ public class MonoBehaviourSingleton<T> : MonoBehaviour where T : Component
 {
     public static T Instance { get; private set; }
 
-    public void Awake()
+    public virtual void Awake()
     {
         // If there is an instance, and it's not me, delete myself.
         if (Instance != null && Instance != this)

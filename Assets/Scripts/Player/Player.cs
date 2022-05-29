@@ -15,11 +15,6 @@ public class Player : Interactor
     [SerializeField] StringVariable _interactMessage;
     [SerializeField] TriggerVariable _rotateCrosshair;
 
-    void Awake()
-    {
-
-    }
-
     protected void OnEnable()
     {
         // Interact
@@ -50,7 +45,7 @@ public class Player : Interactor
         if (GetInteractable(out var interactable))
         {
             if (IsEquipped() && (interactable is Item)) _equipment.Interact(this);
-            else 
+            else
             {
                 state = InteractorState.Interacting;
                 interactable.Interact(this);
@@ -86,7 +81,7 @@ public class Player : Interactor
 
     private void UpdateUI()
     {
-        // Interact Message (Crosshair)
+        //Interact Message(Crosshair)
         if (GetInteractable(out var interactable) && !_interactMessage.Equals(interactable.interactMessage))
         {
             _interactMessage.Value = interactable.interactMessage;

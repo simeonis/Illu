@@ -31,9 +31,6 @@ namespace Illu.Networking
         public static event Action<NetworkConnection> OnServerReadied;
 
         [HideInInspector] public static string HostAddress = "";
-
-        //private bool isLanConnection = false;
-
         [SerializeField] private BoolVariable isLanConnection;
 
 
@@ -54,14 +51,8 @@ namespace Illu.Networking
         }
         void OnEnable()
         {
-            isLanConnection.AddListener(testBool);
+            isLanConnection.AddListener(HostStartServer);
         }
-
-        public void testBool()
-        {
-            Debug.Log("NM Testing Bool");
-        }
-
 
         /*  --------------------------
         *       Callback functions
@@ -118,7 +109,9 @@ namespace Illu.Networking
         {
             base.OnClientConnect(conn);
 
-            GameManager.Instance.TriggerEvent("ClientConnected");
+            GameManager
+            .Instance
+            .TriggerEvent("ClientConnected");
 
             // you can send the message here, or wherever else you want
             CreateCharacterMessage characterMessage = new CreateCharacterMessage
@@ -136,7 +129,9 @@ namespace Illu.Networking
         {
             base.OnClientDisconnect(conn);
 
-            GameManager.Instance.TriggerEvent("ClientDisconnected");
+            GameManager
+            .Instance
+            .TriggerEvent("ClientDisconnected");
 
             if (SceneManager.GetActiveScene().name != menuScene)
             {
@@ -248,6 +243,9 @@ namespace Illu.Networking
         //
         public void HostStartServer()
         {
+            if (isNetworkActive)
+                StopHost();
+
             //Holds all the different Transports for different connection types
             var switchTransport = (SwitchTransport)transport;
 
@@ -270,6 +268,7 @@ namespace Illu.Networking
         //
         public void ClientJoinServer()
         {
+            StopClient();
             //Holds all the different Transports for different connection types
             var switchTransport = (SwitchTransport)transport;
 

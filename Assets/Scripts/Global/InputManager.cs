@@ -1,13 +1,12 @@
-using System;
-using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviourSingleton<InputManager>
 {
     public PlayerControls playerControls;
 
-    void Awake()
+    public override void Awake()
     {
+        base.Awake();
         playerControls = new PlayerControls();
 
         playerControls.Player.Menu.performed += context => GameManager.Instance.TriggerEvent("GamePaused");

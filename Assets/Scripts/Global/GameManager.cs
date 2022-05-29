@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class GameManager : MonoBehaviourSingleton<GameManager>
@@ -7,8 +6,9 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     //public static GameManager Instance { get; private set; }
     private Dictionary<string, Event> _events = new Dictionary<string, Event>();
 
-    void Awake()
+    public override void Awake()
     {
+        base.Awake();
         Event[] events = Resources.LoadAll<Event>("ScriptableObjects/Event");
         foreach (var e in events) { _events.Add(e.name, e); }
     }
