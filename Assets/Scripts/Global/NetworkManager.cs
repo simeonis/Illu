@@ -35,6 +35,7 @@ namespace Illu.Networking
 
 
         public static NetworkManager Instance { get; private set; }
+        public ReadyUpSystem ReadyUpSystem { get; private set; }
 
         override public void Awake()
         {
@@ -51,6 +52,7 @@ namespace Illu.Networking
         }
         void OnEnable()
         {
+            isLanConnection.Value = false;
             isLanConnection.AddListener(HostStartServer);
         }
 

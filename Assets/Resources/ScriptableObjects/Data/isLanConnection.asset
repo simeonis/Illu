@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31d880ce0d94449e09da481ef29bd4a8, type: 3}
   m_Name: isLanConnection
   m_EditorClassIdentifier: 
-  _value: 1
+  _value: 0
