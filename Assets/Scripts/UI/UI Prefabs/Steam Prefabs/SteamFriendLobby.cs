@@ -10,10 +10,10 @@ public class SteamFriendLobby : MonoBehaviour
     Image background;
 
     // Steam Avatar
-    Image avatar;
+    [SerializeField] Image avatar;
 
     // Steam Name
-    TMP_Text steamName;
+    [SerializeField] TMP_Text steamName;
 
     // Kick Button
     public Button removeButton;
@@ -25,7 +25,14 @@ public class SteamFriendLobby : MonoBehaviour
         // Prefab name
         this.name = user.id.ToString();
 
-        avatar.sprite = Sprite.Create(avatarTex, new Rect(0.0f, 0.0f, avatarTex.width, -avatarTex.height), new Vector2(0.5f, 0.5f), 100.0f);
+
+        avatar.sprite = Sprite.Create(
+            avatarTex,
+            new Rect(0.0f, 0.0f,
+            avatarTex.width,
+            -avatarTex.height),
+             new Vector2(0.5f, 0.5f), 100.0f
+            );
 
         // Steam Name
         steamName.text = user.name;

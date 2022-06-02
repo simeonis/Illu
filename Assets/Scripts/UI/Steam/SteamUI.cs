@@ -86,26 +86,15 @@ namespace Illu.Steam
                         DestroyInvite(invite);
                     }
                  );
-
-                // // Accept Button
-                // inviteDetails.acceptButton.onClick.AddListener(delegate
-                // {
-                //     SteamManager.Instance.JoinSteamLobby(lobbyID);
-                //     DestroyInvite(invite);
-                // });
-
-                // // Decline Button
-                // inviteDetails.declineButton.onClick.AddListener(delegate
-                // {
-                //     DestroyInvite(invite);
-                // });
             }
         }
 
         //triggered on Lobby Join Attempt
         void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside)
         {
+            Debug.Log("Generating the lobby host");
             GenerateLobbyFriend(steamFriend, serverside, true);
+
         }
 
         // triggered on Lobby Join Attempt 
@@ -116,7 +105,7 @@ namespace Illu.Steam
             lobbyEmptyDetails.addButton.onClick.AddListener(delegate
             {
                 GenerateFriendList();
-                GameManager.Instance.TriggerEvent("SteamFriendsRequested");
+
             });
         }
 
@@ -159,18 +148,6 @@ namespace Illu.Steam
                     SteamManager.Instance.KickUser(steamFriend.id);
                 }
             );
-
-            // //Could refactor like the other one 
-            // // Kick Button (Only visible server-side and only applies to clients)
-            // bool canKick = serverside && !hostSlot;
-            // lobbyUserDetails.removeButton.gameObject.SetActive(canKick);
-            // if (canKick)
-            // {
-            //     lobbyUserDetails.removeButton.onClick.AddListener(delegate
-            //     {
-            //         SteamManager.Instance.KickUser(steamFriend.id);
-            //     });
-            // }
         }
 
         void DestroyLobby()

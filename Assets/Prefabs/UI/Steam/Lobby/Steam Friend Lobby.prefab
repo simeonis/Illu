@@ -224,7 +224,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15fb01c7a387cb443b5ec9e69d830254, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  background: {fileID: 2273484595419669975}
   avatar: {fileID: 6615818654619934558}
   steamName: {fileID: 1759593607373971566}
   removeButton: {fileID: 353972534589365995}

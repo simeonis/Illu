@@ -105,6 +105,8 @@ namespace Illu.Steam
                 // Create the lobbyUI and exit
                 if (NetworkServer.active)
                 {
+                    Debug.Log("OnLobbyJoinAttempt callbck");
+
                     // Adds Host UI to Host Lobby
                     //SteamUI.GenerateLobbyHost(GetSteamFriend(SteamUser.GetSteamID()), true);
                     onLobbyHost?.Invoke(GetSteamFriend(SteamUser.GetSteamID()), true);

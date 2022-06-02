@@ -49,6 +49,8 @@ namespace Illu.Networking
             {
                 Instance = this;
             }
+
+            ReadyUpSystem = new ReadyUpSystem();
         }
         void OnEnable()
         {
@@ -245,21 +247,25 @@ namespace Illu.Networking
         //
         public void HostStartServer()
         {
+            Debug.Log("Host Start Server " + isLanConnection.Value);
             if (isNetworkActive)
                 StopHost();
 
             //Holds all the different Transports for different connection types
             var switchTransport = (SwitchTransport)transport;
 
-            if (!isLanConnection)
+            if (isLanConnection.Value)
             {
-                switchTransport.PickTransport(0);
-                //HostAddress = "localhost";  ??
+                Debug.Log("Host Server called it is LAN");
+                switchTransport.PickTransport(1);
+                HostAddress = "localhost";
             }
             else
             {
-                switchTransport.PickTransport(1);
-                HostAddress = "localhost";
+                Debug.Log("Host Server called and not LAN");
+                switchTransport.PickTransport(0);
+                //HostAddress = "localhost";  ??
+                Illu.Steam.SteamManager.Instance.HostLobby();
             }
 
             StartHost();
