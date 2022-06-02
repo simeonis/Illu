@@ -22,7 +22,7 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
     {
         if (_ctx.IsPrimaryPressed)
         {
-            SwitchState(_factory.Fired());
+            SwitchState(_factory.GetState<GrapplingHookFiredState>());
         }
     }
 

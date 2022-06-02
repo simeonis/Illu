@@ -64,7 +64,7 @@ public class GrapplingHookStateMachine : MonoBehaviour
         _ropeRemaining.Value = _maxRopeLength;
 
         _states = new GrapplingHookStateFactory(this);
-        _currentState = _states.Idle();
+        _currentState = _states.GetState<GrapplingHookIdleState>();
         _currentState.EnterState();
     }
 
@@ -99,10 +99,9 @@ public class GrapplingHookStateMachine : MonoBehaviour
     #if UNITY_EDITOR
     [Header("Debug")] 
     [SerializeField] bool enable = false;
-    public bool IsDebugging { get { return enable; } }
     void OnDrawGizmos()
     {
-        if (Application.isPlaying && IsDebugging) 
+        if (Application.isPlaying && enable) 
             _currentState.GizmosState();
     }
     #endif

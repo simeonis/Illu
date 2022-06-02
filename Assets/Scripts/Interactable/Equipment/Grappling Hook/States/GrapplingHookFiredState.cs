@@ -72,9 +72,9 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
     public override void CheckSwitchState()
     {
         if (_grappled)
-            SwitchState(_factory.Grappled());
+            SwitchState(_factory.GetState<GrapplingHookGrappledState>());
         else if (!_ctx.IsPrimaryPressed || _outOfRope)
-            SwitchState(_factory.Idle());
+            SwitchState(_factory.GetState<GrapplingHookIdleState>());
     }
 
     #if UNITY_EDITOR
