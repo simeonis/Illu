@@ -23,7 +23,7 @@ namespace Illu.Steam
         // Make a Enum
         List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
         Dictionary<string, GameObject> _invites = new Dictionary<string, GameObject>();
-
+        List<SteamFriendLobby> playerCards = new List<SteamFriendLobby>();
 
         void OnEnable()
         {
@@ -33,6 +33,9 @@ namespace Illu.Steam
             SteamManager.Instance.onClearLobby.AddListener(GenerateLobbyEmpty);
             SteamManager.Instance.onDestroyLobby.AddListener(DestroyLobby);
             SteamManager.Instance.OnLobbyClientRemoved.AddListener(RemoveLobbyClient);
+
+            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.OneReady.AddListener(setPlayerOneStatus);
+            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.TwoReady.AddListener(setPlayerTwoStatus);
         }
 
         void OnDisable()
@@ -43,6 +46,9 @@ namespace Illu.Steam
             SteamManager.Instance.onClearLobby.RemoveListener(GenerateLobbyEmpty);
             SteamManager.Instance.onDestroyLobby.RemoveListener(DestroyLobby);
             SteamManager.Instance.OnLobbyClientRemoved.RemoveListener(RemoveLobbyClient);
+
+            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.OneReady.RemoveListener(setPlayerOneStatus);
+            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.TwoReady.RemoveListener(setPlayerTwoStatus);
         }
 
 
@@ -90,12 +96,7 @@ namespace Illu.Steam
         }
 
         //triggered on Lobby Join Attempt
-        void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside)
-        {
-            Debug.Log("Generating the lobby host");
-            GenerateLobbyFriend(steamFriend, serverside, true);
-
-        }
+        void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside) => GenerateLobbyFriend(steamFriend, serverside, true);
 
         // triggered on Lobby Join Attempt 
         void GenerateLobbyEmpty()
@@ -105,7 +106,6 @@ namespace Illu.Steam
             lobbyEmptyDetails.addButton.onClick.AddListener(delegate
             {
                 GenerateFriendList();
-
             });
         }
 
@@ -148,12 +148,18 @@ namespace Illu.Steam
                     SteamManager.Instance.KickUser(steamFriend.id);
                 }
             );
+
+            Debug.Log("LEN " + playerCards.Count);
+
+            playerCards.Add(lobbyUserDetails);
         }
 
         void DestroyLobby()
         {
             DestroyLobbyHost();
             DestroyLobbyClient();
+
+            playerCards.Clear();
         }
 
         void DestroyLobbyHost()
@@ -171,7 +177,6 @@ namespace Illu.Steam
                 foreach (Transform child in lobbyClient) Destroy(child.gameObject);
             }
         }
-
 
         public void GenerateFriendList()
         {
@@ -221,6 +226,15 @@ namespace Illu.Steam
             {
                 Destroy(child.gameObject);
             }
+        }
+
+        void setPlayerOneStatus(bool status) => SetIndicatorOnPlayerCard(status, 0);
+        void setPlayerTwoStatus(bool status) => SetIndicatorOnPlayerCard(status, 1);
+
+        void SetIndicatorOnPlayerCard(bool status, int caller)
+        {
+            if (caller < playerCards.Count)
+                playerCards[caller].SetIndicator(status);
         }
 
         // /*  --------------------------

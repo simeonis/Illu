@@ -181,6 +181,7 @@ namespace Mirror
         /// <summary>Add a connection and setup callbacks. Returns true if not added yet.</summary>
         public static bool AddConnection(NetworkConnectionToClient conn)
         {
+            Debug.Log("connID " + conn.connectionId);
             if (!connections.ContainsKey(conn.connectionId))
             {
                 // connection cannot be null here or conn.connectionId
@@ -407,6 +408,7 @@ namespace Mirror
             // Debug.Log("Server accepted client:" + conn);
 
             // add connection and invoke connected event
+            Debug.Log("connID 1" + conn.connectionId);
             AddConnection(conn);
             OnConnectedEvent?.Invoke(conn);
         }

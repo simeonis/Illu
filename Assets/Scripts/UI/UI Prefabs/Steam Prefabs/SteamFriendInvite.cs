@@ -11,16 +11,16 @@ public class SteamFriendInvite : MonoBehaviour
     Image background;
 
     // Steam Avatar
-    Image avatar;
+    [SerializeField] Image avatar;
 
     // Steam Name
-    TMP_Text steamName;
+    [SerializeField] TMP_Text steamName;
 
     // Accept Button
-    Button acceptButton;
+    [SerializeField] Button acceptButton;
 
     // Decline Button
-    Button declineButton;
+    [SerializeField] Button declineButton;
 
     public void Instantiate(string name, Texture2D avatarTex, UnityEngine.Events.UnityAction accept, UnityEngine.Events.UnityAction decline)
     {

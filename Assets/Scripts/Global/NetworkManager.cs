@@ -7,7 +7,6 @@ using System.Linq;
 
 namespace Illu.Networking
 {
-
     public struct CreateCharacterMessage : NetworkMessage
     {
         public string name;
@@ -37,6 +36,11 @@ namespace Illu.Networking
         public static NetworkManager Instance { get; private set; }
         public ReadyUpSystem ReadyUpSystem { get; private set; }
 
+        [SerializeField] ReadyUpSystem _readUpSystem;
+
+        //Holds all the different Transports for different connection types
+        SwitchTransport switchTransport;
+
         override public void Awake()
         {
             base.Awake();
@@ -50,12 +54,15 @@ namespace Illu.Networking
                 Instance = this;
             }
 
-            ReadyUpSystem = new ReadyUpSystem();
+            ReadyUpSystem = _readUpSystem;
+            switchTransport = (SwitchTransport)transport;
+
         }
         void OnEnable()
         {
             isLanConnection.Value = false;
-            isLanConnection.AddListener(HostStartServer);
+            isLanConnection.AddListener(SetConnectionType);
+            //SetConnectionType();
         }
 
         /*  --------------------------
@@ -242,33 +249,50 @@ namespace Illu.Networking
             base.StartClient();
         }
 
+
+
         //
         //  Entry point for starting networking 
         //
-        public void HostStartServer()
+        public void SetConnectionType()
         {
-            Debug.Log("Host Start Server " + isLanConnection.Value);
-            if (isNetworkActive)
-                StopHost();
+            // Debug.Log("Host Start Server " + isLanConnection.Value);
+            // if (isNetworkActive)
+            // {
+            //     Shutdown();
+            //     StopHost();
+            // }
 
-            //Holds all the different Transports for different connection types
-            var switchTransport = (SwitchTransport)transport;
 
             if (isLanConnection.Value)
             {
-                Debug.Log("Host Server called it is LAN");
+                // Debug.Log("Host Server called it is LAN");
                 switchTransport.PickTransport(1);
                 HostAddress = "localhost";
+                Illu.Steam.SteamManager.Instance.LobbyLeft();
             }
             else
             {
-                Debug.Log("Host Server called and not LAN");
+                // Debug.Log("Host Server called and not LAN");
                 switchTransport.PickTransport(0);
+                Illu.Steam.SteamManager.Instance.HostLobby();
                 //HostAddress = "localhost";  ??
+            }
+        }
+
+        public void StartHosting()
+        {
+            StartHost();
+            if (isLanConnection.Value)
+            {
+                Illu.Steam.SteamManager.Instance.LobbyLeft();
+
+            }
+            else
+            {
                 Illu.Steam.SteamManager.Instance.HostLobby();
             }
 
-            StartHost();
         }
 
         //

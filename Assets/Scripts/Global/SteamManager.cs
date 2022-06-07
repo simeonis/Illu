@@ -9,10 +9,6 @@ namespace Illu.Steam
 {
     public class SteamManager : MonoBehaviourSingleton<SteamManager>
     {
-
-        // SteamUI
-        //[SerializeField] private SteamUI SteamUI;
-
         //Events raised by Steam Manager 
         public delegate void OnLobbyClientJoined(SteamUserRecord user, bool serverside);
         public OnLobbyClientJoined clientJoined;

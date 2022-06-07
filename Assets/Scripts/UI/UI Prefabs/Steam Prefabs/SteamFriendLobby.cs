@@ -12,11 +12,16 @@ public class SteamFriendLobby : MonoBehaviour
     // Steam Avatar
     [SerializeField] Image avatar;
 
+    //Indicator
+    [SerializeField] Image indicator;
+
     // Steam Name
     [SerializeField] TMP_Text steamName;
 
     // Kick Button
     public Button removeButton;
+
+
 
     private bool canKick = true;
 
@@ -37,4 +42,7 @@ public class SteamFriendLobby : MonoBehaviour
         // Steam Name
         steamName.text = user.name;
     }
+
+    public void SetIndicator(bool status) => indicator.color = status ? Color.green : Color.red;
+
 }

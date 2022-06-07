@@ -25,13 +25,6 @@ public class NetworkRoomPlayer : NetworkBehaviour
         Room.RoomPlayers.Remove(this);
     }
 
-    public override void OnStartAuthority()
-    {
-        base.OnStartAuthority();
-        Debug.Log("I have Authority !!!!@@!!!! " + hasAuthority + " is local PLayer  " + netIdentity.isLocalPlayer);
-
-    }
-
     ReadyUpSystem.ID myID;
     void Awake()
     {
@@ -41,9 +34,7 @@ public class NetworkRoomPlayer : NetworkBehaviour
     [Client]
     public void ReadyUP()
     {
-        Debug.Log("Ready up");
-        //Illu.Networking.NetworkManager.Instance.ReadyUpSystem.SetReadyStatus(myID, true);
-        CMDSetStatus();
+        CMDSetStatus(myID, true);
     }
     public void CancelReadyUP()
     {
@@ -51,16 +42,15 @@ public class NetworkRoomPlayer : NetworkBehaviour
     }
 
     [Command]
-    private void CMDSetStatus()
+    private void CMDSetStatus(ReadyUpSystem.ID id, bool status)
     {
-        // if (id == ID.playerOne)
-        // {
-        //     playerOneReady = status;
-        // }
-        // else
-        // {
-        //     playerTwoReady = status;
-        // }
+        if (id == ReadyUpSystem.ID.playerOne)
+        {
+            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.playerOneReady = status;
+        }
+        else
+        {
+            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.playerTwoReady = status;
+        }
     }
-
 }

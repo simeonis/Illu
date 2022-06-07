@@ -1,10 +1,19 @@
 using Mirror;
 using UnityEngine.Events;
+
+[System.Serializable]
+public class MyBoolEvent : UnityEvent<bool> { }
 public class ReadyUpSystem : NetworkBehaviour
 {
     public UnityEvent BothReady = new UnityEvent();
-    [SyncVar] bool playerOneReady;
-    [SyncVar] bool playerTwoReady;
+    public MyBoolEvent OneReady = new MyBoolEvent();
+    public MyBoolEvent TwoReady = new MyBoolEvent();
+
+    [SyncVar(hook = nameof(PlayerOneStatus))]
+    public bool playerOneReady;
+
+    [SyncVar(hook = nameof(PlayerTwoStatus))]
+    public bool playerTwoReady = true;
 
     public enum ID
     {
@@ -13,9 +22,22 @@ public class ReadyUpSystem : NetworkBehaviour
     }
     ID[] assigned = new ID[2];
 
-    public void SetReadyStatus(ID id, bool status)
+
+    private void PlayerOneStatus(bool oldValue, bool newValue)
     {
-        //CMDSetStatus(id, status);
+        OneReady.Invoke(newValue);
+        CheckReady();
+    }
+
+    private void PlayerTwoStatus(bool oldValue, bool newValue)
+    {
+        TwoReady.Invoke(newValue);
+        CheckReady();
+    }
+
+    private void CheckReady()
+    {
+
         if (playerOneReady && playerTwoReady)
         {
             BothReady?.Invoke();
