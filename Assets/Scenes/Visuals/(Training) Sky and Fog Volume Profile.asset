@@ -84,7 +84,7 @@ MonoBehaviour:
     m_Value: 1
   seaLevel:
     m_OverrideState: 1
-    m_Value: -2500
+    m_Value: 0
   planetaryRadius:
     m_OverrideState: 0
     m_Value: 6378100
@@ -203,23 +203,7 @@ MonoBehaviour:
     m_Value: 0
     min: -1
     max: 1
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
-  m_Name: (Training) Sky and Fog Volume Profile
-  m_EditorClassIdentifier: 
-  components:
-  - {fileID: -8835320866873480133}
-  - {fileID: 6389157969918805525}
-  - {fileID: -8662743599507397752}
---- !u!114 &6389157969918805525
+--- !u!114 &-7841373941412276839
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -268,3 +252,19 @@ MonoBehaviour:
   cascadeShadowBorder3:
     m_OverrideState: 0
     m_Value: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
+  m_Name: (Training) Sky and Fog Volume Profile
+  m_EditorClassIdentifier: 
+  components:
+  - {fileID: -8835320866873480133}
+  - {fileID: -8662743599507397752}
+  - {fileID: -7841373941412276839}

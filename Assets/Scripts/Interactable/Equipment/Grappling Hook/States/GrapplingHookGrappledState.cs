@@ -16,8 +16,6 @@ public class GrapplingHookGrappledState : GrapplingHookBaseState
         _springJoint.connectedAnchor = _ctx.GrappleTarget;
         _springJoint.spring = _springStrength;
         _springJoint.damper = _damperAmount;
-        _springJoint.maxDistance = Vector3.Distance(_ctx.ExitPoint, _ctx.GrappleTarget) * 0.8f;
-        _springJoint.minDistance = 0;
 
         _ctx.RopeRenderer.positionCount = 2;
     }

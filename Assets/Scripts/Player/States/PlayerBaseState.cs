@@ -47,7 +47,11 @@ public abstract class PlayerBaseState
     public void EnterStates()
     {
         EnterState();
-        _currentSubState?.EnterState();
+        if (_currentSubState != null)
+        {
+            _currentSubState.SetSuperState(this);
+            _currentSubState.EnterState();
+        }
     }
 
     /// <summary>
@@ -122,5 +126,15 @@ public abstract class PlayerBaseState
     {
         _currentSubState = newSubState;
         _currentSubState.SetSuperState(this);
+    }
+
+    protected void InitializeLocomotion()
+    {
+        if (!_ctx.IsMovementPressed && !_ctx.IsSprintPressed)
+            SetSubState(_factory.GetState<PlayerIdleState>());
+        else if(_ctx.IsMovementPressed && !_ctx.IsSprintPressed)
+            SetSubState(_factory.GetState<PlayerWalkState>());
+        else
+            SetSubState(_factory.GetState<PlayerSprintState>());
     }
 }

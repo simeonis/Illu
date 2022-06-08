@@ -8,20 +8,14 @@ public class PlayerGroundState : PlayerBaseState
         InitializeSubState();
     }
 
+    Vector3 _targetVel = Vector3.zero;
+    
+    public override void InitializeSubState() => InitializeLocomotion();
+
     public override void EnterState()
     {
         Debug.Log("Enter Ground State");
         _ctx.CoyoteTimeCounter = _ctx.CoyoteTime;
-    }
-
-    public override void InitializeSubState()
-    {
-        if (!_ctx.IsMovementPressed && !_ctx.IsSprintPressed)
-            SetSubState(_factory.GetState<PlayerIdleState>());
-        else if(_ctx.IsMovementPressed && !_ctx.IsSprintPressed)
-            SetSubState(_factory.GetState<PlayerWalkState>());
-        else
-            SetSubState(_factory.GetState<PlayerSprintState>());
     }
 
     public override void CheckSwitchState()
@@ -29,6 +23,11 @@ public class PlayerGroundState : PlayerBaseState
         if (_ctx.IsJumpPressed)
             SwitchState(_factory.GetState<PlayerJumpState>());
         else if (!_ctx.IsGrounded)
-            SwitchState(_factory.GetState<PlayerFallState>());
+        {
+            if (_ctx.IsGrappled)
+                SwitchState(_factory.GetState<PlayerSwingState>());
+            else
+                SwitchState(_factory.GetState<PlayerFallState>());
+        }
     }
 }

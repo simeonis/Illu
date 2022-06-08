@@ -7,9 +7,12 @@ public class PlayerJumpState : PlayerBaseState
         _isRootState = true;
         InitializeSubState(); 
     }
+    
+    public override void InitializeSubState() => InitializeLocomotion();
 
     public override void EnterState()
     {
+        _ctx.IsJumpPressed = false; // Prevent hold-down jump spam
         // Start animation
         //_ctx.Animator.SetBool(_ctx.IsJumpingHash, true);
             
@@ -29,6 +32,11 @@ public class PlayerJumpState : PlayerBaseState
     public override void CheckSwitchState()
     {
         if (_ctx.VerticalVelocity < -_ctx.FallThresholdVelocity)
-            SwitchState(_factory.GetState<PlayerFallState>());
+        {
+            if (_ctx.IsGrappled)
+                SwitchState(_factory.GetState<PlayerSwingState>());
+            else
+                SwitchState(_factory.GetState<PlayerFallState>());
+        }
     }
 }

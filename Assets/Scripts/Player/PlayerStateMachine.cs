@@ -5,6 +5,9 @@ public class PlayerStateMachine : MonoBehaviour
     PlayerBaseState _currentState;
     PlayerStateFactory _states;
 
+    [Header("Grappling Hook")]
+    [SerializeField] GrapplingHookStateMachine _grapplingHook;
+
     [Header("Animation Modifiers")]
     [SerializeField] Animator _animator;
     [SerializeField, Tooltip("Player \"Landing Flat\" animation clip")]
@@ -36,8 +39,11 @@ public class PlayerStateMachine : MonoBehaviour
     float _maxAcceleration = 150f;
     [SerializeField, Tooltip("Acceleration factor based on direction change")]
     AnimationCurve _accelerationDotFactor;
+    [SerializeField, Range(0f, 10f), Tooltip("Amount of drag being applied")] 
+    float _drag = 3f;
     float _moveSpeed;
     Vector3 _moveDir;
+    
 
     [Header("Jump Modifiers")]
     [SerializeField, Tooltip("Apex of jump")] 
@@ -74,6 +80,9 @@ public class PlayerStateMachine : MonoBehaviour
     Rigidbody _playerBody;
     float _gravity;
 
+    // Getters & Setters - Grappling Hook
+    public bool IsGrappled { get { return _grapplingHook.IsGrappled; } }
+
     // Getters & Setters - Animation
     public Animator Animator { get { return _animator; } }
     public int IsGroundedHash { get { return _isGroundedHash; } }
@@ -86,12 +95,18 @@ public class PlayerStateMachine : MonoBehaviour
     public int FallSpeedHash { get { return _fallSpeedHash; } }
 
     // Getters & Setters - Locomotion
+    public float MoveSpeed { get; set; }
     public float WalkSpeed { get { return _walkSpeed; } }
     public float SprintSpeed { get { return _sprintSpeed; } }
+    public float SwingSpeed { get { return _walkSpeed * 0.05f; } }
     public Vector3 MoveDirection { get { return _moveDir; } }
     public float Acceleration { get { return _acceleration; } }
     public float MaxAcceleration { get { return _maxAcceleration; } }
     public AnimationCurve AccelerationDotFactor { get { return _accelerationDotFactor; } }
+
+    // Getters & Setters - Drag
+    public float DefaultDrag { get { return _drag; } set { _drag = value; } }
+    public float Drag { get; set; }
 
     // Getters & Setters - Jump
     public float InitialJumpVelocity { get { return _initialJumpVelocity; } }
@@ -109,7 +124,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     // Getters & Setters - Player Input
     public bool IsMovementPressed { get { return _isMovementPressed; } }
-    public bool IsJumpPressed { get { return _isJumpPressed; } }
+    public bool IsJumpPressed { get { return _isJumpPressed; } set { _isJumpPressed = false; } }
     public bool IsSprintPressed { get { return _isSprintPressed; } }
 
     // Getters & Setters - Other
@@ -122,6 +137,8 @@ public class PlayerStateMachine : MonoBehaviour
     {
         // Rigidbody
         _playerBody = GetComponent<Rigidbody>();
+
+        Drag = DefaultDrag;
 
         // Calculate Gravity + Intial Jump Velocity
         float timeToApex = _maxJumpTime * 0.5f;
@@ -154,9 +171,25 @@ public class PlayerStateMachine : MonoBehaviour
 
     void FixedUpdate()
     {
-        _playerBody.AddForce(transform.up * _gravity, ForceMode.Acceleration); // Gravity
+        Gravity();
+        Locomotion();
         _verticalVelocity = Vector3.Dot(_playerBody.velocity, transform.up);
         _currentState.FixedUpdateStates();
+    }
+
+    void Gravity()
+    {
+        _playerBody.AddForce(transform.up * _gravity, ForceMode.Acceleration);
+    }
+
+    void Locomotion()
+    {
+        _playerBody.AddForce(MoveDirection * MoveSpeed, ForceMode.Acceleration);
+        
+        // Player's velocity (excluding vertical)
+        Vector3 currVel = _playerBody.velocity - Vector3.Project(_playerBody.velocity, transform.up);
+        
+        _playerBody.AddForce(currVel * -Drag, ForceMode.Acceleration);
     }
 
     #if UNITY_EDITOR

@@ -9,12 +9,14 @@ public class PlayerSprintState : PlayerBaseState
 
     public override void EnterState()
     {
-        Debug.Log("Enter Sprint SubState");
-    }
-
-    public override void FixedUpdateState()
-    {
-        _ctx.PlayerBody.AddForce(_ctx.MoveDirection * _ctx.SprintSpeed * 10f, ForceMode.Acceleration);
+        if (_currentSuperState is PlayerSwingState)
+        {
+            _ctx.MoveSpeed = _ctx.SwingSpeed;
+        }
+        else
+        {
+            _ctx.MoveSpeed = _ctx.SprintSpeed;
+        }
     }
 
     public override void CheckSwitchState()

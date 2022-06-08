@@ -57,6 +57,7 @@ public class GrapplingHookStateMachine : MonoBehaviour
     
     // Getters & Setters - State
     public GrapplingHookBaseState CurrentState { get { return _currentState; } set { _currentState = value; } }
+    public bool IsGrappled { get { return _currentState is GrapplingHookGrappledState; } }
 
     void Start()
     {

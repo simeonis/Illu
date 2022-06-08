@@ -10,12 +10,8 @@ public class PlayerIdleState : PlayerBaseState
     public override void EnterState()
     {
         Debug.Log("Enter Idle SubState");
+        _ctx.MoveSpeed = 0f;
         // _ctx.Animator.SetBool(_ctx.IsMovingHash, false);
-    }
-
-    public override void FixedUpdateState()
-    {
-        _ctx.PlayerBody.AddForce(-_ctx.MoveDirection * _ctx.SprintSpeed * 10f, ForceMode.Acceleration);
     }
 
     public override void CheckSwitchState()
