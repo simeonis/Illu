@@ -1098,6 +1098,8 @@ GameObject:
   - component: {fileID: 7198437112992415356}
   - component: {fileID: -4129583225098405565}
   - component: {fileID: 7836636298077460997}
+  - component: {fileID: 5238090557533713654}
+  - component: {fileID: 7165232645293327614}
   m_Layer: 0
   m_Name: RoomPlayer
   m_TagString: Untagged
@@ -1194,6 +1196,72 @@ MonoBehaviour:
     type: 3}
   steamInvitePrefab: {fileID: 2913364059952556577, guid: 56fa8ae94bbbc134f96c3f92ead702bc,
     type: 3}
+--- !u!114 &5238090557533713654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7242622422971727020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae5b9a4b4ccd87d4aa4db91872794fe7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  lobbyHostTarget: {fileID: 4017971946690042452}
+  lobbyClientTarget: {fileID: 2342129423365093235}
+  _lobbyPrefab: {fileID: 2913364059952556577, guid: 6db95e59ad1b26e4e9480b925d495002,
+    type: 3}
+  isLanConnection: {fileID: 11400000, guid: dfa454c489c664fa882b6232628a0b86, type: 2}
+  clientConnected: {fileID: 11400000, guid: 968697ab9ae1e3c4e98f04ae4e9a1176, type: 2}
+  clientDisconnected: {fileID: 11400000, guid: 5064ba9590a04064288ff38e39fe6939, type: 2}
+--- !u!114 &7165232645293327614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7242622422971727020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdd93c7f182464a6c93cc1deea34f10b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  listeners:
+  - Event: {fileID: 11400000, guid: 968697ab9ae1e3c4e98f04ae4e9a1176, type: 2}
+    Response:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 5238090557533713654}
+          m_TargetAssemblyTypeName: LanUI, Assembly-CSharp
+          m_MethodName: OnClientConnect
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 1
+          m_CallState: 2
+  - Event: {fileID: 11400000, guid: 5064ba9590a04064288ff38e39fe6939, type: 2}
+    Response:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 5238090557533713654}
+          m_TargetAssemblyTypeName: LanUI, Assembly-CSharp
+          m_MethodName: OnClientDisconnect
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 1
+          m_CallState: 2
 --- !u!1 &7346980627910081811
 GameObject:
   m_ObjectHideFlags: 0

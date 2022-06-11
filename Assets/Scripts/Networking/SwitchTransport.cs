@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using UnityEngine;
 using Mirror;
 
@@ -133,38 +132,9 @@ public class SwitchTransport : Transport
     #endregion
 
     #region Server
-    // connection ids get mapped to base transports
-    // if we have 3 transports,  then
-    // transport 0 will produce connection ids [0, 3, 6, 9, ...]
-    // transport 1 will produce connection ids [1, 4, 7, 10, ...]
-    // transport 2 will produce connection ids [2, 5, 8, 11, ...]
-    // int FromBaseId(int transportId, int connectionId)
-    // {
-    //     return connectionId * transports.Length + transportId;
-    // }
-
-    // int ToBaseId(int connectionId)
-    // {
-    //     return connectionId / transports.Length;
-    // }
-
-    // int ToTransportId(int connectionId)
-    // {
-    //     return connectionId % transports.Length;
-    // }
-
-
 
     void AddServerCallbacks()
     {
-        // wire all the base transports to my events
-        // for (int i = 0; i < transports.Length; i++)
-        // {
-        // this is required for the handlers,  if I use i directly
-        // then all the handlers will use the last i
-
-
-
         selectedTransport.OnServerConnected = (baseConnectionId =>
         {
             OnServerConnected.Invoke(baseConnectionId);
@@ -222,16 +192,7 @@ public class SwitchTransport : Transport
 
     public override void ServerSend(int connectionId, ArraySegment<byte> segment, int channelId)
     {
-        // int baseConnectionId = ToBaseId(connectionId);
-        // int transportId = ToTransportId(connectionId);
-
-        // for (int i = 0; i < transports.Length; ++i)
-        // {
-        //     if (i == transportId)
-        //     {
         selectedTransport.ServerSend(connectionId, segment, channelId);
-        //     }
-        // }
     }
 
     public override void ServerStart()

@@ -110,7 +110,7 @@ namespace Illu.Networking
             foreach (var prefab in spawnablePrefabs)
             {
                 NetworkClient.RegisterPrefab(prefab);
-            }
+            } 
 
             UIConsole.Log("Client Started");
         }
@@ -256,43 +256,35 @@ namespace Illu.Networking
         //
         public void SetConnectionType()
         {
-            // Debug.Log("Host Start Server " + isLanConnection.Value);
-            // if (isNetworkActive)
-            // {
-            //     Shutdown();
-            //     StopHost();
-            // }
-
-
             if (isLanConnection.Value)
             {
-                // Debug.Log("Host Server called it is LAN");
                 switchTransport.PickTransport(1);
                 HostAddress = "localhost";
                 Illu.Steam.SteamManager.Instance.LobbyLeft();
             }
             else
             {
-                // Debug.Log("Host Server called and not LAN");
                 switchTransport.PickTransport(0);
                 Illu.Steam.SteamManager.Instance.HostLobby();
-                //HostAddress = "localhost";  ??
             }
         }
 
         public void StartHosting()
         {
+            Debug.Log("StartHosting");
+
+            if(NetworkServer.active)
+                StopHost();
+
             StartHost();
             if (isLanConnection.Value)
             {
                 Illu.Steam.SteamManager.Instance.LobbyLeft();
-
             }
             else
             {
                 Illu.Steam.SteamManager.Instance.HostLobby();
             }
-
         }
 
         //
@@ -300,17 +292,19 @@ namespace Illu.Networking
         //
         public void ClientJoinServer()
         {
+            Debug.Log("ClientJoinServer");
             StopClient();
             //Holds all the different Transports for different connection types
             var switchTransport = (SwitchTransport)transport;
 
-            if (!isLanConnection)
+            if (false)
             {
                 switchTransport.PickTransport(0);
                 //HostAddress = "localhost";
             }
             else
             {
+                Debug.Log("Is Local Host");
                 switchTransport.PickTransport(1);
                 HostAddress = "localhost";
             }
