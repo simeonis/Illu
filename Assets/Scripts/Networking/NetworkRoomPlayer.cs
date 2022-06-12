@@ -28,7 +28,7 @@ public class NetworkRoomPlayer : NetworkBehaviour
     ReadyUpSystem.ID myID;
     void Awake()
     {
-        myID = Illu.Networking.NetworkManager.Instance.ReadyUpSystem.requestID();
+        myID = ReadyUpSystem.Instance.requestID();
     }
 
     [Client]
@@ -46,11 +46,11 @@ public class NetworkRoomPlayer : NetworkBehaviour
     {
         if (id == ReadyUpSystem.ID.playerOne)
         {
-            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.playerOneReady = status;
+            ReadyUpSystem.Instance.playerOneReady = status;
         }
         else
         {
-            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.playerTwoReady = status;
+            ReadyUpSystem.Instance.playerTwoReady = status;
         }
     }
 }

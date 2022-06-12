@@ -7,10 +7,10 @@ using UnityEngine.Events;
 
 namespace Illu.Steam
 {
-    public class SteamManager : MonoBehaviourSingleton<SteamManager>
+    public class SteamManager : MonoBehaviourSingletonDontDestroy<SteamManager>
     {
         //Events raised by Steam Manager 
-        public delegate void OnLobbyClientJoined(SteamUserRecord user, bool serverside);
+        public delegate void OnLobbyClientJoined(SteamUserRecord user, bool serverside);    
         public OnLobbyClientJoined clientJoined;
 
         public delegate void OnLobbyHost(SteamUserRecord user, bool serverside);
@@ -46,6 +46,15 @@ namespace Illu.Steam
             SteamAppID = new CGameID(uint.Parse(GetComponent<FizzySteamworks>().SteamAppID));
         }
 
+        //Steam lobby create attempt -> hostLobby
+        // stean lobby created _> null
+        // steam lobby entered -> null
+        // lobby left -> lobby left 
+        // lbb kick -> kick 
+        //disconecct -> lobby dis && Root screen
+        // INvite -> null
+        // Friends requested -> null
+
         void OnEnable()
         {
             if (!global::SteamManager.Initialized) { return; }
@@ -56,6 +65,13 @@ namespace Illu.Steam
             lobbyInvited = Callback<LobbyInvite_t>.Create(OnLobbyInvited);
             lobbyChatMessage = Callback<LobbyChatMsg_t>.Create(OnLobbyChatMessage);
             lobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+
+
+            GameManager.Instance.AddListener(GameManager.Event.SteamLobbyCreateAttempt, HostLobby);
+            GameManager.Instance.AddListener(GameManager.Event.GameLeft,                LobbyLeft);
+            GameManager.Instance.AddListener(GameManager.Event.SteamLobbyKicked,        LobbyKicked);
+            GameManager.Instance.AddListener(GameManager.Event.SteamLobbyDisconnected,  LobbyDisconnected);
+
         }
 
         /*  --------------------------
@@ -75,11 +91,11 @@ namespace Illu.Steam
             // Successfully created lobby
             if (callback.m_eResult == EResult.k_EResultOK)
             {
-                GameManager.Instance.TriggerEvent("SteamLobbyCreated");
+                GameManager.Instance.TriggerEvent(GameManager.Event.SteamLobbyCreated);
                 UIConsole.Log("Steam lobby created successfully.\nAttempting to host...");
 
-                // Creating HOST
-                GameManager.Instance.TriggerEvent("ServerStart");
+                // Creating HOST -> host already created 
+                //GameManager.Instance.TriggerEvent(GameManager.Event.ServerStart);
 
                 // Setting HostAddress in Lobby Metadata
                 lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
@@ -94,7 +110,7 @@ namespace Illu.Steam
             if (callback.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
             {
                 // Successfully joined host
-                GameManager.Instance.TriggerEvent("SteamLobbyEntered");
+                GameManager.Instance.TriggerEvent(GameManager.Event.SteamLobbyEntered);
 
                 // Host is already connected to the server
                 // No further networking work is needed
@@ -114,7 +130,7 @@ namespace Illu.Steam
                 // Creating CLIENT
                 string hostAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey);
                 Illu.Networking.NetworkManager.HostAddress = hostAddress;
-                GameManager.Instance.TriggerEvent("ClientStart");
+                GameManager.Instance.TriggerEvent(GameManager.Event.ClientStart);
 
                 // Lobby ID
                 lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
@@ -140,7 +156,7 @@ namespace Illu.Steam
         {
             if (callback.m_ulGameID == SteamAppID.m_GameID)
             {
-                GameManager.Instance.TriggerEvent("SteamLobbyInvited");
+                GameManager.Instance.TriggerEvent(GameManager.Event.SteamLobbyInvited);
                 SteamUserRecord steamFriend = GetSteamFriend(new CSteamID(callback.m_ulSteamIDUser));
                 UIConsole.Log("Invite received from: " + steamFriend.name);
                 //SteamUI.GenerateInvite(new CSteamID(callback.m_ulSteamIDLobby), steamFriend);
@@ -172,7 +188,7 @@ namespace Illu.Steam
                     // The lobby owner has kicked you!
                     if (SteamMatchmaking.GetLobbyOwner(lobbyID) == new CSteamID(callback.m_ulSteamIDUser))
                     {
-                        GameManager.Instance.TriggerEvent("SteamLobbyKicked");
+                        GameManager.Instance.TriggerEvent(GameManager.Event.SteamLobbyKicked);
                     }
                 }
             }
@@ -230,7 +246,11 @@ namespace Illu.Steam
 
         private enum LobbyExitReason { Left, Kicked, Disconnected };
         public void LobbyLeft() => LeaveLobby(LobbyExitReason.Left);
-        public void LobbyDisconnected() => LeaveLobby(LobbyExitReason.Disconnected);
+        public void LobbyDisconnected()
+        {
+            ScreenController.Instance.ChangeScreen(ScreenController.Screen.Root);
+            LeaveLobby(LobbyExitReason.Disconnected);
+        }
         public void LobbyKicked() => LeaveLobby(LobbyExitReason.Kicked);
 
         // USER leaves lobby
@@ -271,14 +291,9 @@ namespace Illu.Steam
             onDestroyLobby?.Invoke();
 
             // Disconnect from any network connection (and close server if host)
-            if (lobbyOwner)
-            {
-                GameManager.Instance.TriggerEvent("ServerStop");
-            }
-            else
-            {
-                GameManager.Instance.TriggerEvent("ClientStop");
-            }
+            GameManager.Instance.TriggerEvent(lobbyOwner ? GameManager.Event.ServerStop : GameManager.Event.ClientStop);
+           
+     
         }
 
         // HOST invites CLIENT

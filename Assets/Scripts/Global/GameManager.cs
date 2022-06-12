@@ -1,25 +1,105 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class GameManager : MonoBehaviourSingleton<GameManager>
+public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
 {
-    //public static GameManager Instance { get; private set; }
-    private Dictionary<string, Event> _events = new Dictionary<string, Event>();
+    private Dictionary<Event, UnityEvent> _events = new Dictionary<Event, UnityEvent>
+    {
+        { Event.ServerStart,              new UnityEvent() },
+        { Event.ClientStart,              new UnityEvent() },
+        { Event.ClientConnected,          new UnityEvent() },
+        { Event.ClientDisconnected,       new UnityEvent() },
+        { Event.ServerStop,               new UnityEvent() },
+        { Event.ClientStop,               new UnityEvent() },
+        { Event.LanHost,                  new UnityEvent() },
+        { Event.LanJoin,                  new UnityEvent() },
+        { Event.GameStarted,              new UnityEvent() },
+        { Event.GamePaused,               new UnityEvent() },
+        { Event.GameResumed,              new UnityEvent() },
+        { Event.GameExited,               new UnityEvent() },
+        { Event.GameLeft,                 new UnityEvent() },
+        { Event.GameModeTraining,         new UnityEvent() },
+        { Event.GameModeStandard,         new UnityEvent() },
+        { Event.SteamLobbyCreateAttempt,  new UnityEvent() },
+        { Event.SteamLobbyCreated,        new UnityEvent() },
+        { Event.SteamLobbyEntered,        new UnityEvent() },
+        { Event.SteamLobbyInvited,        new UnityEvent() },
+        { Event.SteamLobbyLeft,           new UnityEvent() },
+        { Event.SteamLobbyDisconnected,   new UnityEvent() },
+        { Event.SteamLobbyKicked,         new UnityEvent() },
+    };
+
+    public enum Event
+    {
+        ServerStart,
+        ClientStart,
+        ClientConnected,
+        ClientDisconnected,
+        ServerStop,
+        ClientStop,
+        LanHost,
+        LanJoin,
+        GameStarted,
+        GamePaused,
+        GameResumed,
+        GameExited,
+        GameLeft,
+        GameModeTraining,
+        GameModeStandard,
+        SteamLobbyCreated,
+        SteamLobbyCreateAttempt,
+        SteamLobbyEntered,
+        SteamLobbyInvited,
+        SteamLobbyLeft,
+        SteamLobbyKicked,
+        SteamLobbyDisconnected,
+        SteamFriendsRequested
+    }
+
+
+    //internal events to listen to
+    // pause 
+    // resume -> raises play and call resume 
+    // exit -> exit 
+    // left -> screen controller root  / change scene to main menu // raise steasm lobby left 
+    // stopped nothing 
+    // training -> raises gamestarted 
+    // standard -> 
+
 
     public override void Awake()
     {
         base.Awake();
-        Event[] events = Resources.LoadAll<Event>("ScriptableObjects/Event");
-        foreach (var e in events) { _events.Add(e.name, e); }
+        // Event[] events = Resources.LoadAll<Event>("ScriptableObjects/Event");
+        // foreach (var e in events) { _events.Add(e.name, e); }
+
+        AddListener(Event.GameResumed, Resume);
+        AddListener(Event.GameExited, Resume);
+        AddListener(Event.GameLeft, Resume);
+        AddListener(Event.GameModeTraining, StartGame);
+    }
+
+    public void TriggerEvent(Event name)
+    {
+        Debug.Log("TriggerEvent" + name.ToString());
+        _events[name].Invoke();
     }
 
     public void TriggerEvent(string name)
     {
-        _events[name].Trigger();
+      Event.TryParse(name, out Event requestedEvent);
+      TriggerEvent(requestedEvent);
+    }
+
+    public void AddListener(Event name, UnityAction listener)
+    {
+         _events[name].AddListener(listener);
     }
 
     public void Resume()
     {
+        //TriggerEvent(Play?)
         InputManager.Instance.TogglePlayer();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -36,4 +116,22 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     {
         Application.Quit();
     }
+
+    public void ChangeScene(string scene)
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(scene);
+    }
+    
+    void StartGame()
+    {
+        TriggerEvent(Event.GameStarted);
+    }
+
+    void LeaveGame()
+    {
+        ScreenController.Instance.ChangeScreen(ScreenController.Screen.Root);
+        ChangeScene("MainMenu");
+        TriggerEvent(Event.SteamLobbyLeft);
+    }
+
 }

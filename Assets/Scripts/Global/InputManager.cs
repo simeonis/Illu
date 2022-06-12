@@ -1,6 +1,6 @@
 using UnityEngine.InputSystem;
 
-public class InputManager : MonoBehaviourSingleton<InputManager>
+public class InputManager : MonoBehaviourSingletonDontDestroy<InputManager>
 {
     public PlayerControls playerControls;
 
@@ -9,16 +9,16 @@ public class InputManager : MonoBehaviourSingleton<InputManager>
         base.Awake();
         playerControls = new PlayerControls();
 
-        playerControls.Player.Menu.performed += context => GameManager.Instance.TriggerEvent("GamePaused");
-        playerControls.Menu.Menu.performed += context => GameManager.Instance.TriggerEvent("GameResumed");
+        playerControls.Player.Menu.performed += context => GameManager.Instance.TriggerEvent(GameManager.Event.GamePaused);
+        playerControls.Menu.Menu.performed += context => GameManager.Instance.TriggerEvent(GameManager.Event.GameResumed);
         // playerControls.Land.Console.performed += context => ShowConsole();
         // playerControls.Menu.Console.performed += context => HideConsole();
     }
 
     void OnDisable()
     {
-        playerControls.Player.Menu.performed -= context => GameManager.Instance.TriggerEvent("GamePaused");
-        playerControls.Menu.Menu.performed -= context => GameManager.Instance.TriggerEvent("GameResumed");
+        playerControls.Player.Menu.performed -= context => GameManager.Instance.TriggerEvent(GameManager.Event.GamePaused);
+        playerControls.Menu.Menu.performed -= context => GameManager.Instance.TriggerEvent(GameManager.Event.GameResumed);
         // playerControls.Land.Console.performed -= context => ShowConsole();
         // playerControls.Menu.Console.performed -= context => HideConsole();
     }

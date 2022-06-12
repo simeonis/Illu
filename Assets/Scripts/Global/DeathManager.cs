@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DeathManager : MonoBehaviourSingleton<DeathManager>
+public class DeathManager : MonoBehaviourSingletonDontDestroy<DeathManager>
 {
     [SerializeField] private Transform respawnLocation;
     private float offset;

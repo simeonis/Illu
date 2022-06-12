@@ -34,8 +34,8 @@ namespace Illu.Steam
             SteamManager.Instance.onDestroyLobby.AddListener(DestroyLobby);
             SteamManager.Instance.OnLobbyClientRemoved.AddListener(RemoveLobbyClient);
 
-            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.OneReady.AddListener(setPlayerOneStatus);
-            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.TwoReady.AddListener(setPlayerTwoStatus);
+            ReadyUpSystem.Instance.OneReady.AddListener(setPlayerOneStatus);
+            ReadyUpSystem.Instance.TwoReady.AddListener(setPlayerTwoStatus);
         }
 
         void OnDisable()
@@ -47,8 +47,8 @@ namespace Illu.Steam
             SteamManager.Instance.onDestroyLobby.RemoveListener(DestroyLobby);
             SteamManager.Instance.OnLobbyClientRemoved.RemoveListener(RemoveLobbyClient);
 
-            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.OneReady.RemoveListener(setPlayerOneStatus);
-            Illu.Networking.NetworkManager.Instance.ReadyUpSystem.TwoReady.RemoveListener(setPlayerTwoStatus);
+            ReadyUpSystem.Instance.OneReady.RemoveListener(setPlayerOneStatus);
+            ReadyUpSystem.Instance.TwoReady.RemoveListener(setPlayerTwoStatus);
         }
 
 
@@ -149,8 +149,6 @@ namespace Illu.Steam
                 }
             );
 
-            Debug.Log("LEN " + playerCards.Count);
-
             playerCards.Add(lobbyUserDetails);
         }
 
@@ -184,8 +182,6 @@ namespace Illu.Steam
 
             //access friend list 
             var steamFriends = SteamManager.Instance.GetSteamFriends();
-
-            Debug.Log("steamFriends length " + steamFriends);
 
             GameObject subList = null;
             float numberOfTypes = steamFriends.Count;

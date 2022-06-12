@@ -12,7 +12,7 @@ namespace Illu.Networking
 
         void OnEnable()
         {
-            NetworkManager.Instance.ReadyUpSystem.BothReady.AddListener(OnBothReady);
+            ReadyUpSystem.Instance.BothReady.AddListener(OnBothReady);
             startBTN.onClick.AddListener(handleOnClick);
         }
         void OnBothReady()

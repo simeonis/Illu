@@ -9,7 +9,7 @@ namespace Illu.Networking
 {
     public struct CreateCharacterMessage : NetworkMessage
     {
-        public string name;
+        public string name; 
     }
 
     public class NetworkManager : Mirror.NetworkManager
@@ -34,9 +34,6 @@ namespace Illu.Networking
 
 
         public static NetworkManager Instance { get; private set; }
-        public ReadyUpSystem ReadyUpSystem { get; private set; }
-
-        [SerializeField] ReadyUpSystem _readUpSystem;
 
         //Holds all the different Transports for different connection types
         SwitchTransport switchTransport;
@@ -54,16 +51,28 @@ namespace Illu.Networking
                 Instance = this;
             }
 
-            ReadyUpSystem = _readUpSystem;
+            // ReadyUpSystem = _readUpSystem;
             switchTransport = (SwitchTransport)transport;
 
-        }
-        void OnEnable()
-        {
             isLanConnection.Value = false;
             isLanConnection.AddListener(SetConnectionType);
-            //SetConnectionType();
+
+            GameManager.Instance.AddListener(GameManager.Event.ServerStart,     StartHost);
+            GameManager.Instance.AddListener(GameManager.Event.ClientStart,     StartClient);
+            //GameManager.Instance.AddListener(GameManager.Event.ClientConnected, StartHost);
+            GameManager.Instance.AddListener(GameManager.Event.ServerStop,      StopHost);
+            GameManager.Instance.AddListener(GameManager.Event.ClientStop,      StopClient);
+
         }
+
+
+        //ServerStart -> StartHost
+        //ClientStart -> startClient 
+        //clientconnected -> null
+        //clientdisconnected -> steam lobby disconnect // move to steam 
+        //Server Stop -> StartHOst????
+        //CLient Stop -> StopCLient 
+        //LanJoin -> ClientJoinSever  // should just call direct 
 
         /*  --------------------------
         *       Callback functions
@@ -120,9 +129,7 @@ namespace Illu.Networking
         {
             base.OnClientConnect(conn);
 
-            GameManager
-            .Instance
-            .TriggerEvent("ClientConnected");
+            GameManager.Instance.TriggerEvent(GameManager.Event.ClientConnected);
 
             // you can send the message here, or wherever else you want
             CreateCharacterMessage characterMessage = new CreateCharacterMessage
@@ -140,9 +147,7 @@ namespace Illu.Networking
         {
             base.OnClientDisconnect(conn);
 
-            GameManager
-            .Instance
-            .TriggerEvent("ClientDisconnected");
+            GameManager.Instance.TriggerEvent(GameManager.Event.ClientDisconnected);
 
             if (SceneManager.GetActiveScene().name != menuScene)
             {
@@ -185,7 +190,7 @@ namespace Illu.Networking
             // Game Started
             if (previousScene == menuScene && sceneName != menuScene)
             {
-                GameManager.Instance.TriggerEvent("GameStarted");
+                GameManager.Instance.TriggerEvent(GameManager.Event.GameStarted);
                 UIConsole.Log("[Client]: Server has started the game");
             }
 
@@ -249,8 +254,6 @@ namespace Illu.Networking
             base.StartClient();
         }
 
-
-
         //
         //  Entry point for starting networking 
         //
@@ -292,8 +295,6 @@ namespace Illu.Networking
         //
         public void ClientJoinServer()
         {
-            Debug.Log("ClientJoinServer");
-            StopClient();
             //Holds all the different Transports for different connection types
             var switchTransport = (SwitchTransport)transport;
 
@@ -304,31 +305,12 @@ namespace Illu.Networking
             }
             else
             {
-                Debug.Log("Is Local Host");
                 switchTransport.PickTransport(1);
                 HostAddress = "localhost";
             }
 
             StartClient();
         }
-
-
-        // public void StartLan()
-        // {
-        //     var switchTransport = (SwitchTransport)transport;
-        //     switchTransport.PickTransport(1);
-        //     isLanConnection.Value = true;
-        //     StartHost();
-        // }
-
-        // public void JoinLan()
-        // {
-        //     var switchTransport = (SwitchTransport)transport;
-        //     switchTransport.PickTransport(1);
-        //     HostAddress = "localhost";
-        //     isLanConnection.Value = true;
-        //     StartClient();
-        // }
 
         /*  --------------------------
         *        Helper functions
@@ -340,19 +322,10 @@ namespace Illu.Networking
             // Manager but you can use different prefabs per race for example
             GameObject gameobject = Instantiate(playerPrefab);
 
-            // Apply data from the message however appropriate for your game
-            // Typically Player would be a component you write with syncvars or properties
-            //Player player = gameobject.GetComponent();
-            //player.hairColor = message.hairColor;
-            //player.eyeColor = message.eyeColor;
-            //player.name = message.name;
-            //player.race = message.race;
-
             // call this to use this gameobject as the primary controller
             NetworkServer.AddPlayerForConnection(conn, gameobject);
 
-            UIConsole.Log("[Server]: Created character " + characterMessage.name +
-            " for Client" + "[" + conn.connectionId + "].");
+            UIConsole.Log("[Server]: Created character " + characterMessage.name + " for Client" + "[" + conn.connectionId + "].");
         }
     }
 }

@@ -31,14 +31,21 @@ public class LanUI : NetworkBehaviour
 
     void OnEnable()
     {
-        Illu.Networking.NetworkManager.Instance.ReadyUpSystem.OneReady.AddListener(setPlayerOneStatus);
-        Illu.Networking.NetworkManager.Instance.ReadyUpSystem.TwoReady.AddListener(setPlayerTwoStatus);
+        GameManager.Instance.AddListener(GameManager.Event.ClientConnected, OnClientConnect);
+        GameManager.Instance.AddListener(GameManager.Event.ClientDisconnected, OnClientDisconnect);
+
+        ReadyUpSystem.Instance.OneReady.AddListener(setPlayerOneStatus);
+        ReadyUpSystem.Instance.TwoReady.AddListener(setPlayerTwoStatus);
     }
 
     void OnDisable()
     {
-        Illu.Networking.NetworkManager.Instance.ReadyUpSystem.OneReady.RemoveListener(setPlayerOneStatus);
-        Illu.Networking.NetworkManager.Instance.ReadyUpSystem.TwoReady.RemoveListener(setPlayerTwoStatus);
+        // remove listener 
+        // GameManager.Instance.AddListener(GameManager.Event.ClientConnected, OnClientConnect);
+        // GameManager.Instance.AddListener(GameManager.Event.ClientDisconnected, OnClientDisconnect);
+
+        ReadyUpSystem.Instance.OneReady.RemoveListener(setPlayerOneStatus);
+        ReadyUpSystem.Instance.TwoReady.RemoveListener(setPlayerTwoStatus);
     }
 
     override public void OnStartServer() 
@@ -53,6 +60,7 @@ public class LanUI : NetworkBehaviour
     {
         if(isLanConnection.Value)
         {
+            GenerateLobbyMember(new LanPlayer("Player1", 0), true);
             GenerateLobbyMember(new LanPlayer("Player2", 1), false);
         } 
     }
