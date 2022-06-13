@@ -8,8 +8,9 @@ public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
     {
         { Event.ServerStart,              new UnityEvent() },
         { Event.ClientStart,              new UnityEvent() },
-        { Event.ClientConnected,          new UnityEvent() },
-        { Event.ClientDisconnected,       new UnityEvent() },
+        { Event.S_ClientConnected,        new UnityEvent() },
+        { Event.C_ClientConnected,        new UnityEvent() },
+        { Event.C_ClientDisconnected,     new UnityEvent() },
         { Event.ServerStop,               new UnityEvent() },
         { Event.ClientStop,               new UnityEvent() },
         { Event.LanHost,                  new UnityEvent() },
@@ -34,8 +35,9 @@ public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
     {
         ServerStart,
         ClientStart,
-        ClientConnected,
-        ClientDisconnected,
+        S_ClientConnected,
+        C_ClientConnected,
+        C_ClientDisconnected,
         ServerStop,
         ClientStop,
         LanHost,

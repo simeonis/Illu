@@ -25,14 +25,11 @@ public class LanUI : NetworkBehaviour
     [SerializeField] BoolVariable isLanConnection;
 
 
-    [SerializeField] Event clientConnected;
-    [SerializeField] Event clientDisconnected;
-
-
     void OnEnable()
     {
-        GameManager.Instance.AddListener(GameManager.Event.ClientConnected, OnClientConnect);
-        GameManager.Instance.AddListener(GameManager.Event.ClientDisconnected, OnClientDisconnect);
+        Debug.Log("LanUI has been Enabled");
+        GameManager.Instance.AddListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
+        GameManager.Instance.AddListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
 
         ReadyUpSystem.Instance.OneReady.AddListener(setPlayerOneStatus);
         ReadyUpSystem.Instance.TwoReady.AddListener(setPlayerTwoStatus);
@@ -56,10 +53,20 @@ public class LanUI : NetworkBehaviour
         }
     }
 
-    public void OnClientConnect()
+    void OnClientConnect()
     {
-        if(isLanConnection.Value)
+        Debug.Log("SOnClientConnect");
+        GenerateLobbyMember(new LanPlayer("Player2", 1), false);
+    }
+
+    override public void OnStartClient()
+    {
+        base.OnStartClient();
+        Debug.Log("OnStartClient");
+
+        if(isLanConnection.Value && !isServer)
         {
+            Debug.Log("OnCLientConnect and Is Lan");
             GenerateLobbyMember(new LanPlayer("Player1", 0), true);
             GenerateLobbyMember(new LanPlayer("Player2", 1), false);
         } 

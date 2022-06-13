@@ -8,20 +8,24 @@ public class ReadyUpSystem : NetworkBehaviour
     [HideInInspector] public UnityEvent BothReady = new UnityEvent();
     public MyBoolEvent OneReady = new MyBoolEvent();
     public MyBoolEvent TwoReady = new MyBoolEvent();
-    
+
 
     [SyncVar(hook = nameof(PlayerOneStatus))]
-    public bool playerOneReady;
+    public bool playerOneReady = false;
 
     [SyncVar(hook = nameof(PlayerTwoStatus))]
-    public bool playerTwoReady = true;
+    public bool playerTwoReady = false;
 
+    [System.Serializable]
     public enum ID
     {   
         playerOne,
         playerTwo
     }
-    ID[] assigned = new ID[2];
+
+    public SyncList<ID> assigned = new SyncList<ID>();
+
+    public ID myID;
 
     public static ReadyUpSystem Instance { get; private set; }
 
@@ -36,11 +40,6 @@ public class ReadyUpSystem : NetworkBehaviour
         {
             Instance =  this;
         }
-    }
-
-    void OnEnable()
-    {
-        Debug.Log("I've been enabled");
     }
 
 
@@ -65,17 +64,4 @@ public class ReadyUpSystem : NetworkBehaviour
         }
     }
 
-    public ID requestID()
-    {
-        if (assigned.Length == 0)
-        {
-            assigned[0] = ID.playerOne;
-            return ID.playerOne;
-        }
-        else
-        {
-            assigned[1] = ID.playerTwo;
-            return ID.playerOne;
-        }
-    }
 }

@@ -32,7 +32,6 @@ namespace Illu.Networking
         [HideInInspector] public static string HostAddress = "";
         [SerializeField] private BoolVariable isLanConnection;
 
-
         public static NetworkManager Instance { get; private set; }
 
         //Holds all the different Transports for different connection types
@@ -41,15 +40,8 @@ namespace Illu.Networking
         override public void Awake()
         {
             base.Awake();
-            // If there is an instance, and it's not me, delete myself.
-            if (Instance != null && Instance != this)
-            {
-                Destroy(this);
-            }
-            else
-            {
-                Instance = this;
-            }
+
+            Instance = singleton as NetworkManager;
 
             // ReadyUpSystem = _readUpSystem;
             switchTransport = (SwitchTransport)transport;
@@ -107,6 +99,8 @@ namespace Illu.Networking
                 UIConsole.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
                 return;
             }
+
+            GameManager.Instance.TriggerEvent(GameManager.Event.S_ClientConnected);
         }
 
         // HOST and CLIENT started
@@ -129,7 +123,7 @@ namespace Illu.Networking
         {
             base.OnClientConnect(conn);
 
-            GameManager.Instance.TriggerEvent(GameManager.Event.ClientConnected);
+            GameManager.Instance.TriggerEvent(GameManager.Event.C_ClientConnected);
 
             // you can send the message here, or wherever else you want
             CreateCharacterMessage characterMessage = new CreateCharacterMessage
@@ -147,7 +141,7 @@ namespace Illu.Networking
         {
             base.OnClientDisconnect(conn);
 
-            GameManager.Instance.TriggerEvent(GameManager.Event.ClientDisconnected);
+            GameManager.Instance.TriggerEvent(GameManager.Event.C_ClientDisconnected);
 
             if (SceneManager.GetActiveScene().name != menuScene)
             {

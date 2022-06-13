@@ -17,15 +17,16 @@ namespace Illu.Networking
         }
         void OnBothReady()
         {
-
-            readyUp.gameObject.SetActive(false);
-            startGame.gameObject.SetActive(true);
-            startBTN.gameObject.SetActive(true);
+            if(isServer)
+            {
+                readyUp.gameObject.SetActive(false);
+                startBTN.gameObject.SetActive(true);
+            }
         }
 
         void handleOnClick()
         {
-            NetworkManager.Instance.ServerChangeScene("LevelOne");
+            NetworkManager.singleton.ServerChangeScene("LevelOne");
         }
     }
 }
