@@ -2,8 +2,11 @@ using UnityEngine;
 
 public abstract class GrapplingHookBaseState
 {
-    protected GrapplingHookStateMachine _ctx;
-    protected GrapplingHookStateFactory _factory;
+    private GrapplingHookStateMachine _ctx;
+    private GrapplingHookStateFactory _factory;
+
+    protected GrapplingHookStateMachine Ctx { get { return _ctx; } }
+    protected GrapplingHookStateFactory Factory { get { return _factory; } }
 
     public GrapplingHookBaseState(GrapplingHookStateMachine currentContext, GrapplingHookStateFactory grapplingHookStateFactory)
     {
@@ -58,7 +61,7 @@ public abstract class GrapplingHookBaseState
     /// </summary>
     protected void RetractHook()
     {
-        _ctx.Hook.SetParent(_ctx.HookParent, false);
+        _ctx.Hook.SetParent(_ctx.HookDefaultParent, false);
         _ctx.Hook.localPosition = Vector3.zero;
         _ctx.Hook.localRotation = Quaternion.identity;
     }
@@ -81,16 +84,16 @@ public abstract class GrapplingHookBaseState
     protected bool CalculateGrappleTarget(out RaycastHit hit)
     {
         Vector3 startPos = NearestExitPointOnAimVector();
-        if (Physics.Raycast(startPos, _ctx.Viewpoint.forward, out hit, _ctx.RopeRemaining, _ctx.HookableLayers))
+        if (Physics.Raycast(startPos, _ctx.PlayerViewpoint.forward, out hit, _ctx.RopeRemaining, _ctx.HookableLayers))
         {
             _ctx.GrappleDistance = hit.distance;
-            _ctx.GrappleTarget = hit.point;
+            _ctx.GrapplePoint = hit.point;
             return true;
         }
         else
         {
             _ctx.GrappleDistance = _ctx.RopeRemaining;
-            _ctx.GrappleTarget = startPos + _ctx.Viewpoint.forward * _ctx.RopeRemaining;
+            _ctx.GrapplePoint = startPos + _ctx.PlayerViewpoint.forward * _ctx.RopeRemaining;
             return false;
         }
     }
@@ -100,7 +103,7 @@ public abstract class GrapplingHookBaseState
     /// </summary>
     private Vector3 NearestExitPointOnAimVector()
     {
-        return FindNearestPointOnLine(_ctx.Viewpoint.position, _ctx.Viewpoint.forward, _ctx.ExitPoint);
+        return FindNearestPointOnLine(_ctx.PlayerViewpoint.position, _ctx.PlayerViewpoint.forward, _ctx.ExitPoint);
     }
 
     /// <summary>

@@ -9,7 +9,6 @@ public class GrapplingHookStateMachine : MonoBehaviour
     [SerializeField] float _projectileSpeed = 100f;
     [SerializeField] LayerMask _hookableLayers;
     Transform _defaultHookParent;
-    Vector3 _grappleTarget;
 
     [Header("Rope")]
     [SerializeField] float _maxRopeLength = 200f;
@@ -20,7 +19,7 @@ public class GrapplingHookStateMachine : MonoBehaviour
     [SerializeField] LineRenderer _ropeRenderer;
 
     [Header("Player")]
-    [SerializeField] GameObject _player;
+    [SerializeField] Rigidbody _rigidbody;
     [SerializeField] Transform _viewpoint;
     bool _isPrimaryPressed = false;
 
@@ -33,12 +32,12 @@ public class GrapplingHookStateMachine : MonoBehaviour
 
     // Getters & Setters - Projectile
     public Transform Hook { get { return _hook; } }
-    public Transform HookParent { get { return _defaultHookParent; } }
+    public Transform HookDefaultParent { get { return _defaultHookParent; } }
     public Vector3 HookPosition { get { return _hook.position; } set { _hook.position = value; } }
     public Vector3 ExitPoint { get { return _exitPoint.position; } }
     public float ProjectileSpeed { get { return _projectileSpeed; } }
     public LayerMask HookableLayers { get { return _hookableLayers; } }
-    public Vector3 GrappleTarget { get { return _grappleTarget; } set { _grappleTarget = value; } }
+    public Vector3 GrapplePoint { get; set; }
 
     // Getters & Setters - Rope
     public float MaxRopeLength { get { return _maxRopeLength; } }
@@ -51,8 +50,8 @@ public class GrapplingHookStateMachine : MonoBehaviour
     public LineRenderer RopeRenderer { get { return _ropeRenderer; } }
     
     // Getters & Setters - Player
-    public GameObject Player { get { return _player; } }
-    public Transform Viewpoint { get { return _viewpoint; } }
+    public Rigidbody PlayerRigidbody { get { return _rigidbody; } }
+    public Transform PlayerViewpoint { get { return _viewpoint; } }
     public bool IsPrimaryPressed { get { return _isPrimaryPressed; } set { _isPrimaryPressed = false; } }
     
     // Getters & Setters - State

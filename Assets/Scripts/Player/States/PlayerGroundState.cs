@@ -4,7 +4,7 @@ public class PlayerGroundState : PlayerBaseState
 {
     public PlayerGroundState(PlayerStateMachine currentContext, PlayerStateFactory playerStateFactory)
     : base (currentContext, playerStateFactory) {
-        _isRootState = true;
+        IsRootState = true;
         InitializeSubState();
     }
 
@@ -15,19 +15,25 @@ public class PlayerGroundState : PlayerBaseState
     public override void EnterState()
     {
         Debug.Log("Enter Ground State");
-        _ctx.CoyoteTimeCounter = _ctx.CoyoteTime;
+        Ctx.CoyoteTimeCounter = Ctx.CoyoteTime;
+        Ctx.Resistance = Ctx.GroundResistance;
+    }
+
+    public override void ExitState()
+    {
+        Ctx.Resistance = Ctx.AirResistance;
     }
 
     public override void CheckSwitchState()
     {
-        if (_ctx.IsJumpPressed)
-            SwitchState(_factory.GetState<PlayerJumpState>());
-        else if (!_ctx.IsGrounded)
+        if (Ctx.IsJumpPressed)
+            SwitchState(Factory.GetState<PlayerJumpState>());
+        else if (!Ctx.IsGrounded)
         {
-            if (_ctx.IsGrappled)
-                SwitchState(_factory.GetState<PlayerSwingState>());
+            if (Ctx.IsGrappled)
+                SwitchState(Factory.GetState<PlayerSwingState>());
             else
-                SwitchState(_factory.GetState<PlayerFallState>());
+                SwitchState(Factory.GetState<PlayerFallState>());
         }
     }
 }

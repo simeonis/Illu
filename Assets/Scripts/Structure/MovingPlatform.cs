@@ -5,11 +5,13 @@ public class MovingPlatform : InertialPlatform
     public Vector3 TargetPosition;
     [SerializeField] float _speed = 1.0f;
     [SerializeField] bool _loop = false;
+    
     bool _isTarget = false;
     Vector3 _initialPos;
     Vector3 _loopTarget;
 
     [Header("Projection Settings")]
+    [SerializeField] Mesh _mesh;
     [SerializeField] Color _color = Color.red;
     [SerializeField] float _radius = 1f;
     [HideInInspector] public bool Fill = false;
@@ -51,8 +53,16 @@ public class MovingPlatform : InertialPlatform
         if (Visualize)
         {
             Gizmos.color = _color;
-            if (Fill) Gizmos.DrawSphere(TargetPosition, _radius);
-            else Gizmos.DrawWireSphere(TargetPosition, _radius);
+            if (_mesh != null)
+            {
+                if (Fill) Gizmos.DrawMesh(_mesh, -1, TargetPosition, transform.rotation, transform.localScale);
+                else Gizmos.DrawWireMesh(_mesh, -1, TargetPosition, transform.rotation, transform.localScale);
+            }
+            else
+            {
+                if (Fill) Gizmos.DrawSphere(TargetPosition, _radius);
+                else Gizmos.DrawWireSphere(TargetPosition, _radius);
+            }
         }
     }
     #endif

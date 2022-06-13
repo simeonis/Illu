@@ -10,9 +10,9 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
 
     public override void EnterState()
     {
-        _ctx.IsPrimaryPressed = false; // Setter prevents value from being set to true
-        _ctx.RopeRemaining = _ctx.MaxRopeLength;
-        _ctx.RopeRenderer.positionCount = 0;
+        Ctx.IsPrimaryPressed = false; // Setter prevents value from being set to true
+        Ctx.RopeRemaining = Ctx.MaxRopeLength;
+        Ctx.RopeRenderer.positionCount = 0;
         RetractHook();
     }
 
@@ -20,9 +20,9 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
 
     public override void CheckSwitchState()
     {
-        if (_ctx.IsPrimaryPressed)
+        if (Ctx.IsPrimaryPressed)
         {
-            SwitchState(_factory.GetState<GrapplingHookFiredState>());
+            SwitchState(Factory.GetState<GrapplingHookFiredState>());
         }
     }
 
@@ -32,14 +32,14 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
         if (CalculateGrappleTarget(out gizmosHit))
         {
             Gizmos.color = Color.green;
-            Vector3 direction = gizmosHit.point - _ctx.ExitPoint;
-            Gizmos.DrawRay(_ctx.ExitPoint, direction);
+            Vector3 direction = gizmosHit.point - Ctx.ExitPoint;
+            Gizmos.DrawRay(Ctx.ExitPoint, direction);
             Gizmos.DrawSphere(gizmosHit.point, 0.125f);
         }
         else
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawRay(_ctx.ExitPoint, _ctx.Viewpoint.forward * distance);
+            Gizmos.DrawRay(Ctx.ExitPoint, Ctx.PlayerViewpoint.forward * distance);
         }
     }
     #endif

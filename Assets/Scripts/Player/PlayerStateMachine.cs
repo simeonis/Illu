@@ -14,14 +14,6 @@ public class PlayerStateMachine : MonoBehaviour
     AnimationClip _landingFlatAnimationClip;
     [SerializeField, Tooltip("Player \"Stand Up\" animation clip")]
     AnimationClip _standUpAnimationClip;
-    int _isGroundedHash;
-    int _isMovingHash;
-    int _isJumpingHash; 
-    int _isFallingHash;
-    int _isSafeLandingHash;
-    int _hasLandedHash;
-    int _moveSpeedHash;
-    int _fallSpeedHash;
 
     [Header("Rotation Modifiers")]
     [SerializeField] Transform _orientation;
@@ -33,18 +25,20 @@ public class PlayerStateMachine : MonoBehaviour
     float _walkSpeed = 4f;
     [SerializeField, Tooltip("Max sprint speed")] 
     float _sprintSpeed = 10f;
-    [SerializeField, Tooltip("Rate of change to reach max speed")]
-    float _acceleration = 50;
-    [SerializeField, Tooltip("Max acceleration")]
-    float _maxAcceleration = 150f;
-    [SerializeField, Tooltip("Acceleration factor based on direction change")]
-    AnimationCurve _accelerationDotFactor;
-    [SerializeField, Range(0f, 10f), Tooltip("Amount of drag being applied")] 
+    [SerializeField, Tooltip("Max sprint speed")] 
     float _drag = 3f;
+    [SerializeField, Tooltip("Max sprint speed")] 
+    float _airDrag = 0.5f;
     float _moveSpeed;
     Vector3 _moveDir;
-    
 
+    [Header("Resistance Modifiers")]
+    [SerializeField, Range(0f, 2f)]
+    float _groundResistance = 1f;
+    [SerializeField, Range(0f, 2f)]
+    float _airResistance = 0.5f;
+    float _resistance = 1f;
+    
     [Header("Jump Modifiers")]
     [SerializeField, Tooltip("Apex of jump")] 
     float _maxJumpHeight = 1.5f;
@@ -85,14 +79,9 @@ public class PlayerStateMachine : MonoBehaviour
 
     // Getters & Setters - Animation
     public Animator Animator { get { return _animator; } }
-    public int IsGroundedHash { get { return _isGroundedHash; } }
-    public int IsMovingHash { get { return _isMovingHash; } }
-    public int IsJumpingHash { get { return _isJumpingHash; } }
-    public int IsFallingHash { get { return _fallSpeedHash; } }
-    public int IsSafeLandingHash { get { return _isSafeLandingHash; } }
-    public int HasLandedHash { get { return _hasLandedHash; } }
-    public int MoveSpeedHash { get { return _moveSpeedHash; } }
-    public int FallSpeedHash { get { return _fallSpeedHash; } }
+    public int IsWalkingHash { get; set; }
+    public int IsSprintingHash { get; set; }
+    public int IsJumpingHash { get; set; }
 
     // Getters & Setters - Locomotion
     public float MoveSpeed { get; set; }
@@ -100,13 +89,11 @@ public class PlayerStateMachine : MonoBehaviour
     public float SprintSpeed { get { return _sprintSpeed; } }
     public float SwingSpeed { get { return _walkSpeed * 0.05f; } }
     public Vector3 MoveDirection { get { return _moveDir; } }
-    public float Acceleration { get { return _acceleration; } }
-    public float MaxAcceleration { get { return _maxAcceleration; } }
-    public AnimationCurve AccelerationDotFactor { get { return _accelerationDotFactor; } }
 
-    // Getters & Setters - Drag
-    public float DefaultDrag { get { return _drag; } set { _drag = value; } }
-    public float Drag { get; set; }
+    // Getters & Setters - Resistance
+    public float Resistance { get { return _resistance; } set { _resistance = value; } }
+    public float GroundResistance { get { return _groundResistance; } }
+    public float AirResistance { get { return _airResistance; } }
 
     // Getters & Setters - Jump
     public float InitialJumpVelocity { get { return _initialJumpVelocity; } }
@@ -138,22 +125,15 @@ public class PlayerStateMachine : MonoBehaviour
         // Rigidbody
         _playerBody = GetComponent<Rigidbody>();
 
-        Drag = DefaultDrag;
-
         // Calculate Gravity + Intial Jump Velocity
         float timeToApex = _maxJumpTime * 0.5f;
         _gravity = (-2 * _maxJumpHeight) / Mathf.Pow(timeToApex, 2);
         _initialJumpVelocity = (2 * _maxJumpHeight) / timeToApex;
 
         // Animation Hash (Increases Performance)
-        _isGroundedHash = Animator.StringToHash("isGrounded");
-        _isMovingHash = Animator.StringToHash("isMoving");
-        _isJumpingHash = Animator.StringToHash("isJumping");
-        _isFallingHash = Animator.StringToHash("isFalling");
-        _isSafeLandingHash = Animator.StringToHash("isSafeLanding");
-        _hasLandedHash = Animator.StringToHash("hasLanded");
-        _moveSpeedHash = Animator.StringToHash("moveSpeed");
-        _fallSpeedHash = Animator.StringToHash("fallSpeed");
+        IsWalkingHash = Animator.StringToHash("isWalking");
+        IsSprintingHash = Animator.StringToHash("isSprinting");
+        IsJumpingHash = Animator.StringToHash("isJumping");
 
         // State
         _states = new PlayerStateFactory(this);
@@ -164,7 +144,7 @@ public class PlayerStateMachine : MonoBehaviour
     void Update()
     {
         _isGrounded = Physics.CheckSphere(transform.position, _groundDetection, _groundMask);
-        if (!_isGrounded) _coyoteTimeCounter -= Time.deltaTime;
+        if (!_isGrounded && _coyoteTimeCounter >= 0) _coyoteTimeCounter -= Time.deltaTime;
         _currentState.UpdateStates();
         _currentState.CheckSwitchStates();
     }
@@ -182,14 +162,24 @@ public class PlayerStateMachine : MonoBehaviour
         _playerBody.AddForce(transform.up * _gravity, ForceMode.Acceleration);
     }
 
+    //Vector3 targetDirection = Vector3.zero;
     void Locomotion()
     {
-        _playerBody.AddForce(MoveDirection * MoveSpeed, ForceMode.Acceleration);
+        // float velDot = Vector3.Dot(MoveDirection, targetDirection);
+        // float acceleration = Acceleration * AccelerationDotFactor.Evaluate(velDot);
+        // targetDirection = Vector3.MoveTowards(targetDirection, MoveDirection * MoveSpeed, acceleration * Time.fixedDeltaTime);
+        // Vector3 currVel = _playerBody.velocity - Vector3.Project(_playerBody.velocity, transform.up);
+        // Vector3 targetAcceleration = (targetDirection - currVel) / Time.fixedDeltaTime;
+        // targetAcceleration = Vector3.ClampMagnitude(targetAcceleration, MaxAcceleration);
+        // PlayerBody.AddForce(targetAcceleration, ForceMode.Acceleration);
+
+        _playerBody.AddForce(MoveDirection * MoveSpeed * _resistance, ForceMode.Acceleration);
         
         // Player's velocity (excluding vertical)
-        Vector3 currVel = _playerBody.velocity - Vector3.Project(_playerBody.velocity, transform.up);
+        Vector3 currentVelocity = _playerBody.velocity - Vector3.Project(_playerBody.velocity, transform.up);
         
-        _playerBody.AddForce(currVel * -Drag, ForceMode.Acceleration);
+        // Friction
+        _playerBody.AddForce(-currentVelocity * (IsGrounded ? _drag : _airDrag), ForceMode.Acceleration);
     }
 
     #if UNITY_EDITOR

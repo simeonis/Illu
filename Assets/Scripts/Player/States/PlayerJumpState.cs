@@ -4,7 +4,7 @@ public class PlayerJumpState : PlayerBaseState
 {
     public PlayerJumpState(PlayerStateMachine currentContext, PlayerStateFactory playerStateFactory)
     : base (currentContext, playerStateFactory) {
-        _isRootState = true;
+        IsRootState = true;
         InitializeSubState(); 
     }
     
@@ -12,31 +12,31 @@ public class PlayerJumpState : PlayerBaseState
 
     public override void EnterState()
     {
-        _ctx.IsJumpPressed = false; // Prevent hold-down jump spam
+        Ctx.IsJumpPressed = false; // Prevent hold-down jump spam
         // Start animation
-        //_ctx.Animator.SetBool(_ctx.IsJumpingHash, true);
+        //Ctx.Animator.SetBool(Ctx.IsJumpingHash, true);
             
         // Cancel upwards velocity, relative to player's orientation
-        _ctx.PlayerBody.velocity -= Vector3.Project(_ctx.PlayerBody.velocity, _ctx.transform.up);
+        Ctx.PlayerBody.velocity -= Vector3.Project(Ctx.PlayerBody.velocity, Ctx.transform.up);
             
         // Add upwards force, relative to player's orientation
-        _ctx.PlayerBody.AddForce(_ctx.transform.up * _ctx.InitialJumpVelocity, ForceMode.VelocityChange);
+        Ctx.PlayerBody.AddForce(Ctx.transform.up * Ctx.InitialJumpVelocity, ForceMode.VelocityChange);
     }
 
     public override void ExitState()
     {
         // Cancel animation
-        //_ctx.Animator.SetBool(_ctx.IsJumpingHash, false);
+        //Ctx.Animator.SetBool(Ctx.IsJumpingHash, false);
     }
 
     public override void CheckSwitchState()
     {
-        if (_ctx.VerticalVelocity < -_ctx.FallThresholdVelocity)
+        if (Ctx.VerticalVelocity < -Ctx.FallThresholdVelocity)
         {
-            if (_ctx.IsGrappled)
-                SwitchState(_factory.GetState<PlayerSwingState>());
+            if (Ctx.IsGrappled)
+                SwitchState(Factory.GetState<PlayerSwingState>());
             else
-                SwitchState(_factory.GetState<PlayerFallState>());
+                SwitchState(Factory.GetState<PlayerFallState>());
         }
     }
 }

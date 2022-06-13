@@ -1,10 +1,17 @@
 public abstract class PlayerBaseState
 {
-    protected bool _isRootState = false;
-    protected PlayerStateMachine _ctx;
-    protected PlayerStateFactory _factory;
-    protected PlayerBaseState _currentSubState;
-    protected PlayerBaseState _currentSuperState;
+    private bool _isRootState = false;
+    private PlayerStateMachine _ctx;
+    private PlayerStateFactory _factory;
+    private PlayerBaseState _currentSubState;
+    private PlayerBaseState _currentSuperState;
+
+    protected bool IsRootState { set { _isRootState = value; } }
+    protected PlayerStateMachine Ctx { get { return _ctx; } }
+    protected PlayerStateFactory Factory { get { return _factory; } }
+    protected PlayerBaseState SubState { get { return _currentSubState; } }
+    protected PlayerBaseState SuperState { get { return _currentSuperState; } }
+
     public PlayerBaseState(PlayerStateMachine currentContext, PlayerStateFactory playerStateFactory)
     {
         _ctx = currentContext;

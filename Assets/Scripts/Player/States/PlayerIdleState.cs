@@ -9,16 +9,16 @@ public class PlayerIdleState : PlayerBaseState
 
     public override void EnterState()
     {
-        Debug.Log("Enter Idle SubState");
-        _ctx.MoveSpeed = 0f;
-        // _ctx.Animator.SetBool(_ctx.IsMovingHash, false);
+        Ctx.MoveSpeed = 0f;
+        Ctx.Animator.SetBool(Ctx.IsWalkingHash, false);
+        Ctx.Animator.SetBool(Ctx.IsSprintingHash, false);
     }
 
     public override void CheckSwitchState()
     {
-        if (_ctx.IsMovementPressed && _ctx.IsSprintPressed)
-            SwitchState(_factory.GetState<PlayerSprintState>());
-        else if (_ctx.IsMovementPressed)
-            SwitchState(_factory.GetState<PlayerWalkState>());
+        if (Ctx.IsMovementPressed && Ctx.IsSprintPressed)
+            SwitchState(Factory.GetState<PlayerSprintState>());
+        else if (Ctx.IsMovementPressed)
+            SwitchState(Factory.GetState<PlayerWalkState>());
     }
 }

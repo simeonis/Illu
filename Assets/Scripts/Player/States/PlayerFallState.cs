@@ -4,7 +4,7 @@ public class PlayerFallState : PlayerBaseState
 {
     public PlayerFallState(PlayerStateMachine currentContext, PlayerStateFactory playerStateFactory)
     : base (currentContext, playerStateFactory) {
-        _isRootState = true;
+        IsRootState = true;
         InitializeSubState();
     }
     
@@ -14,22 +14,22 @@ public class PlayerFallState : PlayerBaseState
     {
         Debug.Log("Enter Fall State");
         // Start animation
-        // _ctx.Animator.SetBool(_ctx.IsFallingHash, true);
+        // Ctx.Animator.SetBool(Ctx.IsFallingHash, true);
     }
 
     public override void ExitState()
     {
         // Start animation
-        // _ctx.Animator.SetBool(_ctx.IsFallingHash, false);
+        // Ctx.Animator.SetBool(Ctx.IsFallingHash, false);
     }
 
     public override void CheckSwitchState()
     {
-        if (_ctx.IsGrounded)
-            SwitchState(_factory.GetState<PlayerGroundState>());
-        else if (_ctx.IsGrappled)
-            SwitchState(_factory.GetState<PlayerSwingState>());
-        else if ((_ctx.CoyoteTimeCounter > 0f) && _ctx.IsJumpPressed)
-            SwitchState(_factory.GetState<PlayerJumpState>());
+        if (Ctx.IsGrounded)
+            SwitchState(Factory.GetState<PlayerGroundState>());
+        else if (Ctx.IsGrappled)
+            SwitchState(Factory.GetState<PlayerSwingState>());
+        else if ((Ctx.CoyoteTimeCounter > 0f) && Ctx.IsJumpPressed)
+            SwitchState(Factory.GetState<PlayerJumpState>());
     }
 }

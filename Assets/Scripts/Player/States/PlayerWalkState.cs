@@ -9,21 +9,24 @@ public class PlayerWalkState : PlayerBaseState
 
     public override void EnterState()
     {
-        if (_currentSuperState is PlayerSwingState)
+        if (SuperState is PlayerSwingState)
         {
-            _ctx.MoveSpeed = _ctx.SwingSpeed;
+            Ctx.MoveSpeed = Ctx.SwingSpeed;
         }
         else
         {
-            _ctx.MoveSpeed = _ctx.WalkSpeed;
+            Ctx.MoveSpeed = Ctx.WalkSpeed;
         }
+
+        Ctx.Animator.SetBool(Ctx.IsWalkingHash, true);
+        Ctx.Animator.SetBool(Ctx.IsSprintingHash, false);
     }
 
     public override void CheckSwitchState()
     {
-        if (!_ctx.IsMovementPressed)
-            SwitchState(_factory.GetState<PlayerIdleState>());
-        else if (_ctx.IsMovementPressed && _ctx.IsSprintPressed)
-            SwitchState(_factory.GetState<PlayerSprintState>());
+        if (!Ctx.IsMovementPressed)
+            SwitchState(Factory.GetState<PlayerIdleState>());
+        else if (Ctx.IsMovementPressed && Ctx.IsSprintPressed)
+            SwitchState(Factory.GetState<PlayerSprintState>());
     }
 }

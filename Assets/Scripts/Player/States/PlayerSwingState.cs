@@ -4,7 +4,7 @@ public class PlayerSwingState : PlayerBaseState
 {
     public PlayerSwingState(PlayerStateMachine currentContext, PlayerStateFactory playerStateFactory)
     : base (currentContext, playerStateFactory) {
-        _isRootState = true;
+        IsRootState = true;
         InitializeSubState();
     }
     
@@ -12,20 +12,20 @@ public class PlayerSwingState : PlayerBaseState
 
     public override void EnterState()
     {
-        _ctx.Drag = 0.25f;
+        //Ctx.Drag = 0.25f;
     }
 
     public override void ExitState()
     {
-        _ctx.Drag = _ctx.DefaultDrag;
+        //Ctx.Drag = Ctx.DefaultDrag;
     }
 
 
     public override void CheckSwitchState()
     {
-        if (_ctx.IsGrounded)
-            SwitchState(_factory.GetState<PlayerGroundState>());
-        else if (!_ctx.IsGrappled)
-            SwitchState(_factory.GetState<PlayerFallState>());
+        if (Ctx.IsGrounded)
+            SwitchState(Factory.GetState<PlayerGroundState>());
+        else if (!Ctx.IsGrappled)
+            SwitchState(Factory.GetState<PlayerFallState>());
     }
 }

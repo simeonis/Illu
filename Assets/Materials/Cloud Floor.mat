@@ -23,10 +23,10 @@ Material:
   m_Name: Cloud Floor
   m_Shader: {fileID: -6465566751694194690, guid: 95635568cea5a404a88dd9089ec4abc8,
     type: 3}
-  m_ShaderKeywords: _DOUBLESIDED_ON _SURFACE_TYPE_TRANSPARENT
+  m_ShaderKeywords: _SURFACE_TYPE_TRANSPARENT
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 1
+  m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
   stringTagMap:
     MotionVector: User
@@ -58,25 +58,25 @@ Material:
     - _AlphaSrcBlend: 1
     - _AlphaToMask: 0
     - _AlphaToMaskInspectorValue: 0
-    - _BaseScale: 0.03
-    - _BaseSpeed: 10
-    - _BaseStength: 0.61
+    - _BaseScale: 0.0125
+    - _BaseSpeed: 20
+    - _BaseStength: 0.53
     - _BlendMode: 0
-    - _CullMode: 0
-    - _CullModeForward: 0
-    - _CurvatureRadius: 250
+    - _CullMode: 2
+    - _CullModeForward: 2
+    - _CurvatureRadius: 200
     - _DepthOffsetEnable: 0
-    - _DoubleSidedEnable: 1
+    - _DoubleSidedEnable: 0
     - _DoubleSidedNormalMode: 2
     - _DstBlend: 10
-    - _EmissionStrength: 20000
+    - _EmissionStrength: 5000
     - _EnableBlendModePreserveSpecularLighting: 0
     - _EnableFogOnTransparent: 0
     - _FadeDepth: 32
     - _FresnelOpacity: 1
     - _FresnelPower: 8
-    - _NodeScale: 0.02
-    - _NoiseHeight: 9
+    - _NodeScale: 0.002
+    - _NoiseHeight: 60
     - _NoisePower: 2
     - _NoiseSpeed: 25
     - _OpaqueCullMode: 2
@@ -107,8 +107,8 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - Vector2_61d24b15c8de4c37bc5d635879e99d5d: {r: 0, g: 1, b: 0, a: 0}
-    - _ColorPeak: {r: 0.58000004, g: 0.82500005, b: 1, a: 0}
-    - _ColorValley: {r: 0.42920002, g: 0.60532, b: 0.74, a: 1}
+    - _ColorPeak: {r: 1, g: 1, b: 1, a: 0}
+    - _ColorValley: {r: 0.63234246, g: 0.77040833, b: 0.9245283, a: 1}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _NoiseEdge: {r: -1, g: 2, b: 0, a: 0}
