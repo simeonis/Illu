@@ -1137,7 +1137,7 @@ MonoBehaviour:
   _waveCount: 2
   _waveHeight: 0.5
   _ropeRenderer: {fileID: 203225506}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 4333712776440942763}
   _viewpoint: {fileID: 4333712776587452003}
   _ropeRemaining: {fileID: 11400000, guid: b5e89818a6a60e44e8b76ef1c46dc42b, type: 2}
   _grappleDistance: {fileID: 11400000, guid: 29df79c1765f9b34793d780b4de929a4, type: 2}

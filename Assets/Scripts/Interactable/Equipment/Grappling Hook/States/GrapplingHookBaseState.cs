@@ -75,16 +75,15 @@ public abstract class GrapplingHookBaseState
     }
 
     /// <summary>
-    /// 1. Shoots a raycast from the player's viewpoint forward until out of rope.
+    /// 1. Shoots a raycast in "direction" starting at "origin".
     /// <br/>
     /// 2. Calculates the new grapple target and sets the grapple distance.
     /// <br/>
     /// Returns true if a collision occured, otherwise false.
     /// </summary>
-    protected bool CalculateGrappleTarget(out RaycastHit hit)
+    protected bool SimulateGrapple(Vector3 origin, Vector3 direction)
     {
-        Vector3 startPos = NearestExitPointOnAimVector();
-        if (Physics.Raycast(startPos, _ctx.PlayerViewpoint.forward, out hit, _ctx.RopeRemaining, _ctx.HookableLayers))
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, _ctx.RopeRemaining, _ctx.HookableLayers))
         {
             _ctx.GrappleDistance = hit.distance;
             _ctx.GrapplePoint = hit.point;
@@ -93,28 +92,8 @@ public abstract class GrapplingHookBaseState
         else
         {
             _ctx.GrappleDistance = _ctx.RopeRemaining;
-            _ctx.GrapplePoint = startPos + _ctx.PlayerViewpoint.forward * _ctx.RopeRemaining;
+            _ctx.GrapplePoint = origin + direction * _ctx.RopeRemaining;
             return false;
         }
-    }
-
-    /// <summary>
-    /// Returns the grappling hook's exit point projected on the aim vector.
-    /// </summary>
-    private Vector3 NearestExitPointOnAimVector()
-    {
-        return FindNearestPointOnLine(_ctx.PlayerViewpoint.position, _ctx.PlayerViewpoint.forward, _ctx.ExitPoint);
-    }
-
-    /// <summary>
-    /// Returns the nearest point on a line for a target point.
-    /// </summary>
-    private Vector3 FindNearestPointOnLine(Vector3 origin, Vector3 direction, Vector3 point)
-    {
-        direction.Normalize();
-        Vector3 lhs = point - origin;
-
-        float dotP = Vector3.Dot(lhs, direction);
-        return origin + direction * dotP;
     }
 }

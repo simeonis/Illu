@@ -1,61 +1,84 @@
 using UnityEngine;
-using System.Collections;
 
 public class GrapplingHookFiredState : GrapplingHookBaseState
 {
     public GrapplingHookFiredState(GrapplingHookStateMachine currentContext, GrapplingHookStateFactory grapplingHookStateFactory)
     : base (currentContext, grapplingHookStateFactory) {}
 
-    IEnumerator _ropeCoroutine;
-    RaycastHit _recalcHit;
-    float _initialRopeRemaining;
+    Vector3 _previousHookPos;
     bool _grappled, _outOfRope;
+    float _initialRopeRemaining;
+    float _speedOverLength;
+    float _percent;
 
     public override void EnterState()
     {
         ReleaseHook();
         
+        // Initialize variables
+        _previousHookPos = Ctx.HookPosition;
         _initialRopeRemaining = Ctx.RopeRemaining;
         _grappled = _outOfRope = false;
+        _speedOverLength = _percent = 0f;
 
-        // Animate rope
-        // TO-DO: Fix rope animation not properly sync with projectile movement
-        if (_ropeCoroutine != null) Ctx.StopCoroutine(_ropeCoroutine);
-        Ctx.StartCoroutine(_ropeCoroutine = AnimateRope());
+        // Set the array size of the line renderer
+        Ctx.RopeRenderer.positionCount = Ctx.Resolution;
+    }
+
+    public override void UpdateState()
+    {
+        // Calculate every frame incase of unexpected collisions or move platforms
+        _speedOverLength = Ctx.ProjectileSpeed / Ctx.GrappleDistance;
+
+        if (_percent < 1.0f)
+        {
+            _percent += Time.deltaTime * _speedOverLength;
+            SetRopePoints(_percent, _speedOverLength);
+        }
     }
 
     public override void FixedUpdateState()
     {
-        // TO-DO: Check for unexpected collisions
+        // Target reached
+        if (Vector3.Distance(Ctx.HookPosition, Ctx.GrapplePoint) < 0.01f)
+        {
+            // Expected collision occured
+            if (CheckForCollision())
+            {
+                _grappled = true;
+                return;
+            }
+            // No collision occured, re-calculating...
+            else
+            {
+                RecalculateGrappleTarget();
+                _percent = 0f; // Reset rope animation percentage
+            }
+        }
 
+        // TODO: Differentiate moving platform from normal collision
+        // Check for unexpected collisions
+        // else if (CheckForCollision()) {
+        //     Debug.Log("Unexpected collision occured");
+        //     Ctx.GrapplePoint = Ctx.HookPosition;
+        //     Ctx.GrappleDistance = Ctx.RopeRemaining;
+        //     _grappled = true;
+        //     return;
+        // }
+
+        // Save hook position to calculate direction in case target moves before arrival
+        _previousHookPos = Ctx.HookPosition;
+        
         // Move projectile to target position
-        float step = Ctx.ProjectileSpeed * Time.deltaTime;
-        Ctx.HookPosition = Vector3.MoveTowards(Ctx.HookPosition, Ctx.GrapplePoint, step);
+        Ctx.HookPosition = Vector3.MoveTowards(Ctx.HookPosition, Ctx.GrapplePoint, Ctx.ProjectileSpeed * Time.deltaTime);
 
         // Update rope remaining
-        float currentDistance = Vector3.Distance(Ctx.HookPosition, Ctx.GrapplePoint);
-        Ctx.RopeRemaining = _initialRopeRemaining - (Ctx.GrappleDistance - currentDistance);
-        
+        Ctx.RopeRemaining = _initialRopeRemaining - Vector3.Distance(Ctx.ExitPoint, Ctx.HookPosition);
+
         // Check if out of rope
         if (Ctx.RopeRemaining <= 0f)
-        {
             _outOfRope = true;
-            return;
-        }
-
-        // Arrived at target
-        if (currentDistance < 0.001f)
-        {
-            // Check if target is still here
-            if (CheckForCollision())
-                _grappled = true;
-            // Otherwise, recalculate target
-            else
-                CalculateGrappleTarget(out _);
-        }
     }
-
-    bool CheckForCollision() => Physics.CheckSphere(Ctx.HookPosition, 0.25f, Ctx.HookableLayers);
 
     public override void ExitState()
     {
@@ -66,9 +89,6 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
             // Update rope remaining
             Ctx.RopeRemaining = _initialRopeRemaining - Ctx.GrappleDistance;
         }
-
-        // Stop rope animation
-        Ctx.StopCoroutine(_ropeCoroutine);
     }
 
     public override void CheckSwitchState()
@@ -79,32 +99,20 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
             SwitchState(Factory.GetState<GrapplingHookIdleState>());
     }
 
-    private IEnumerator AnimateRope()
+    // Helper Functions
+    bool RecalculateGrappleTarget()
     {
-        // Set the array size of the line renderer
-        Ctx.RopeRenderer.positionCount = Ctx.Resolution;
-
-        // Calculate the percentage rate increase based on projectile speed and
-        // the distance from the projectile exit position to the target position
-        float length = Vector3.Distance(Ctx.ExitPoint, Ctx.GrapplePoint);
-        float speedOverLength = Ctx.ProjectileSpeed / length;
-
-        float percent = 0f;
-        while (percent <= 1f)
-        {
-            percent += Time.deltaTime * speedOverLength;
-            SetRopePoints(percent, speedOverLength);
-            yield return null;
-        }
-
-        SetRopePoints(1f, speedOverLength);
+        Vector3 direction = (Ctx.HookPosition - _previousHookPos).normalized;
+        return SimulateGrapple(Ctx.HookPosition, direction);
     }
 
-    private void SetRopePoints(float percent, float speedOverLength)
+    bool CheckForCollision()
     {
-        // How far along from projectile exit position to target position based on percentage
-        Vector3 ropeEnd = Vector3.Lerp(Ctx.ExitPoint, Ctx.GrapplePoint, percent);
+        return Physics.CheckSphere(Ctx.HookPosition, 0.25f, Ctx.HookableLayers);
+    }
 
+    void SetRopePoints(float percent, float speedOverLength)
+    {
         // Upwards vector from projectile exit position to target position
         Vector3 gunToGrapple = (Ctx.GrapplePoint - Ctx.ExitPoint);
         Vector3 up = Quaternion.LookRotation(gunToGrapple.normalized) * Vector3.up;
@@ -120,13 +128,10 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
             float amplitude = Mathf.Sin(inversePercent * Ctx.WobbleCount * Mathf.PI) * ((1f - resolutionPercent) * Ctx.WaveHeight) * (percent * 2f);
             float deltaY = Mathf.Sin(Ctx.WaveCount * resolutionPercent * 2 * Mathf.PI * inversePercent) * amplitude;
 
-            // Apply calculations to the upwards vector of the projectile trajectory
-            Vector3 offsetY = up * deltaY;
-
             // Move the corresponding points according to their new y-offset
-            Vector3 pos = Vector3.Lerp(Ctx.ExitPoint, ropeEnd, resolutionPercent) + offsetY;
+            Vector3 newPosition = Vector3.Lerp(Ctx.ExitPoint, Ctx.HookPosition, resolutionPercent) + (up * deltaY);
 
-            Ctx.RopeRenderer.SetPosition(i, pos);
+            Ctx.RopeRenderer.SetPosition(i, newPosition);
         }
     }
 }

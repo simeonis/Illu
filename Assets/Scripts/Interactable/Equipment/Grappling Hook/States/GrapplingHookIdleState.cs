@@ -4,9 +4,6 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
 {
     public GrapplingHookIdleState(GrapplingHookStateMachine currentContext, GrapplingHookStateFactory grapplingHookStateFactory)
     : base (currentContext, grapplingHookStateFactory) {}
-    
-    RaycastHit hit, gizmosHit;
-    float distance = 0f;
 
     public override void EnterState()
     {
@@ -16,7 +13,22 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
         RetractHook();
     }
 
-    public override void UpdateState() => CalculateGrappleTarget(out _);
+    public override void UpdateState() => CalculateGrappleTarget();
+
+    bool CalculateGrappleTarget()
+    {
+        Vector3 origin = FindNearestPointOnLine(Ctx.PlayerViewpoint.position, Ctx.PlayerViewpoint.forward, Ctx.ExitPoint);
+        return SimulateGrapple(origin, Ctx.PlayerViewpoint.forward);
+    }
+
+    Vector3 FindNearestPointOnLine(Vector3 origin, Vector3 direction, Vector3 point)
+    {
+        direction.Normalize();
+        Vector3 lhs = point - origin;
+
+        float dotP = Vector3.Dot(lhs, direction);
+        return origin + direction * dotP;
+    }
 
     public override void CheckSwitchState()
     {
@@ -29,18 +41,17 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
     #if UNITY_EDITOR
     public override void GizmosState()
     {
-        if (CalculateGrappleTarget(out gizmosHit))
+        if (CalculateGrappleTarget())
         {
             Gizmos.color = Color.green;
-            Vector3 direction = gizmosHit.point - Ctx.ExitPoint;
-            Gizmos.DrawRay(Ctx.ExitPoint, direction);
-            Gizmos.DrawSphere(gizmosHit.point, 0.125f);
+            Gizmos.DrawSphere(Ctx.GrapplePoint, 0.125f);
         }
         else
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawRay(Ctx.ExitPoint, Ctx.PlayerViewpoint.forward * distance);
         }
+        
+        Gizmos.DrawLine(Ctx.ExitPoint, Ctx.GrapplePoint);
     }
     #endif
 }
