@@ -5,19 +5,31 @@ public class PlayerHUD : MonoBehaviour
 {
     [Header("Crosshair")]
     [SerializeField] Animator crosshairAnimator;
-    [SerializeField] private TextMeshProUGUI crosshairMessage;
+    [SerializeField] private TextMeshProUGUI crosshairText;
 
-    public void SetCrosshairText(string message)
+    [Header("Grappling Hook")]
+    [SerializeField] private TextMeshProUGUI ropeRemainingText;
+    [SerializeField] private TextMeshProUGUI grappleDistanceText;
+
+    [Header("Scriptable Object")]
+    [SerializeField] StringVariable _interactMessage;
+    [SerializeField] TriggerVariable _rotateCrosshair;
+    [SerializeField] FloatVariable _ropeRemaining;
+    [SerializeField] FloatVariable _grappleDistance;
+
+    void Start()
     {
-        crosshairMessage.text = message;
+        _interactMessage.AddListener(SetCrosshairText);
+        _rotateCrosshair.AddListener(RotateCrosshair);
+        _ropeRemaining.AddListener(SetRopeRemaining);
+        _grappleDistance.AddListener(SetGrappleDistance);
     }
 
-    public void ClearCrosshairText() => SetCrosshairText("");
+    // Crosshair
+    void SetCrosshairText() => crosshairText.text = _interactMessage.Value;
+    void RotateCrosshair() => crosshairAnimator.SetTrigger("interaction");
 
-    public void RotateCrosshair() => crosshairAnimator.SetTrigger("interaction");
-
-    public bool CrosshairTextEqual(string message)
-    {
-        return crosshairMessage.text == message;
-    }
+    // Ammo
+    void SetRopeRemaining() => ropeRemainingText.text = $"{_ropeRemaining.Value.ToString("0.#")}m";
+    void SetGrappleDistance() => grappleDistanceText.text = $"({_grappleDistance.Value.ToString("0.#")}m)";
 }

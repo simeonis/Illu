@@ -2,7 +2,7 @@
     "name": "PlayerControls",
     "maps": [
         {
-            "name": "Land",
+            "name": "Player",
             "id": "b86d038c-082b-4caa-91a1-c8fc05197238",
             "actions": [
                 {

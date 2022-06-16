@@ -2,64 +2,59 @@ using UnityEngine;
 using Cinemachine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(PlayerMotor))]
+[RequireComponent(typeof(PlayerStateMachine))]
 public class PlayerController : MonoBehaviour
 {
     // Mouse variables
     [Header("Mouse Sensitivity")]
-    [SerializeField, Range(0f, 100f)] private float sensitivity = 50f;
-    [SerializeField] private CinemachineVirtualCamera cinemachineCamera;
+    [SerializeField, Range(0f, 100f)] float _sensitivity = 50f;
+    [SerializeField] CinemachineVirtualCamera _cinemachineCamera;
     
-    private CinemachinePOV cinemachinePOV;
-    private PlayerMotor playerMotor;
-    private InputAction inputMovement;
+    CinemachinePOV _cinemachinePOV;
+    PlayerStateMachine _playerStateMachine;
+    InputAction _inputMovement;
 
     void Start()
     {
         // Motor
-        playerMotor = GetComponent<PlayerMotor>();
-
+        _playerStateMachine = GetComponent<PlayerStateMachine>();
 
         // Camera
-        cinemachinePOV = cinemachineCamera.GetCinemachineComponent<CinemachinePOV>();
-        cinemachinePOV.m_HorizontalAxis.m_MaxSpeed = sensitivity / 100f * 3.2f;
-        cinemachinePOV.m_VerticalAxis.m_MaxSpeed = sensitivity / 100f * 1.2f;
+        _cinemachinePOV = _cinemachineCamera.GetCinemachineComponent<CinemachinePOV>();
+        _cinemachinePOV.m_HorizontalAxis.m_MaxSpeed = _sensitivity / 100f * 3.2f;
+        _cinemachinePOV.m_VerticalAxis.m_MaxSpeed = _sensitivity / 100f * 1.2f;
 
         // Movement
-        inputMovement = InputManager.Instance.playerControls.Land.Movement;
+        _inputMovement = InputManager.Instance.playerControls.Player.Movement;
     }
 
     void OnEnable() 
     {
-        InputManager.Instance.playerControls.Land.Enable();
+        InputManager.Instance.playerControls.Player.Enable();
 
         // Jump
-        InputManager.Instance.playerControls.Land.Jump.started += onJump;
-        InputManager.Instance.playerControls.Land.Jump.canceled += onJump;
+        InputManager.Instance.playerControls.Player.Jump.started += onJump;
+        InputManager.Instance.playerControls.Player.Jump.canceled += onJump;
 
         // Sprint
-        InputManager.Instance.playerControls.Land.Sprint.started += onSprint;
-        InputManager.Instance.playerControls.Land.Sprint.canceled += onSprint;
+        InputManager.Instance.playerControls.Player.Sprint.started += onSprint;
+        InputManager.Instance.playerControls.Player.Sprint.canceled += onSprint;
     }
 
     void OnDisable() 
     {
-        InputManager.Instance.playerControls.Land.Disable();
+        InputManager.Instance.playerControls.Player.Disable();
 
         // Jump
-        InputManager.Instance.playerControls.Land.Jump.started -= onJump;
-        InputManager.Instance.playerControls.Land.Jump.canceled -= onJump;
+        InputManager.Instance.playerControls.Player.Jump.started -= onJump;
+        InputManager.Instance.playerControls.Player.Jump.canceled -= onJump;
 
         // Sprint
-        InputManager.Instance.playerControls.Land.Sprint.started -= onSprint;
-        InputManager.Instance.playerControls.Land.Sprint.canceled -= onSprint;
+        InputManager.Instance.playerControls.Player.Sprint.started -= onSprint;
+        InputManager.Instance.playerControls.Player.Sprint.canceled -= onSprint;
     }
 
-    void Update() {
-        playerMotor.UpdateMovement(
-            inputMovement.ReadValue<Vector2>()
-        );
-    }
-    void onJump(InputAction.CallbackContext context) => playerMotor.SetJump(context.ReadValueAsButton());
-    void onSprint(InputAction.CallbackContext context) => playerMotor.SetSprint(context.ReadValueAsButton());
+    void Update() => _playerStateMachine.SetMovement(_inputMovement.ReadValue<Vector2>());
+    void onJump(InputAction.CallbackContext context) => _playerStateMachine.SetJump(context.ReadValueAsButton());
+    void onSprint(InputAction.CallbackContext context) => _playerStateMachine.SetSprint(context.ReadValueAsButton());
 }

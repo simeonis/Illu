@@ -1,23 +1,25 @@
 using UnityEngine;
 
-public class InertialPlatform : MonoBehaviour
-{
-    void OnCollisionEnter(Collision collision)
+public abstract class InertialPlatform : MonoBehaviour
+{ 
+    void OnTriggerEnter(Collider collider)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collider.gameObject.tag == "Player")
         {
-            Debug.Log(collision.gameObject.name + " got on a rotating bridge.");
-            collision.transform.SetParent(transform);
+            collider.transform.SetParent(transform);
+            PlayerEnter();
         }
     }
 
-    void OnCollisionExit(Collision collision)
+    void OnTriggerExit(Collider collider)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collider.gameObject.tag == "Player")
         {
-            Debug.Log(collision.gameObject.name + " got off a rotating bridge.");
-            collision.transform.SetParent(null);
+            collider.transform.SetParent(null);
+            PlayerExit();
         }
     }
-    
+
+    protected virtual void PlayerEnter() {}
+    protected virtual void PlayerExit() {}
 }
