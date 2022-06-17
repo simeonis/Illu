@@ -12,14 +12,8 @@ public class PlayerSwingState : PlayerBaseState
 
     public override void EnterState()
     {
-        //Ctx.Drag = 0.25f;
+        Ctx.HasLandedFromSwinging = false;
     }
-
-    public override void ExitState()
-    {
-        //Ctx.Drag = Ctx.DefaultDrag;
-    }
-
 
     public override void CheckSwitchState()
     {

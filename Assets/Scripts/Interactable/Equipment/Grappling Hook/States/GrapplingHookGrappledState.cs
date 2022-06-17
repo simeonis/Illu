@@ -3,7 +3,7 @@ using UnityEngine;
 public class GrapplingHookGrappledState : GrapplingHookBaseState
 {
     public GrapplingHookGrappledState(GrapplingHookStateMachine currentContext, GrapplingHookStateFactory grapplingHookStateFactory)
-    : base (currentContext, grapplingHookStateFactory) {}
+    : base(currentContext, grapplingHookStateFactory) { }
 
     Vector3 testPosition = Vector3.zero;
     Vector3 anchorToPlayer = Vector3.zero;
@@ -23,13 +23,14 @@ public class GrapplingHookGrappledState : GrapplingHookBaseState
     {
         // Predict where player (grapple exit point) will be next physics frame
         testPosition = Ctx.ExitPoint + (Ctx.PlayerRigidbody.velocity * Time.fixedDeltaTime);
-        
+
         // Calculate if test position is outside of acceptable rope range
         anchorToPlayer = (testPosition - Ctx.GrapplePoint);
-        if (anchorToPlayer.magnitude > Ctx.GrappleDistance) {
+        if (anchorToPlayer.magnitude > Ctx.GrappleDistance)
+        {
             testPosition = Ctx.GrapplePoint + (anchorToPlayer.normalized * Ctx.GrappleDistance);
         }
-        
+
         // Constrain player
         Ctx.PlayerRigidbody.velocity = (testPosition - Ctx.ExitPoint) / Time.fixedDeltaTime;
     }
@@ -46,11 +47,11 @@ public class GrapplingHookGrappledState : GrapplingHookBaseState
             SwitchState(Factory.GetState<GrapplingHookIdleState>());
     }
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     public override void GizmosState()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(Ctx.GrapplePoint, Ctx.GrappleDistance);
     }
-    #endif
+#endif
 }

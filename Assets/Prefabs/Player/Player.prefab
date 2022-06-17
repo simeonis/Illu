@@ -784,13 +784,43 @@ MonoBehaviour:
     type: 3}
   _orientation: {fileID: 4333712777098963925}
   _playerCamera: {fileID: 4333712776587452003}
-  _walkSpeed: 16
+  _walkSpeed: 18
   _sprintSpeed: 32
-  _drag: 3
-  _airDrag: 0.5
-  _groundResistance: 1
-  _airResistance: 0.5
-  _maxJumpHeight: 1.5
+  _friction: 0.1
+  _dotCurveFactor:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -1
+      value: 2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.07460058
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.08348384
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _maxJumpHeight: 2
   _maxJumpTime: 0.75
   _coyoteTime: 0.15
   _fallThresholdVelocity: 1

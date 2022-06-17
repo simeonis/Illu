@@ -21,45 +21,40 @@ public class PlayerStateMachine : MonoBehaviour
     float _turnSmoothVelocity;
 
     [Header("Locomotion Modifiers")]
-    [SerializeField, Tooltip("Max walk speed")] 
+    [SerializeField, Tooltip("Max walk speed")]
     float _walkSpeed = 4f;
-    [SerializeField, Tooltip("Max sprint speed")] 
+    [SerializeField, Tooltip("Max sprint speed")]
     float _sprintSpeed = 10f;
-    [SerializeField, Tooltip("Max sprint speed")] 
-    float _drag = 3f;
-    [SerializeField, Tooltip("Max sprint speed")] 
-    float _airDrag = 0.5f;
-    float _moveSpeed;
+    [SerializeField, Range(0f, 1f)]
+    float _friction = 0.5f;
+    [SerializeField, Tooltip("Velocity factor based on direction change")]
+    AnimationCurve _dotCurveFactor;
     Vector3 _moveDir;
+    Vector3 _verticalVel;
+    Vector3 _horizontalVel;
+    float _moveSpeed;
+    float _turnFactor;
 
-    [Header("Resistance Modifiers")]
-    [SerializeField, Range(0f, 2f)]
-    float _groundResistance = 1f;
-    [SerializeField, Range(0f, 2f)]
-    float _airResistance = 0.5f;
-    float _resistance = 1f;
-    
     [Header("Jump Modifiers")]
-    [SerializeField, Tooltip("Apex of jump")] 
+    [SerializeField, Tooltip("Apex of jump")]
     float _maxJumpHeight = 1.5f;
     [SerializeField, Tooltip("Time to complete a full jump in seconds")]
     float _maxJumpTime = 0.75f;
-    [SerializeField, Tooltip("Amount of time a player can still jump, even after walking off a platform")] 
+    [SerializeField, Tooltip("Amount of time a player can still jump, even after walking off a platform")]
     float _coyoteTime = 0.15f;
     float _coyoteTimeCounter;
     float _initialJumpVelocity;
 
     [Header("Fall Modifiers")]
-    [SerializeField, Tooltip("Threshold velocity in which the player will count as falling")] 
+    [SerializeField, Tooltip("Threshold velocity in which the player will count as falling")]
     float _fallThresholdVelocity = 1f;
-    [SerializeField, Tooltip("Velocity or lower that ensures a safe landing")] 
+    [SerializeField, Tooltip("Velocity or lower that ensures a safe landing")]
     float _safeVelocity = 20f;
-    [SerializeField, Tooltip("Velocity or higher that causes a harmful landing")] 
+    [SerializeField, Tooltip("Velocity or higher that causes a harmful landing")]
     float _harmfulVelocity = 24f;
-    float _verticalVelocity = 0.0f;
 
     [Header("Ground Modifiers")]
-    [SerializeField, Tooltip("Layers that the player can collide with")] 
+    [SerializeField, Tooltip("Layers that the player can collide with")]
     LayerMask _groundMask;
     [SerializeField, Range(0f, 1f), Tooltip("Range from feet that checks if the player is grounded")]
     float _groundDetection = 0.18f;
@@ -71,69 +66,58 @@ public class PlayerStateMachine : MonoBehaviour
     bool _isSprintPressed = false;
 
     // Other
-    Rigidbody _playerBody;
+    Rigidbody _rigidbody;
     float _gravity;
 
     // Getters & Setters - Grappling Hook
-    public bool IsGrappled { get { return _grapplingHook.IsGrappled; } }
+    public bool IsGrappled { get => _grapplingHook.IsGrappled; }
+    public bool HasLandedFromSwinging { get; set; } = true;
 
     // Getters & Setters - Animation
-    public Animator Animator { get { return _animator; } }
-    public int IsWalkingHash { get; set; }
-    public int IsSprintingHash { get; set; }
-    public int IsJumpingHash { get; set; }
+    public Animator Animator { get => _animator; }
+    public int IsWalkingHash { get => Animator.StringToHash("isWalking"); }
+    public int IsSprintingHash { get => Animator.StringToHash("isSprinting"); }
+    public int IsJumpingHash { get => Animator.StringToHash("isJumping"); }
 
     // Getters & Setters - Locomotion
     public float MoveSpeed { get; set; }
-    public float WalkSpeed { get { return _walkSpeed; } }
-    public float SprintSpeed { get { return _sprintSpeed; } }
-    public float SwingSpeed { get { return _walkSpeed * 0.05f; } }
-    public Vector3 MoveDirection { get { return _moveDir; } }
-
-    // Getters & Setters - Resistance
-    public float Resistance { get { return _resistance; } set { _resistance = value; } }
-    public float GroundResistance { get { return _groundResistance; } }
-    public float AirResistance { get { return _airResistance; } }
+    public float WalkSpeed { get => _walkSpeed; }
+    public float SprintSpeed { get => _sprintSpeed; }
+    public Vector3 MoveDirection { get => _moveDir; }
 
     // Getters & Setters - Jump
-    public float InitialJumpVelocity { get { return _initialJumpVelocity; } }
-    public float CoyoteTime { get { return _coyoteTime; } }
-    public float CoyoteTimeCounter { get { return _coyoteTimeCounter; } set { _coyoteTimeCounter = value; } }
+    public float InitialJumpVelocity { get => _initialJumpVelocity; }
+    public float CoyoteTime { get => _coyoteTime; }
+    public float CoyoteTimeCounter { get => _coyoteTimeCounter; set => _coyoteTimeCounter = value; }
 
     // Getters & Setters - Fall
-    public float FallThresholdVelocity { get { return _fallThresholdVelocity; } }
-    public float SafeVelocity { get { return _safeVelocity; } }
-    public float HarmfulVelocity { get { return _harmfulVelocity; } }
-    public float VerticalVelocity { get { return _verticalVelocity; } }
+    public float FallThresholdVelocity { get => _fallThresholdVelocity; }
+    public float SafeVelocity { get => _safeVelocity; }
+    public float HarmfulVelocity { get => _harmfulVelocity; }
 
     // Getters & Setters - Ground
-    public bool IsGrounded { get { return _isGrounded; } }
+    public bool IsGrounded { get => _isGrounded; }
 
     // Getters & Setters - Player Input
-    public bool IsMovementPressed { get { return _isMovementPressed; } }
-    public bool IsJumpPressed { get { return _isJumpPressed; } set { _isJumpPressed = false; } }
-    public bool IsSprintPressed { get { return _isSprintPressed; } }
+    public bool IsMovementPressed { get => _isMovementPressed; }
+    public bool IsJumpPressed { get => _isJumpPressed; set => _isJumpPressed = false; }
+    public bool IsSprintPressed { get => _isSprintPressed; }
 
     // Getters & Setters - Other
-    public Rigidbody PlayerBody { get { return _playerBody; } }
+    public Rigidbody PlayerRigidbody { get => _rigidbody; }
 
     // Getters & Setters - State
-    public PlayerBaseState CurrentState { get { return _currentState; } set { _currentState = value; } }
+    public PlayerBaseState CurrentState { get => _currentState; set => _currentState = value; }
 
     void Start()
     {
-        // Rigidbody
-        _playerBody = GetComponent<Rigidbody>();
+        // Find rigidbody
+        _rigidbody = GetComponent<Rigidbody>();
 
         // Calculate Gravity + Intial Jump Velocity
         float timeToApex = _maxJumpTime * 0.5f;
         _gravity = (-2 * _maxJumpHeight) / Mathf.Pow(timeToApex, 2);
         _initialJumpVelocity = (2 * _maxJumpHeight) / timeToApex;
-
-        // Animation Hash (Increases Performance)
-        IsWalkingHash = Animator.StringToHash("isWalking");
-        IsSprintingHash = Animator.StringToHash("isSprinting");
-        IsJumpingHash = Animator.StringToHash("isJumping");
 
         // State
         _states = new PlayerStateFactory(this);
@@ -153,46 +137,47 @@ public class PlayerStateMachine : MonoBehaviour
     {
         Gravity();
         Locomotion();
-        _verticalVelocity = Vector3.Dot(_playerBody.velocity, transform.up);
         _currentState.FixedUpdateStates();
     }
 
     void Gravity()
     {
-        _playerBody.AddForce(transform.up * _gravity, ForceMode.Acceleration);
+        _rigidbody.AddForce(transform.up * _gravity, ForceMode.Acceleration);
     }
 
-    //Vector3 targetDirection = Vector3.zero;
     void Locomotion()
     {
-        // float velDot = Vector3.Dot(MoveDirection, targetDirection);
-        // float acceleration = Acceleration * AccelerationDotFactor.Evaluate(velDot);
-        // targetDirection = Vector3.MoveTowards(targetDirection, MoveDirection * MoveSpeed, acceleration * Time.fixedDeltaTime);
-        // Vector3 currVel = _playerBody.velocity - Vector3.Project(_playerBody.velocity, transform.up);
-        // Vector3 targetAcceleration = (targetDirection - currVel) / Time.fixedDeltaTime;
-        // targetAcceleration = Vector3.ClampMagnitude(targetAcceleration, MaxAcceleration);
-        // PlayerBody.AddForce(targetAcceleration, ForceMode.Acceleration);
+        // Calculate the dot product between the current and target velocity,
+        // then evaluate it against the turning animation curve, "dotCurveFactor".
+        // This helps turning feel snappier as the player no longer has to slow down, then speed up
+        _turnFactor = _dotCurveFactor.Evaluate(Vector3.Dot(MoveDirection, _rigidbody.velocity));
 
-        _playerBody.AddForce(MoveDirection * MoveSpeed * _resistance, ForceMode.Acceleration);
-        
-        // Player's velocity (excluding vertical)
-        Vector3 currentVelocity = _playerBody.velocity - Vector3.Project(_playerBody.velocity, transform.up);
-        
-        // Friction
-        _playerBody.AddForce(-currentVelocity * (IsGrounded ? _drag : _airDrag), ForceMode.Acceleration);
+        // Apply movement force
+        _rigidbody.AddForce(MoveDirection * MoveSpeed * _turnFactor, ForceMode.Acceleration);
+
+        // Split vertical & horizontal velocity
+        _verticalVel = Vector3.Scale(_rigidbody.velocity, transform.up);
+        _horizontalVel = (_rigidbody.velocity - _verticalVel);
+
+        // Apply friction ONLY to horizontal velocity (i.e., ignore jump + gravity)
+        // Note: While swinging, friction is non-existent (up until the player lands)
+        _horizontalVel *= Mathf.Pow(HasLandedFromSwinging ? _friction : 1f, Time.deltaTime);
+
+        // Re-combine vertical & horizontal velocity
+        _rigidbody.velocity = _verticalVel + _horizontalVel;
     }
 
     #if UNITY_EDITOR
-    [Header("Debug")] 
+    [Header("Debug")]
     [SerializeField] bool enable = false;
     void OnDrawGizmos()
     {
-        if (Application.isPlaying && enable) 
+        if (Application.isPlaying && enable)
             _currentState.GizmosState();
     }
     #endif
 
-    // PLAYER INPUT
+    // SECTION: PLAYER INPUT
     public void SetMovement(Vector2 input)
     {
         _isMovementPressed = input.x != 0 || input.y != 0;

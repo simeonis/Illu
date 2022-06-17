@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 3622.9736, g: 2728.4238, b: 2527.0312, a: 1}
+  m_IndirectSpecularColor: {r: 3622.9736, g: 2728.4473, b: 2527.0625, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -14645,98 +14645,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
         type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[1].time
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[2].time
+      propertyPath: _airResistance
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[0].value
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[1].value
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[2].value
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[0].inSlope
-      value: -2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[1].inSlope
-      value: -1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[2].inSlope
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[0].outSlope
-      value: -2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[1].inWeight
-      value: 0.33333334
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[1].outSlope
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[2].inWeight
-      value: 0.33333334
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[2].outSlope
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[0].outWeight
-      value: 0.33333334
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[1].outWeight
-      value: 0.33333334
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[0].tangentMode
-      value: 34
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[1].tangentMode
-      value: 65
-      objectReference: {fileID: 0}
-    - target: {fileID: 3472247584241026695, guid: e6624e1425d16354ca9e4d65cfb0be68,
-        type: 3}
-      propertyPath: accelerationDotFactor.m_Curve.Array.data[2].tangentMode
-      value: 34
       objectReference: {fileID: 0}
     - target: {fileID: 3643799090460603450, guid: e6624e1425d16354ca9e4d65cfb0be68,
         type: 3}
