@@ -79,7 +79,9 @@ MonoBehaviour:
   orientation: {fileID: 7628987125707889793}
   playerMotor: {fileID: 7628987124167174141}
   playerController: {fileID: 7628987124167174140}
-  playerCamera: {fileID: 7628987124054223156}
+  gameObjectsToTurnOff:
+  - {fileID: 7628987124054223152}
+  - {fileID: 7451966884584178540}
 --- !u!114 &1338371121765410789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,15 +223,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c39096a55062194890f233743969bbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!4 &7628987124054223159 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4333712776587452003, guid: e6624e1425d16354ca9e4d65cfb0be68,
+--- !u!1 &7451966884584178540 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3643799090460603448, guid: e6624e1425d16354ca9e4d65cfb0be68,
     type: 3}
   m_PrefabInstance: {fileID: 6195804723238860628}
   m_PrefabAsset: {fileID: 0}
---- !u!20 &7628987124054223156 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 4333712776587452000, guid: e6624e1425d16354ca9e4d65cfb0be68,
+--- !u!1 &7628987124054223152 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4333712776587452004, guid: e6624e1425d16354ca9e4d65cfb0be68,
+    type: 3}
+  m_PrefabInstance: {fileID: 6195804723238860628}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7628987124054223159 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4333712776587452003, guid: e6624e1425d16354ca9e4d65cfb0be68,
     type: 3}
   m_PrefabInstance: {fileID: 6195804723238860628}
   m_PrefabAsset: {fileID: 0}

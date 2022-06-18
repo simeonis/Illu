@@ -292,7 +292,7 @@ namespace Illu.Networking
             //Holds all the different Transports for different connection types
             var switchTransport = (SwitchTransport)transport;
 
-            if (false)
+            if (isLanConnection.Value)  // Switched this back  !!
             {
                 switchTransport.PickTransport(0);
                 //HostAddress = "localhost";

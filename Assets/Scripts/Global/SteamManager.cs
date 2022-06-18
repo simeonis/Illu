@@ -41,11 +41,10 @@ namespace Illu.Steam
 
         private SteamUserRecord _steamLobbyClientMember;
 
-        void Start()
-        {
-            SteamAppID = new CGameID(uint.Parse(GetComponent<FizzySteamworks>().SteamAppID));
-        }
 
+
+        void Start() => SteamAppID = new CGameID(uint.Parse(GetComponent<FizzySteamworks>().SteamAppID));
+        
         //Steam lobby create attempt -> hostLobby
         // stean lobby created _> null
         // steam lobby entered -> null
@@ -159,6 +158,7 @@ namespace Illu.Steam
                 GameManager.Instance.TriggerEvent(GameManager.Event.SteamLobbyInvited);
                 SteamUserRecord steamFriend = GetSteamFriend(new CSteamID(callback.m_ulSteamIDUser));
                 UIConsole.Log("Invite received from: " + steamFriend.name);
+                Debug.Log("Invite received from: " + steamFriend.name);
                 //SteamUI.GenerateInvite(new CSteamID(callback.m_ulSteamIDLobby), steamFriend);
                 onInviteReceived?.Invoke(new CSteamID(callback.m_ulSteamIDLobby), steamFriend);
             }
@@ -297,16 +297,12 @@ namespace Illu.Steam
         }
 
         // HOST invites CLIENT
-        public void InviteToLobby(CSteamID friendID)
-        {
-            SteamMatchmaking.InviteUserToLobby(lobbyID, friendID);
-        }
+        public void InviteToLobby(CSteamID friendID) => SteamMatchmaking.InviteUserToLobby(lobbyID, friendID);
+        
 
         // CLIENT joins HOST via invite
-        public void JoinSteamLobby(CSteamID lobbyID)
-        {
-            SteamMatchmaking.JoinLobby(lobbyID);
-        }
+        public void JoinSteamLobby(CSteamID lobbyID) => SteamMatchmaking.JoinLobby(lobbyID);
+        
 
         // HOST kicks CLIENT
         public void KickUser(CSteamID steamID)

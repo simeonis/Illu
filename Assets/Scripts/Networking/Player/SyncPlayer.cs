@@ -1,5 +1,6 @@
 using UnityEngine;
 using Mirror;
+using System.Collections.Generic;
 
 // //////////////////////////////////////////////////////////////////////////
 // ///Sync Player
@@ -57,7 +58,10 @@ public class SyncPlayer : NetworkBehaviour
     float lastClientSendTime;
     [SerializeField] PlayerMotor playerMotor;
     [SerializeField] PlayerController playerController;
-    [SerializeField] Camera playerCamera;
+
+    [Header("Things To Turn Off")]
+
+    [SerializeField] List<GameObject> gameObjectsToTurnOff = new List<GameObject>();
 
     private string _netID;
     private new string name;
@@ -80,8 +84,11 @@ public class SyncPlayer : NetworkBehaviour
     {
         base.OnStartAuthority();
         //Enable everything on the active player 
-        playerCamera.enabled = true;
-        playerCamera.GetComponent<AudioListener>().enabled = true;
+
+
+
+
+        ToggleOnOFF(true);
         playerController.enabled = true;
 
         playerController.playerJumped += playerJumped;
@@ -92,12 +99,20 @@ public class SyncPlayer : NetworkBehaviour
         Debug.Log("OnStartAuthority " + name + " " + _netID);
     }
 
+
     void Awake()
     {
         //Disable when script starts for both players
-        playerCamera.enabled = false;
-        playerCamera.GetComponent<AudioListener>().enabled = false;
+        ToggleOnOFF(false);
         playerController.enabled = false;
+    }
+
+    void ToggleOnOFF(bool state)
+    {
+        for (int i = 0; i < gameObjectsToTurnOff.Count; i++)
+        {
+            gameObjectsToTurnOff[i].SetActive(state);
+        }
     }
 
     void regJMP()

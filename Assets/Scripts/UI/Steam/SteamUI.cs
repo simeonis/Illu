@@ -8,17 +8,18 @@ namespace Illu.Steam
     public class SteamUI : MonoBehaviour
     {
         [Header("Target Parent")]
-        [SerializeField] private RectTransform friendList;
-        [SerializeField] private RectTransform inviteList;
-        [SerializeField] private RectTransform lobbyHost;
-        [SerializeField] private RectTransform lobbyClient;
+        [SerializeField] RectTransform friendList;
+        [SerializeField] RectTransform inviteList;
+        [SerializeField] RectTransform lobbyHost;
+        [SerializeField] RectTransform lobbyClient;
+        
 
         [Header("Prefabs")]
-        [SerializeField] private GameObject steamStatusTitlePrefab;
-        [SerializeField] private GameObject steamFriendListPrefab;
-        [SerializeField] private GameObject steamLobbyPrefab;
-        [SerializeField] private GameObject steamEmptyLobbyPrefab;
-        [SerializeField] private GameObject steamInvitePrefab;
+        [SerializeField] GameObject steamStatusTitlePrefab;
+        [SerializeField] GameObject steamFriendListPrefab;
+        [SerializeField] GameObject steamLobbyPrefab;
+        [SerializeField] GameObject steamEmptyLobbyPrefab;
+        [SerializeField] GameObject steamInvitePrefab;
 
         // Make a Enum
         List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
@@ -55,6 +56,7 @@ namespace Illu.Steam
         // Invited To lobby
         void GenerateInvite(CSteamID lobbyID, SteamUserRecord steamFriend)
         {
+            Debug.Log("steamIDstring " + steamFriend.id);
             string steamIDstring = steamFriend.id.ToString();
 
             // Invite exists
