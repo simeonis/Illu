@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class PlayerStateMachine : MonoBehaviour
 {
@@ -10,21 +11,27 @@ public class PlayerStateMachine : MonoBehaviour
 
     [Header("Animation Modifiers")]
     [SerializeField] Animator _animator;
-    [SerializeField, Tooltip("Player \"Landing Flat\" animation clip")]
-    AnimationClip _landingFlatAnimationClip;
-    [SerializeField, Tooltip("Player \"Stand Up\" animation clip")]
-    AnimationClip _standUpAnimationClip;
+    [SerializeField] Rig _headRig;
+    [SerializeField] Rig _rightArmRig;
+    [SerializeField] Transform _headTarget;
+    [SerializeField] Transform _rightArmTarget;
 
     [Header("Rotation Modifiers")]
-    [SerializeField] Transform _orientation;
     [SerializeField] Transform _playerCamera;
+    [SerializeField] Transform _orientation;
+    [SerializeField] Transform _body;
+    [SerializeField] Rigidbody _rigidbody;
     float _turnSmoothVelocity;
 
     [Header("Locomotion Modifiers")]
+    [SerializeField, Tooltip("Max total speed")]
+    float _maxSpeed = 48f;
     [SerializeField, Tooltip("Max walk speed")]
-    float _walkSpeed = 4f;
+    float _walkSpeed = 15f;
     [SerializeField, Tooltip("Max sprint speed")]
-    float _sprintSpeed = 10f;
+    float _sprintSpeed = 50f;
+    [SerializeField, Tooltip("Max swing speed")]
+    float _swingSpeed = 20f;
     [SerializeField, Range(0f, 1f)]
     float _friction = 0.5f;
     [SerializeField, Tooltip("Velocity factor based on direction change")]
@@ -66,23 +73,35 @@ public class PlayerStateMachine : MonoBehaviour
     bool _isSprintPressed = false;
 
     // Other
-    Rigidbody _rigidbody;
     float _gravity;
 
     // Getters & Setters - Grappling Hook
     public bool IsGrappled { get => _grapplingHook.IsGrappled; }
+    public Vector3 GrapplePoint { get => _grapplingHook.GrapplePoint; }
+    public Vector3 ExitPoint { get => _grapplingHook.ExitPoint; }
     public bool HasLandedFromSwinging { get; set; } = true;
 
     // Getters & Setters - Animation
     public Animator Animator { get => _animator; }
+    public int IsGroundedHash { get => Animator.StringToHash("isGrounded"); }
     public int IsWalkingHash { get => Animator.StringToHash("isWalking"); }
     public int IsSprintingHash { get => Animator.StringToHash("isSprinting"); }
     public int IsJumpingHash { get => Animator.StringToHash("isJumping"); }
+    public int IsSwingingHash { get => Animator.StringToHash("isSwinging"); }
+    public int MoveSpeedHash { get => Animator.StringToHash("moveSpeed"); }
+    public Rig RightArmRig { get => _rightArmRig; }
+    public Transform RightArmTarget { get => _rightArmTarget; }
+
+    // Getters & Setters - Rotation
+    public Transform Viewpoint { get => _playerCamera; }
+    public Transform Orientation { get => _orientation; }
+    public Transform Body { get => _body; }
 
     // Getters & Setters - Locomotion
     public float MoveSpeed { get; set; }
     public float WalkSpeed { get => _walkSpeed; }
     public float SprintSpeed { get => _sprintSpeed; }
+    public float SwingSpeed { get => _swingSpeed; }
     public Vector3 MoveDirection { get => _moveDir; }
 
     // Getters & Setters - Jump
@@ -111,13 +130,14 @@ public class PlayerStateMachine : MonoBehaviour
 
     void Start()
     {
-        // Find rigidbody
-        _rigidbody = GetComponent<Rigidbody>();
-
         // Calculate Gravity + Intial Jump Velocity
         float timeToApex = _maxJumpTime * 0.5f;
         _gravity = (-2 * _maxJumpHeight) / Mathf.Pow(timeToApex, 2);
         _initialJumpVelocity = (2 * _maxJumpHeight) / timeToApex;
+
+        // Animation
+        _headRig.weight = 1f;
+        _rightArmRig.weight = 0f;
 
         // State
         _states = new PlayerStateFactory(this);
@@ -125,10 +145,24 @@ public class PlayerStateMachine : MonoBehaviour
         _currentState.EnterStates();
     }
 
+    RaycastHit _cameraMousePos;
     void Update()
     {
-        _isGrounded = Physics.CheckSphere(transform.position, _groundDetection, _groundMask);
+        // Logic Checks
+        _isGrounded = Physics.CheckSphere(_body.position, _groundDetection, _groundMask);
         if (!_isGrounded && _coyoteTimeCounter >= 0) _coyoteTimeCounter -= Time.deltaTime;
+        
+        // Grapple Arm Animation
+        RightArmRig.weight = IsGrappled ? 1f : 0f;
+        RightArmTarget.position = GrapplePoint;
+        RightArmTarget.right = (GrapplePoint - ExitPoint).normalized;
+        
+        // Head Aim Animation
+        if (Physics.Raycast(_playerCamera.position, _playerCamera.forward, out _cameraMousePos, float.MaxValue))
+            _headTarget.position = _cameraMousePos.point;
+        else
+            _headTarget.position = _playerCamera.position + (_playerCamera.forward * float.MaxValue);
+
         _currentState.UpdateStates();
         _currentState.CheckSwitchStates();
     }
@@ -150,21 +184,24 @@ public class PlayerStateMachine : MonoBehaviour
         // Calculate the dot product between the current and target velocity,
         // then evaluate it against the turning animation curve, "dotCurveFactor".
         // This helps turning feel snappier as the player no longer has to slow down, then speed up
-        _turnFactor = _dotCurveFactor.Evaluate(Vector3.Dot(MoveDirection, _rigidbody.velocity));
+        _turnFactor = _dotCurveFactor.Evaluate(Vector3.Dot(MoveDirection, _rigidbody.velocity.normalized));
 
         // Apply movement force
         _rigidbody.AddForce(MoveDirection * MoveSpeed * _turnFactor, ForceMode.Acceleration);
 
         // Split vertical & horizontal velocity
-        _verticalVel = Vector3.Scale(_rigidbody.velocity, transform.up);
-        _horizontalVel = (_rigidbody.velocity - _verticalVel);
+        _horizontalVel = _rigidbody.velocity - Vector3.Project(_rigidbody.velocity, transform.up);
+        _verticalVel = (_rigidbody.velocity - _horizontalVel);
+
+        // Adjust the player's animation from walking to sprinting gradually (and vice versa)
+        _animator.SetFloat(MoveSpeedHash, _horizontalVel.magnitude);
 
         // Apply friction ONLY to horizontal velocity (i.e., ignore jump + gravity)
         // Note: While swinging, friction is non-existent (up until the player lands)
-        _horizontalVel *= Mathf.Pow(HasLandedFromSwinging ? _friction : 1f, Time.deltaTime);
+        _horizontalVel *= Mathf.Pow(HasLandedFromSwinging ? _friction : 0.95f, Time.deltaTime);
 
-        // Re-combine vertical & horizontal velocity
-        _rigidbody.velocity = _verticalVel + _horizontalVel;
+        // Re-combine vertical & horizontal velocity & limit max speed
+        _rigidbody.velocity = Vector3.ClampMagnitude(_horizontalVel + _verticalVel, _maxSpeed);
     }
 
     #if UNITY_EDITOR
@@ -189,7 +226,7 @@ public class PlayerStateMachine : MonoBehaviour
             // Visual explanation: https://youtu.be/4HpC--2iowE?t=762
             float targetAngle = Mathf.Atan2(input.x, input.y) * Mathf.Rad2Deg + _playerCamera.localEulerAngles.y;
             float smoothAngle = Mathf.SmoothDampAngle(_orientation.localEulerAngles.y, targetAngle, ref _turnSmoothVelocity, 0.1f);
-            _orientation.rotation = transform.rotation * Quaternion.Euler(0f, smoothAngle, 0f);
+            if (HasLandedFromSwinging) _orientation.rotation = transform.rotation * Quaternion.Euler(0f, smoothAngle, 0f);
             _moveDir = Quaternion.Euler(transform.up * targetAngle) * transform.forward;
         }
     }

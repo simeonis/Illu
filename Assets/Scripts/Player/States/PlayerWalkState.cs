@@ -9,7 +9,7 @@ public class PlayerWalkState : PlayerBaseState
 
     public override void EnterState()
     {
-        Ctx.MoveSpeed = Ctx.WalkSpeed;
+        Ctx.MoveSpeed = (SuperState is PlayerSwingState) ? Ctx.SwingSpeed : Ctx.WalkSpeed;
         Ctx.Animator.SetBool(Ctx.IsWalkingHash, true);
         Ctx.Animator.SetBool(Ctx.IsSprintingHash, false);
     }

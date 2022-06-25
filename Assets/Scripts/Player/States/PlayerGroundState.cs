@@ -14,8 +14,16 @@ public class PlayerGroundState : PlayerBaseState
     public override void EnterState()
     {
         Debug.Log("Enter Ground State");
+        Ctx.Animator.SetBool(Ctx.IsGroundedHash, true);
+        
         Ctx.HasLandedFromSwinging = true;
         Ctx.CoyoteTimeCounter = Ctx.CoyoteTime;
+        Ctx.Body.localRotation = Quaternion.identity;
+    }
+
+    public override void ExitState()
+    {
+        Ctx.Animator.SetBool(Ctx.IsGroundedHash, false);
     }
 
     public override void CheckSwitchState()
