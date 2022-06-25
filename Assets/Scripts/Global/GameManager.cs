@@ -94,10 +94,9 @@ public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
       TriggerEvent(requestedEvent);
     }
 
-    public void AddListener(Event name, UnityAction listener)
-    {
-         _events[name].AddListener(listener);
-    }
+    public void AddListener(Event name, UnityAction listener) => _events[name].AddListener(listener);
+    public void RemoveListener(Event name, UnityAction listener) => _events[name].RemoveListener(listener);
+    
 
     public void Resume()
     {

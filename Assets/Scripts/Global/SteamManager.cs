@@ -153,15 +153,16 @@ namespace Illu.Steam
         // CLIENT invited by HOST
         private void OnLobbyInvited(LobbyInvite_t callback)
         {
-            if (callback.m_ulGameID == SteamAppID.m_GameID)
-            {
+            // Debug.Log("Invite " + callback.m_ulGameID + " " + SteamAppID.m_GameID);
+            // if (callback.m_ulGameID == SteamAppID.m_GameID)
+            // {
                 GameManager.Instance.TriggerEvent(GameManager.Event.SteamLobbyInvited);
                 SteamUserRecord steamFriend = GetSteamFriend(new CSteamID(callback.m_ulSteamIDUser));
                 UIConsole.Log("Invite received from: " + steamFriend.name);
                 Debug.Log("Invite received from: " + steamFriend.name);
                 //SteamUI.GenerateInvite(new CSteamID(callback.m_ulSteamIDLobby), steamFriend);
                 onInviteReceived?.Invoke(new CSteamID(callback.m_ulSteamIDLobby), steamFriend);
-            }
+            // }
         }
 
         // CLIENT attemps to join via steam or steam invite

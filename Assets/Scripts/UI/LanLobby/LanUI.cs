@@ -38,8 +38,8 @@ public class LanUI : NetworkBehaviour
     void OnDisable()
     {
         // remove listener 
-        // GameManager.Instance.AddListener(GameManager.Event.ClientConnected, OnClientConnect);
-        // GameManager.Instance.AddListener(GameManager.Event.ClientDisconnected, OnClientDisconnect);
+        GameManager.Instance.RemoveListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
+        GameManager.Instance.RemoveListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
 
         ReadyUpSystem.Instance.OneReady.RemoveListener(setPlayerOneStatus);
         ReadyUpSystem.Instance.TwoReady.RemoveListener(setPlayerTwoStatus);
@@ -55,8 +55,11 @@ public class LanUI : NetworkBehaviour
 
     void OnClientConnect()
     {
-        Debug.Log("SOnClientConnect");
-        GenerateLobbyMember(new LanPlayer("Player2", 1), false);
+         if(isLanConnection.Value)
+        {
+            Debug.Log("SOnClientConnect");
+            GenerateLobbyMember(new LanPlayer("Player2", 1), false);
+        }
     }
 
     override public void OnStartClient()
@@ -76,7 +79,7 @@ public class LanUI : NetworkBehaviour
 
     void DestroyLobbyClient()
     {
-        if (lobbyClientTarget.childCount > 0)
+        if (isLanConnection.Value && lobbyClientTarget.childCount > 0)
         {
             foreach (Transform child in lobbyClientTarget) Destroy(child.gameObject);
         }
@@ -95,7 +98,7 @@ public class LanUI : NetworkBehaviour
 
     void SetIndicatorOnPlayerCard(bool status, int caller)
     {
-        if (caller < playerCards.Count)
+        if (isLanConnection.Value && caller < playerCards.Count)
             playerCards[caller].SetIndicator(status);
     }
 }
