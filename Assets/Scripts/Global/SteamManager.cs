@@ -301,8 +301,7 @@ namespace Illu.Steam
 
         // HOST invites CLIENT
         public void InviteToLobby(CSteamID friendID) => SteamMatchmaking.InviteUserToLobby(lobbyID, friendID);
-        
-
+    
         // CLIENT joins HOST via invite
         public void JoinSteamLobby(CSteamID lobbyID) => SteamMatchmaking.JoinLobby(lobbyID);
         

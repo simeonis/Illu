@@ -20,8 +20,6 @@ namespace Illu.Steam
         [SerializeField] GameObject steamEmptyLobbyPrefab;
         [SerializeField] GameObject steamInvitePrefab;
 
-        [SerializeField] BoolVariable isLanConnection;
-
         // Make a Enum
         List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
         Dictionary<string, GameObject> _invites = new Dictionary<string, GameObject>();
@@ -50,13 +48,13 @@ namespace Illu.Steam
             SteamManager.Instance.OnLobbyClientRemoved.RemoveListener(RemoveLobbyClient);
 
             ReadyUpSystem.Instance.OneReady.RemoveListener(setPlayerOneStatus);
-            ReadyUpSystem.Instance.TwoReady.RemoveListener(setPlayerTwoStatus);
+            ReadyUpSystem.Instance.TwoReady.RemoveListener(setPlayerTwoStatus); 
         }
 
         override public void OnStartClient()
         {
             Debug.Log("OnStartClient Steam UI");
-            if(!isLanConnection.Value && !isServer)
+            if(!Networking.NetworkManager.Instance.isLanConnection && !isServer)
             {
                 Debug.Log("OnClientConnect not on LAN");
                 Debug.Log("SteamManager.Instance.steamLobbyClient name " + SteamManager.Instance.steamLobbyClient.name);

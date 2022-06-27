@@ -22,12 +22,8 @@ public class LanUI : NetworkBehaviour
 
     List<LanLobbyMember> playerCards = new List<LanLobbyMember>();
 
-    [SerializeField] BoolVariable isLanConnection;
-
-
     void OnEnable()
     {
-        Debug.Log("LanUI has been Enabled");
         GameManager.Instance.AddListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
         GameManager.Instance.AddListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
 
@@ -47,7 +43,7 @@ public class LanUI : NetworkBehaviour
 
     override public void OnStartServer() 
     {
-        if(isLanConnection.Value)
+        if(Illu.Networking.NetworkManager.Instance.isLanConnection)
         {
             GenerateLobbyMember(new LanPlayer("Player1", 0), true);
         }
@@ -55,11 +51,11 @@ public class LanUI : NetworkBehaviour
 
     void OnClientConnect()
     {
-         if(isLanConnection.Value)
-        {
+         if(Illu.Networking.NetworkManager.Instance.isLanConnection)
+         {
             Debug.Log("SOnClientConnect");
             GenerateLobbyMember(new LanPlayer("Player2", 1), false);
-        }
+         }
     }
 
     override public void OnStartClient()
@@ -67,7 +63,7 @@ public class LanUI : NetworkBehaviour
         base.OnStartClient();
         Debug.Log("OnStartClient");
 
-        if(isLanConnection.Value && !isServer)
+        if(Illu.Networking.NetworkManager.Instance.isLanConnection && !isServer)
         {
             Debug.Log("OnCLientConnect and Is Lan");
             GenerateLobbyMember(new LanPlayer("Player1", 0), true);
@@ -79,7 +75,7 @@ public class LanUI : NetworkBehaviour
 
     void DestroyLobbyClient()
     {
-        if (isLanConnection.Value && lobbyClientTarget.childCount > 0)
+        if (Illu.Networking.NetworkManager.Instance.isLanConnection && lobbyClientTarget.childCount > 0)
         {
             foreach (Transform child in lobbyClientTarget) Destroy(child.gameObject);
         }
@@ -98,7 +94,7 @@ public class LanUI : NetworkBehaviour
 
     void SetIndicatorOnPlayerCard(bool status, int caller)
     {
-        if (isLanConnection.Value && caller < playerCards.Count)
+        if (Illu.Networking.NetworkManager.Instance.isLanConnection && caller < playerCards.Count)
             playerCards[caller].SetIndicator(status);
     }
 }

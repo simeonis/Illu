@@ -30,7 +30,7 @@ namespace Illu.Networking
         public static event Action<NetworkConnection> OnServerReadied;
 
         [HideInInspector] public static string HostAddress = "";
-        [SerializeField] private BoolVariable isLanConnection;
+        [HideInInspector] public bool isLanConnection = false;
 
         public static NetworkManager Instance { get; private set; }
 
@@ -46,8 +46,9 @@ namespace Illu.Networking
             // ReadyUpSystem = _readUpSystem;
             switchTransport = (SwitchTransport)transport;
 
-            isLanConnection.Value = false;
-            isLanConnection.AddListener(SetConnectionType);
+            isLanConnection = false;
+            //change this to a call
+            //isLanConnection.AddListener(SetConnectionType);
 
             GameManager.Instance.AddListener(GameManager.Event.ServerStart,     StartHost);
             GameManager.Instance.AddListener(GameManager.Event.ClientStart,     StartClient);
@@ -78,8 +79,6 @@ namespace Illu.Networking
             spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
             NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
             UIConsole.Log("Server Started");
-
-            
         }
 
         // SERVER detects new connection
@@ -254,18 +253,19 @@ namespace Illu.Networking
         //
         //  Entry point for starting networking 
         //
-        public void SetConnectionType()
+        public void SetConnectionType(bool isLan)
         {
-            if (isLanConnection.Value)
+            isLanConnection = isLan;
+            if (isLan)
             {
                 switchTransport.PickTransport(1);
                 HostAddress = "localhost";
-                Illu.Steam.SteamManager.Instance.LobbyLeft();
+                Steam.SteamManager.Instance.LobbyLeft();
             }
             else
             {
                 switchTransport.PickTransport(0);
-                Illu.Steam.SteamManager.Instance.HostLobby();
+                Steam.SteamManager.Instance.HostLobby();
             }
         }
 
@@ -277,13 +277,13 @@ namespace Illu.Networking
                 StopHost();
 
             StartHost();
-            if (isLanConnection.Value)
+            if (isLanConnection)
             {
-                Illu.Steam.SteamManager.Instance.LobbyLeft();
+                Steam.SteamManager.Instance.LobbyLeft();
             }
             else
             {
-                Illu.Steam.SteamManager.Instance.HostLobby();
+                Steam.SteamManager.Instance.HostLobby();
             }
         }
 
@@ -295,7 +295,7 @@ namespace Illu.Networking
             //Holds all the different Transports for different connection types
             var switchTransport = (SwitchTransport)transport;
 
-            if (isLanConnection.Value)  // Switched this back  !!
+            if (!isLanConnection)
             {
                 switchTransport.PickTransport(0);
                 //HostAddress = "localhost";

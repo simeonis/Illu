@@ -91,8 +91,8 @@ public class SyncPlayer : NetworkBehaviour
         ToggleOnOFF(true);
         playerController.enabled = true;
 
-        playerController.playerJumped += playerJumped;
-        playerController.playerSprint += playerSprint;
+        //playerController.playerJumped += playerJumped;
+        //playerController.playerSprint += playerSprint;
 
         shouldSend = true;
 
@@ -139,9 +139,11 @@ public class SyncPlayer : NetworkBehaviour
             //     }
             //     lastClientSendTime = Time.time;
             // }
-            CMDSendDir(playerController.dir);
+
+            //TODO:: bring this back!!!
+            //CMDSendDir(playerController.dir);
             Debug.Log("Sending dir " + dir.x + " " + dir.y);
-        }
+        } 
         else
         {
             // Debug.Log("Here ");
@@ -281,11 +283,11 @@ public class SyncPlayer : NetworkBehaviour
 
     //Handle Sending Crouch, Jump, Sprint
     //--------------------------------------------------------------
-    private void playerSprint(object sender, BoolEventArgs e)
-    {
-        if (shouldSend)
-            CmdHandleSprint(e.state);
-    }
+    //private void playerSprint(object sender, BoolEventArgs e)
+    //{
+    //    if (shouldSend)
+    //        CmdHandleSprint(e.state);
+    //}
 
     [Command(channel = Channels.Unreliable)]
     private void CmdHandleSprint(bool SprintState) { RpcSprint(SprintState); }
@@ -293,11 +295,11 @@ public class SyncPlayer : NetworkBehaviour
     [ClientRpc]
     private void RpcSprint(bool SprintState) { playerMotor.SetSprint(SprintState); }
 
-    private void playerJumped(object sender, BoolEventArgs e)
-    {
-        if (shouldSend)
-            CmdSendJump(e.state);
-    }
+    //private void playerJumped(object sender, BoolEventArgs e)
+    //{
+    //    if (shouldSend)
+    //        CmdSendJump(e.state);
+    //}
 
 
     [Command(channel = Channels.Unreliable)]
