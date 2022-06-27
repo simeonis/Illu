@@ -1,30 +1,32 @@
 using System.Collections.Generic;
+using System;
 
 public class GrapplingHookStateFactory
 {
     GrapplingHookStateMachine _context;
-    Dictionary<string, GrapplingHookBaseState> _states = new Dictionary<string, GrapplingHookBaseState>();
+    Dictionary<Type, GrapplingHookBaseState> _states = new Dictionary<Type, GrapplingHookBaseState>();
 
     public GrapplingHookStateFactory(GrapplingHookStateMachine currentContext)
     {
         _context = currentContext;
-        _states["idle"] = new GrapplingHookIdleState(_context, this);
-        _states["fired"] = new GrapplingHookFiredState(_context, this);
-        _states["grappled"] = new GrapplingHookGrappledState(_context, this);
+        _states[typeof(GrapplingHookIdleState)] = new GrapplingHookIdleState(_context, this);
+        _states[typeof(GrapplingHookFiredState)] = new GrapplingHookFiredState(_context, this);
+        _states[typeof(GrapplingHookGrappledState)] = new GrapplingHookGrappledState(_context, this);
     }
 
-    public GrapplingHookBaseState Idle()
+    public GrapplingHookBaseState GetState<T>() where T : GrapplingHookBaseState
     {
-        return _states["idle"];
-    }
-
-    public GrapplingHookBaseState Fired()
-    {
-        return _states["fired"];
-    }
-
-    public GrapplingHookBaseState Grappled()
-    {
-        return _states["grappled"];
+        // State exist in the dictionary
+        if (_states.ContainsKey(typeof(T)))
+            return _states[typeof(T)];
+        // Forgot to create state in dictionary, so make it!
+        else
+        {
+            // Create state
+            T newState = (T)Activator.CreateInstance(typeof(T), _context, this);
+            // Cache state
+            _states[typeof(T)] = newState;
+            return newState;
+        }
     }
 }

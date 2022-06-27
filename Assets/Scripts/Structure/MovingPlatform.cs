@@ -2,24 +2,25 @@ using UnityEngine;
 
 public class MovingPlatform : InertialPlatform
 {
-    [SerializeField] Vector3 _offset = Vector3.up;
+    public Vector3 TargetPosition;
     [SerializeField] float _speed = 1.0f;
     [SerializeField] bool _loop = false;
+    
     bool _isTarget = false;
     Vector3 _initialPos;
-    Vector3 _targetPos;
     Vector3 _loopTarget;
 
     [Header("Projection Settings")]
+    [SerializeField] Mesh _mesh;
     [SerializeField] Color _color = Color.red;
+    [SerializeField] float _radius = 1f;
     [HideInInspector] public bool Fill = false;
     [HideInInspector] public bool Visualize = true;
 
     void Start()
     {
         _initialPos = transform.position;
-        _targetPos = transform.position + _offset;
-        _loopTarget = _targetPos;
+        _loopTarget = TargetPosition;
     }
 
     protected override void PlayerEnter() => _isTarget = true;
@@ -31,13 +32,13 @@ public class MovingPlatform : InertialPlatform
         {
             MoveTowards(_loopTarget);
             if (transform.position == _initialPos)
-                _loopTarget = _targetPos;
-            else if (transform.position == _targetPos)
+                _loopTarget = TargetPosition;
+            else if (transform.position == TargetPosition)
                 _loopTarget = _initialPos;
         }
         else
         {
-            MoveTowards(_isTarget ? _targetPos : _initialPos);
+            MoveTowards(_isTarget ? TargetPosition : _initialPos);
         }
     }
 
@@ -52,8 +53,16 @@ public class MovingPlatform : InertialPlatform
         if (Visualize)
         {
             Gizmos.color = _color;
-            if (Fill) Gizmos.DrawCube(transform.position + _offset, transform.localScale);
-            else Gizmos.DrawWireCube(transform.position + _offset, transform.localScale);
+            if (_mesh != null)
+            {
+                if (Fill) Gizmos.DrawMesh(_mesh, -1, TargetPosition, transform.rotation, transform.localScale);
+                else Gizmos.DrawWireMesh(_mesh, -1, TargetPosition, transform.rotation, transform.localScale);
+            }
+            else
+            {
+                if (Fill) Gizmos.DrawSphere(TargetPosition, _radius);
+                else Gizmos.DrawWireSphere(TargetPosition, _radius);
+            }
         }
     }
     #endif
