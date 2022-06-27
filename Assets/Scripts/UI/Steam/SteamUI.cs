@@ -5,7 +5,7 @@ using Steamworks;
 
 namespace Illu.Steam
 {
-    public class SteamUI : MonoBehaviour
+    public class SteamUI : Mirror.NetworkBehaviour
     {
         [Header("Target Parent")]
         [SerializeField] RectTransform friendList;
@@ -13,13 +13,14 @@ namespace Illu.Steam
         [SerializeField] RectTransform lobbyHost;
         [SerializeField] RectTransform lobbyClient;
         
-
         [Header("Prefabs")]
         [SerializeField] GameObject steamStatusTitlePrefab;
         [SerializeField] GameObject steamFriendListPrefab;
         [SerializeField] GameObject steamLobbyPrefab;
         [SerializeField] GameObject steamEmptyLobbyPrefab;
         [SerializeField] GameObject steamInvitePrefab;
+
+        [SerializeField] BoolVariable isLanConnection;
 
         // Make a Enum
         List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
@@ -52,6 +53,17 @@ namespace Illu.Steam
             ReadyUpSystem.Instance.TwoReady.RemoveListener(setPlayerTwoStatus);
         }
 
+        override public void OnStartClient()
+        {
+            Debug.Log("OnStartClient Steam UI");
+            if(!isLanConnection.Value && !isServer)
+            {
+                Debug.Log("OnClientConnect not on LAN");
+                Debug.Log("SteamManager.Instance.steamLobbyClient name " + SteamManager.Instance.steamLobbyClient.name);
+                GenerateLobbyHost(SteamManager.Instance.steamLobbyHost, false);
+                GenerateLobbyClient(SteamManager.Instance.steamLobbyClient, false);
+            }
+        }
 
         // Invited To lobby
         void GenerateInvite(CSteamID lobbyID, SteamUserRecord steamFriend)
@@ -98,7 +110,11 @@ namespace Illu.Steam
         }
 
         //triggered on Lobby Join Attempt
-        void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside) => GenerateLobbyFriend(steamFriend, serverside, true);
+        void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside)
+        {
+            Debug.Log("onLobbyHost => GenerateLobbyHost " + steamFriend.name);
+            GenerateLobbyFriend(steamFriend, serverside, true);
+        }
 
         // triggered on Lobby Join Attempt 
         void GenerateLobbyEmpty()
@@ -130,6 +146,7 @@ namespace Illu.Steam
 
         void GenerateLobbyClient(SteamUserRecord steamFriend, bool serverside)
         {
+            Debug.Log("ClientJoined => GenerateLobbyClient");
             GenerateLobbyFriend(steamFriend, serverside, false);
         }
 

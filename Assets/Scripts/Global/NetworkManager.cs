@@ -37,7 +37,7 @@ namespace Illu.Networking
         //Holds all the different Transports for different connection types
         SwitchTransport switchTransport;
 
-        override public void Awake()
+        override public void Awake()    
         {
             base.Awake();
 
@@ -54,6 +54,7 @@ namespace Illu.Networking
             //GameManager.Instance.AddListener(GameManager.Event.ClientConnected, StartHost);
             GameManager.Instance.AddListener(GameManager.Event.ServerStop,      StopHost);
             GameManager.Instance.AddListener(GameManager.Event.ClientStop,      StopClient);
+
 
         }
 
@@ -77,6 +78,8 @@ namespace Illu.Networking
             spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
             NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
             UIConsole.Log("Server Started");
+
+            
         }
 
         // SERVER detects new connection

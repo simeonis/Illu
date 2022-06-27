@@ -19,30 +19,12 @@ public class SwitchTransport : Transport
         selectedTransport = transports[0];
     }
 
-    public void PickTransport(int id)
-    {
-        selectedTransport = transports[id];
-    }
-
-    public override void ClientEarlyUpdate()
-    {
-        selectedTransport.ClientEarlyUpdate();
-    }
-
-    public override void ServerEarlyUpdate()
-    {
-        selectedTransport.ServerEarlyUpdate();
-    }
-
-    public override void ClientLateUpdate()
-    {
-        selectedTransport.ClientLateUpdate();
-    }
-
-    public override void ServerLateUpdate()
-    {
-        selectedTransport.ServerLateUpdate();
-    }
+    public void PickTransport(int id) => selectedTransport = transports[id];
+    public override void ClientEarlyUpdate() => selectedTransport.ClientEarlyUpdate();
+    public override void ServerEarlyUpdate() => selectedTransport.ServerEarlyUpdate();
+    public override void ClientLateUpdate()  => selectedTransport.ClientLateUpdate();
+    public override void ServerLateUpdate()  => selectedTransport.ServerLateUpdate();
+    
 
     void OnEnable()
     {
@@ -216,12 +198,7 @@ public class SwitchTransport : Transport
         return selectedTransport.GetMaxPacketSize(channelId);
     }
 
-    public override void Shutdown()
-    {
-
-        selectedTransport.Shutdown();
-
-    }
+    public override void Shutdown() => selectedTransport.Shutdown();
 
     public override string ToString()
     {

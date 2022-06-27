@@ -24,12 +24,12 @@ namespace Illu.Steam
         public UnityEvent OnLobbyClientRemoved = new UnityEvent();
 
         // Callbacks handled by steam Manager 
-        protected Callback<LobbyCreated_t> lobbyCreated;
+        protected Callback<LobbyCreated_t>           lobbyCreated;
         protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
-        protected Callback<LobbyEnter_t> lobbyEntered;
-        protected Callback<LobbyInvite_t> lobbyInvited;
-        protected Callback<LobbyChatUpdate_t> lobbyChatUpdate;
-        protected Callback<LobbyChatMsg_t> lobbyChatMessage;
+        protected Callback<LobbyEnter_t>             lobbyEntered;
+        protected Callback<LobbyInvite_t>            lobbyInvited;
+        protected Callback<LobbyChatUpdate_t>        lobbyChatUpdate;
+        protected Callback<LobbyChatMsg_t>           lobbyChatMessage;
 
         // Steam IDs
         [HideInInspector] static public CGameID SteamAppID;
@@ -38,8 +38,9 @@ namespace Illu.Steam
         // Networking
         private const string HostAddressKey = "Host Address Key";
         //public Networking.NetworkManager networkManager;
-
-        private SteamUserRecord _steamLobbyClientMember;
+        SteamUserRecord _steamLobbyClientMember;
+        public SteamUserRecord steamLobbyClient;
+        public SteamUserRecord steamLobbyHost;
 
 
 
@@ -70,7 +71,6 @@ namespace Illu.Steam
             GameManager.Instance.AddListener(GameManager.Event.GameLeft,                LobbyLeft);
             GameManager.Instance.AddListener(GameManager.Event.SteamLobbyKicked,        LobbyKicked);
             GameManager.Instance.AddListener(GameManager.Event.SteamLobbyDisconnected,  LobbyDisconnected);
-
         }
 
         /*  --------------------------
@@ -116,8 +116,6 @@ namespace Illu.Steam
                 // Create the lobbyUI and exit
                 if (NetworkServer.active)
                 {
-                    Debug.Log("OnLobbyJoinAttempt callbck");
-
                     // Adds Host UI to Host Lobby
                     //SteamUI.GenerateLobbyHost(GetSteamFriend(SteamUser.GetSteamID()), true);
                     onLobbyHost?.Invoke(GetSteamFriend(SteamUser.GetSteamID()), true);
@@ -137,15 +135,19 @@ namespace Illu.Steam
                 // Adds Host UI to Client Lobby
                 //SteamUI.GenerateLobbyHost(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID)), false);
 
-                onLobbyHost?.Invoke(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID)), false);
+                //onLobbyHost?.Invoke(GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID)), false);
+                steamLobbyHost = GetSteamFriend(SteamMatchmaking.GetLobbyOwner(lobbyID));
 
                 // Adds Clients UI to Client Lobby
                 int lobbyCount = SteamMatchmaking.GetNumLobbyMembers(lobbyID);
+
+                Debug.Log("Lobby Count " + lobbyCount);
+
                 for (int i = 0; i < lobbyCount; i++)
                 {
                     CSteamID lobbyMember = SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, i);
-
-                    clientJoined?.Invoke(GetSteamFriend(lobbyMember), false);
+                    steamLobbyClient = GetSteamFriend(lobbyMember);
+                    //clientJoined?.Invoke(GetSteamFriend(lobbyMember), false);
                 }
             }
         }

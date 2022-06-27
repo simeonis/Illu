@@ -1183,6 +1183,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b3e41fa1f79e6c47985900bf4f0c29c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   friendList: {fileID: 0}
   inviteList: {fileID: 7879893526201478064}
   lobbyHost: {fileID: 4017971946690042452}
@@ -1197,6 +1199,7 @@ MonoBehaviour:
     type: 3}
   steamInvitePrefab: {fileID: 2913364059952556577, guid: 56fa8ae94bbbc134f96c3f92ead702bc,
     type: 3}
+  isLanConnection: {fileID: 11400000, guid: dfa454c489c664fa882b6232628a0b86, type: 2}
 --- !u!114 &5238090557533713654
 MonoBehaviour:
   m_ObjectHideFlags: 0
