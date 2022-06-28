@@ -1,18 +1,29 @@
 using Mirror;
 using UnityEngine;
+using Illu.Steam;
 
 public class NetworkLobbyPlayer : NetworkBehaviour
 {
     [SerializeField] GameObject canvas;
 
-     override public void OnStartAuthority()
-     {  
+    override public void OnStartAuthority()
+    {  
         canvas.SetActive(true);
-        RequestID(this.gameObject);
-     }
+        RequestID(gameObject);
+    }
 
-    public override void OnStartClient() => Illu.Networking.NetworkManager.Instance.RoomPlayers.Add(this);
-    public override void OnStopClient() => Illu.Networking.NetworkManager.Instance.RoomPlayers.Remove(this);
+    public override void OnStartClient() 
+    {
+        Illu.Networking.NetworkManager.Instance.LobbyPlayers.Add(this);
+        bool isLan = Illu.Networking.NetworkManager.Instance.isLanConnection;
+        GetComponent<SteamUI>().enabled = !isLan;
+        GetComponent<LanUI>().enabled = isLan;
+    }
+    public override void OnStopClient() 
+    {
+        Illu.Networking.NetworkManager.Instance.LobbyPlayers.Remove(this);
+        Destroy(gameObject);
+    }
 
     [Client]
     public void ReadyUP() => CMDSetStatus(ReadyUpSystem.Instance.myID, true);

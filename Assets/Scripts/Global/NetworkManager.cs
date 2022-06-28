@@ -19,7 +19,7 @@ namespace Illu.Networking
         [SerializeField] NetworkGamePlayer gamePlayerPrefab = null;
         [SerializeField] GameObject playerSpawnSystem = null;
 
-        public List<NetworkLobbyPlayer> RoomPlayers { get; } = new List<NetworkLobbyPlayer>();
+        public List<NetworkLobbyPlayer> LobbyPlayers { get; } = new List<NetworkLobbyPlayer>();
         public List<NetworkGamePlayer> GamePlayers { get; } = new List<NetworkGamePlayer>();
 
         public static event Action<NetworkConnection> OnServerReadied;
@@ -170,9 +170,9 @@ namespace Illu.Networking
             // Game Started
             if (SceneManager.GetActiveScene().name == menuScene && newSceneName != menuScene)
             {
-                for (int i = RoomPlayers.Count - 1; i >= 0; i--)
+                for (int i = LobbyPlayers.Count - 1; i >= 0; i--)
                 {
-                    var conn = RoomPlayers[i].connectionToClient;
+                    var conn = LobbyPlayers[i].connectionToClient;
                     var gameplayerInstance = Instantiate(gamePlayerPrefab);
 
                     NetworkServer.Destroy(conn.identity.gameObject);

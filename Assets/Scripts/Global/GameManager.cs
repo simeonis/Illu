@@ -31,7 +31,6 @@ public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
     {
         base.Awake();
         AddListener(Event.GameResumed, Resume);
-        AddListener(Event.GameLeft, Resume);
         AddListener(Event.GameModeTraining, StartGame);
     }
 
