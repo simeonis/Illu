@@ -91,7 +91,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7198437112992415356}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: NetworkRoomPlayer, Assembly-CSharp
         m_MethodName: CancelReadyUP
         m_Mode: 1
@@ -675,7 +675,6 @@ GameObject:
   - component: {fileID: 4803312372795460826}
   - component: {fileID: 5927814884980442488}
   - component: {fileID: 1718726078302245831}
-  - component: {fileID: 7653327779607262710}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -773,36 +772,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6354031691592070635}
   m_CullTransparentMesh: 1
---- !u!114 &7653327779607262710
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6354031691592070635}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &6828291401310168976
 GameObject:
   m_ObjectHideFlags: 0
@@ -1073,7 +1042,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7198437112992415356}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: NetworkRoomPlayer, Assembly-CSharp
         m_MethodName: ReadyUP
         m_Mode: 1
@@ -1095,13 +1064,12 @@ GameObject:
   m_Component:
   - component: {fileID: 2252286625659495221}
   - component: {fileID: -6583983706376584967}
-  - component: {fileID: 7198437112992415356}
-  - component: {fileID: -4129583225098405565}
+  - component: {fileID: 5287471887746393460}
   - component: {fileID: 7836636298077460997}
   - component: {fileID: 5238090557533713654}
-  - component: {fileID: 7165232645293327614}
+  - component: {fileID: -4129583225098405565}
   m_Layer: 0
-  m_Name: RoomPlayer
+  m_Name: LobbyPlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1139,7 +1107,7 @@ MonoBehaviour:
   visible: 0
   m_AssetId: ae06d5224d4e44a19ab2b0c8e586f938
   hasSpawned: 0
---- !u!114 &7198437112992415356
+--- !u!114 &5287471887746393460
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1148,29 +1116,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7242622422971727020}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b263727d152e2464fa06c13c80fe533a, type: 3}
+  m_Script: {fileID: 11500000, guid: c9ffa25ef2fdd9944900c52967b0aecd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
   canvas: {fileID: 6354031691592070635}
---- !u!114 &-4129583225098405565
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7242622422971727020}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1f66b54d3f78464b811a42bad2d99b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  readyUp: {fileID: 5330892758491469275}
-  startGame: {fileID: 5943405592690915605}
-  startBTN: {fileID: 3604433306949251706}
 --- !u!114 &7836636298077460997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1199,7 +1150,6 @@ MonoBehaviour:
     type: 3}
   steamInvitePrefab: {fileID: 2913364059952556577, guid: 56fa8ae94bbbc134f96c3f92ead702bc,
     type: 3}
-  isLanConnection: {fileID: 11400000, guid: dfa454c489c664fa882b6232628a0b86, type: 2}
 --- !u!114 &5238090557533713654
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1218,52 +1168,23 @@ MonoBehaviour:
   lobbyClientTarget: {fileID: 2342129423365093235}
   _lobbyPrefab: {fileID: 2913364059952556577, guid: 6db95e59ad1b26e4e9480b925d495002,
     type: 3}
-  isLanConnection: {fileID: 11400000, guid: dfa454c489c664fa882b6232628a0b86, type: 2}
---- !u!114 &7165232645293327614
+--- !u!114 &-4129583225098405565
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7242622422971727020}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdd93c7f182464a6c93cc1deea34f10b, type: 3}
+  m_Script: {fileID: 11500000, guid: a1f66b54d3f78464b811a42bad2d99b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  listeners:
-  - Event: {fileID: 11400000, guid: 968697ab9ae1e3c4e98f04ae4e9a1176, type: 2}
-    Response:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 5238090557533713654}
-          m_TargetAssemblyTypeName: LanUI, Assembly-CSharp
-          m_MethodName: OnClientConnect
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-  - Event: {fileID: 11400000, guid: 5064ba9590a04064288ff38e39fe6939, type: 2}
-    Response:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 5238090557533713654}
-          m_TargetAssemblyTypeName: LanUI, Assembly-CSharp
-          m_MethodName: OnClientDisconnect
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
+  syncMode: 0
+  syncInterval: 0.1
+  readyUp: {fileID: 5330892758491469275}
+  startGame: {fileID: 5943405592690915605}
+  startBTN: {fileID: 3604433306949251706}
 --- !u!1 &7346980627910081811
 GameObject:
   m_ObjectHideFlags: 0

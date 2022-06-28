@@ -9,7 +9,6 @@ namespace Illu.Steam
     {
         [Header("Target Parent")]
         [SerializeField] RectTransform friendList;
-        [SerializeField] RectTransform inviteList;
         [SerializeField] RectTransform lobbyHost;
         [SerializeField] RectTransform lobbyClient;
         
@@ -18,100 +17,44 @@ namespace Illu.Steam
         [SerializeField] GameObject steamFriendListPrefab;
         [SerializeField] GameObject steamLobbyPrefab;
         [SerializeField] GameObject steamEmptyLobbyPrefab;
-        [SerializeField] GameObject steamInvitePrefab;
 
         // Make a Enum
         List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
-        Dictionary<string, GameObject> _invites = new Dictionary<string, GameObject>();
         List<SteamFriendLobby> playerCards = new List<SteamFriendLobby>();
 
         void OnEnable()
         {
-            SteamManager.Instance.clientJoined += GenerateLobbyClient;
-            SteamManager.Instance.onLobbyHost += GenerateLobbyHost;
-            SteamManager.Instance.onInviteReceived += GenerateInvite;
-            SteamManager.Instance.onClearLobby.AddListener(GenerateLobbyEmpty);
-            SteamManager.Instance.onDestroyLobby.AddListener(DestroyLobby);
-            SteamManager.Instance.OnLobbyClientRemoved.AddListener(RemoveLobbyClient);
+            SteamManager.Instance.OnLobbyUserJoined.AddListener(GenerateLobbyClient);
+            SteamManager.Instance.OnLobbyUserLeft.AddListener(GenerateLobbyUsers);
 
-            ReadyUpSystem.Instance.OneReady.AddListener(setPlayerOneStatus);
-            ReadyUpSystem.Instance.TwoReady.AddListener(setPlayerTwoStatus);
+            ReadyUpSystem.Instance.OneReady.AddListener(SetPlayerOneStatus);
+            ReadyUpSystem.Instance.TwoReady.AddListener(SetPlayerTwoStatus);
         }
 
         void OnDisable()
         {
-            SteamManager.Instance.clientJoined -= GenerateLobbyClient;
-            SteamManager.Instance.onLobbyHost -= GenerateLobbyHost;
-            SteamManager.Instance.onInviteReceived -= GenerateInvite;
-            SteamManager.Instance.onClearLobby.RemoveListener(GenerateLobbyEmpty);
-            SteamManager.Instance.onDestroyLobby.RemoveListener(DestroyLobby);
-            SteamManager.Instance.OnLobbyClientRemoved.RemoveListener(RemoveLobbyClient);
 
-            ReadyUpSystem.Instance.OneReady.RemoveListener(setPlayerOneStatus);
-            ReadyUpSystem.Instance.TwoReady.RemoveListener(setPlayerTwoStatus); 
+            SteamManager.Instance.OnLobbyUserJoined.RemoveListener(GenerateLobbyClient);
+            SteamManager.Instance.OnLobbyUserLeft.RemoveListener(GenerateLobbyUsers);
+
+            ReadyUpSystem.Instance.OneReady.RemoveListener(SetPlayerOneStatus);
+            ReadyUpSystem.Instance.TwoReady.RemoveListener(SetPlayerTwoStatus); 
         }
 
         override public void OnStartClient()
         {
-            Debug.Log("OnStartClient Steam UI");
-            if(!Networking.NetworkManager.Instance.isLanConnection && !isServer)
-            {
-                Debug.Log("OnClientConnect not on LAN");
-                Debug.Log("SteamManager.Instance.steamLobbyClient name " + SteamManager.Instance.steamLobbyClient.name);
-                GenerateLobbyHost(SteamManager.Instance.steamLobbyHost, false);
-                GenerateLobbyClient(SteamManager.Instance.steamLobbyClient, false);
-            }
+            base.OnStartClient();
+
+            if(!Networking.NetworkManager.Instance.isLanConnection)
+                GenerateLobbyUsers();
         }
 
-        // Invited To lobby
-        void GenerateInvite(CSteamID lobbyID, SteamUserRecord steamFriend)
+        void GenerateLobbyUsers()
         {
-            Debug.Log("steamIDstring " + steamFriend.id);
-            string steamIDstring = steamFriend.id.ToString();
-
-            // Invite exists
-            if (_invites.ContainsKey(steamIDstring))
-            {
-                // Re-arrange Order
-                _invites[steamIDstring].transform.SetAsFirstSibling();
-            }
-            // New invite
-            else
-            {
-                // Create GameObject
-                GameObject invite = Instantiate(steamInvitePrefab, inviteList);
-                invite.name = steamIDstring;
-                invite.transform.SetAsFirstSibling();
-
-                // Add to dictionary
-                _invites.Add(invite.name, invite);
-
-                // Retrieve Prefab's Script and fill out details
-                SteamFriendInvite inviteDetails = invite.GetComponent<SteamFriendInvite>();
-
-                Texture2D tex = GetSteamImageAsTexture2D(steamFriend.avatar);
-
-                inviteDetails.Instantiate(
-                    steamFriend.name,
-                    tex,
-                    delegate
-                    {
-                        SteamManager.Instance.JoinSteamLobby(lobbyID);
-                        DestroyInvite(invite);
-                    },
-                    delegate
-                    {
-                        DestroyInvite(invite);
-                    }
-                 );
-            }
-        }
-
-        //triggered on Lobby Join Attempt
-        void GenerateLobbyHost(SteamUserRecord steamFriend, bool serverside)
-        {
-            Debug.Log("onLobbyHost => GenerateLobbyHost " + steamFriend.name);
-            GenerateLobbyFriend(steamFriend, serverside, true);
+            DestroyLobby();
+            List<SteamUserRecord> lobbyMembers = SteamManager.Instance.GetLobbyUsers();
+            for(int i = 0; i < lobbyMembers.Count; i++)
+                GenerateLobbyFriend(lobbyMembers[i], isServer, i == 0);
         }
 
         // triggered on Lobby Join Attempt 
@@ -134,19 +77,7 @@ namespace Illu.Steam
 
         //***********************************************************************************************************
 
-        void DestroyInvite(GameObject invite)
-        {
-            // Remove from dictionary
-            _invites.Remove(invite.name);
-            // Destroy GameObject
-            Destroy(invite);
-        }
-
-        void GenerateLobbyClient(SteamUserRecord steamFriend, bool serverside)
-        {
-            Debug.Log("ClientJoined => GenerateLobbyClient");
-            GenerateLobbyFriend(steamFriend, serverside, false);
-        }
+        void GenerateLobbyClient(SteamUserRecord steamFriend) => GenerateLobbyFriend(steamFriend, isServer, false);
 
         void GenerateLobbyFriend(SteamUserRecord steamFriend, bool serverside, bool hostSlot)
         {
@@ -241,8 +172,8 @@ namespace Illu.Steam
             }
         }
 
-        void setPlayerOneStatus(bool status) => SetIndicatorOnPlayerCard(status, 0);
-        void setPlayerTwoStatus(bool status) => SetIndicatorOnPlayerCard(status, 1);
+        void SetPlayerOneStatus(bool status) => SetIndicatorOnPlayerCard(status, 0);
+        void SetPlayerTwoStatus(bool status) => SetIndicatorOnPlayerCard(status, 1);
 
         void SetIndicatorOnPlayerCard(bool status, int caller)
         {

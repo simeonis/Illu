@@ -4,7 +4,7 @@ using Mirror;
 
 namespace Illu.Networking
 {
-    public class ReadyUpInterface : NetworkBehaviour
+    public class ReadyUpUI : NetworkBehaviour
     {
         [SerializeField] RectTransform readyUp;
         [SerializeField] RectTransform startGame;

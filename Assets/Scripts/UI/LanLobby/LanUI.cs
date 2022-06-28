@@ -24,8 +24,8 @@ public class LanUI : NetworkBehaviour
 
     void OnEnable()
     {
-        GameManager.Instance.AddListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
-        GameManager.Instance.AddListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
+        // GameManager.Instance.AddListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
+        // GameManager.Instance.AddListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
 
         ReadyUpSystem.Instance.OneReady.AddListener(setPlayerOneStatus);
         ReadyUpSystem.Instance.TwoReady.AddListener(setPlayerTwoStatus);
@@ -34,8 +34,8 @@ public class LanUI : NetworkBehaviour
     void OnDisable()
     {
         // remove listener 
-        GameManager.Instance.RemoveListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
-        GameManager.Instance.RemoveListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
+        // GameManager.Instance.RemoveListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
+        // GameManager.Instance.RemoveListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
 
         ReadyUpSystem.Instance.OneReady.RemoveListener(setPlayerOneStatus);
         ReadyUpSystem.Instance.TwoReady.RemoveListener(setPlayerTwoStatus);

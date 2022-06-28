@@ -1,15 +1,15 @@
 using Mirror;
 using UnityEngine;
 
-public class NetworkRoomPlayer : NetworkBehaviour
+public class NetworkLobbyPlayer : NetworkBehaviour
 {
     [SerializeField] GameObject canvas;
 
      override public void OnStartAuthority()
-    {  
+     {  
         canvas.SetActive(true);
         RequestID(this.gameObject);
-    }
+     }
 
     public override void OnStartClient() => Illu.Networking.NetworkManager.Instance.RoomPlayers.Add(this);
     public override void OnStopClient() => Illu.Networking.NetworkManager.Instance.RoomPlayers.Remove(this);
@@ -19,8 +19,6 @@ public class NetworkRoomPlayer : NetworkBehaviour
     [Client]
     public void CancelReadyUP() => CMDSetStatus(ReadyUpSystem.Instance.myID, false);
     
-
-
     [Command]
     public void CMDSetStatus(ReadyUpSystem.ID myID, bool status)
     {

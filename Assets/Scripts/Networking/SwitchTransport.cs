@@ -15,6 +15,7 @@ public class SwitchTransport : Transport
         if (transports == null || transports.Length == 0)
         {
             Debug.LogError("Switch transport requires at least 1 transport");
+            return;
         }
         selectedTransport = transports[0];
     }
@@ -42,18 +43,8 @@ public class SwitchTransport : Transport
         }
     }
 
-    public override bool Available()
-    {
-        // available if any of the transports is available
-
-        if (selectedTransport.Available())
-        {
-            return true;
-        }
-
-        return false;
-    }
-
+    public override bool Available() => selectedTransport.Available();
+  
     #region Client
 
     public override void ClientConnect(string address)

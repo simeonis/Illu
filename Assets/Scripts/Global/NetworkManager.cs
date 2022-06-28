@@ -3,38 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
-using System.Linq;
 
 namespace Illu.Networking
 {
-    public struct CreateCharacterMessage : NetworkMessage
-    {
-        public string name; 
-    }
+    public struct CreateLobbyPlayerMessage : NetworkMessage {}
 
     public class NetworkManager : Mirror.NetworkManager
     {
-        // Prefabs
-        [Header("Room")]
-        [SerializeField] private NetworkRoomPlayer roomPlayerPrefab = null;
+        [SerializeField, Scene] string menuScene;
+
+        [Header("Lobby")]
+        [SerializeField] GameObject lobbyPlayerPrefab;
 
         [Header("Game")]
-        [SerializeField] private NetworkGamePlayer gamePlayerPrefab = null;
-        [SerializeField] private GameObject playerSpawnSystem = null;
+        [SerializeField] NetworkGamePlayer gamePlayerPrefab = null;
+        [SerializeField] GameObject playerSpawnSystem = null;
 
-        private readonly string menuScene = "Main Menu";
-
-        public List<NetworkRoomPlayer> RoomPlayers { get; } = new List<NetworkRoomPlayer>();
+        public List<NetworkLobbyPlayer> RoomPlayers { get; } = new List<NetworkLobbyPlayer>();
         public List<NetworkGamePlayer> GamePlayers { get; } = new List<NetworkGamePlayer>();
 
         public static event Action<NetworkConnection> OnServerReadied;
 
-        [HideInInspector] public static string HostAddress = "";
+        public string HostAddress { get => networkAddress; set => networkAddress = value; }
         [HideInInspector] public bool isLanConnection = false;
 
         public static NetworkManager Instance { get; private set; }
 
-        //Holds all the different Transports for different connection types
+        // Holds all the different Transports for different connection types
         SwitchTransport switchTransport;
 
         override public void Awake()    
@@ -43,30 +38,13 @@ namespace Illu.Networking
 
             Instance = singleton as NetworkManager;
 
-            // ReadyUpSystem = _readUpSystem;
             switchTransport = (SwitchTransport)transport;
 
             isLanConnection = false;
-            //change this to a call
-            //isLanConnection.AddListener(SetConnectionType);
-
-            GameManager.Instance.AddListener(GameManager.Event.ServerStart,     StartHost);
-            GameManager.Instance.AddListener(GameManager.Event.ClientStart,     StartClient);
-            //GameManager.Instance.AddListener(GameManager.Event.ClientConnected, StartHost);
-            GameManager.Instance.AddListener(GameManager.Event.ServerStop,      StopHost);
-            GameManager.Instance.AddListener(GameManager.Event.ClientStop,      StopClient);
-
-
         }
 
-
-        //ServerStart -> StartHost
-        //ClientStart -> startClient 
-        //clientconnected -> null
-        //clientdisconnected -> steam lobby disconnect // move to steam 
-        //Server Stop -> StartHOst????
-        //CLient Stop -> StopCLient 
-        //LanJoin -> ClientJoinSever  // should just call direct 
+        void OnEnable() => GameManager.Instance.AddListener(GameManager.Event.GameStart, StartGame);
+        void OnDisable() => GameManager.Instance.RemoveListener(GameManager.Event.GameStart, StartGame);
 
         /*  --------------------------
         *       Callback functions
@@ -76,8 +54,7 @@ namespace Illu.Networking
         public override void OnStartServer()
         {
             base.OnStartServer();
-            spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
-            NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
+            NetworkServer.RegisterHandler<CreateLobbyPlayerMessage>(OnCreateLobbyPlayer);
             UIConsole.Log("Server Started");
         }
 
@@ -101,23 +78,6 @@ namespace Illu.Networking
                 UIConsole.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
                 return;
             }
-
-            GameManager.Instance.TriggerEvent(GameManager.Event.S_ClientConnected);
-        }
-
-        // HOST and CLIENT started
-        public override void OnStartClient()
-        {
-            base.OnStartClient();
-
-            var spawnablePrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs");
-
-            foreach (var prefab in spawnablePrefabs)
-            {
-                NetworkClient.RegisterPrefab(prefab);
-            } 
-
-            UIConsole.Log("Client Started");
         }
 
         // CLIENT connected to SERVER
@@ -125,15 +85,7 @@ namespace Illu.Networking
         {
             base.OnClientConnect(conn);
 
-            GameManager.Instance.TriggerEvent(GameManager.Event.C_ClientConnected);
-
-            // you can send the message here, or wherever else you want
-            CreateCharacterMessage characterMessage = new CreateCharacterMessage
-            {
-                name = "Joe Gaba Gaba",
-            };
-
-            conn.Send(characterMessage);
+            conn.Send(new CreateLobbyPlayerMessage());
 
             UIConsole.Log("[Client]: Connected to server.");
         }
@@ -143,29 +95,17 @@ namespace Illu.Networking
         {
             base.OnClientDisconnect(conn);
 
-            GameManager.Instance.TriggerEvent(GameManager.Event.C_ClientDisconnected);
-
             if (SceneManager.GetActiveScene().name != menuScene)
             {
                 SceneManager.LoadScene(menuScene);
             }
 
+            if (!isLanConnection)
+                Illu.Steam.SteamManager.Instance.LobbyDisconnected();
+            else
+                EnableLAN(false);
+
             UIConsole.Log("[Client]: Disconnected from server.");
-        }
-
-        // SERVER gets "Add Player" request from CLIENT
-        public override void OnServerAddPlayer(NetworkConnection conn)
-        {
-            UIConsole.Log("[Server]: \"Add Player\" request received.");
-
-            if (SceneManager.GetActiveScene().name == menuScene)
-            {
-                UIConsole.Log("[Server]: Adding room player.");
-
-                NetworkRoomPlayer roomPlayerInstance = Instantiate(roomPlayerPrefab);
-
-                NetworkServer.AddPlayerForConnection(conn, roomPlayerInstance.gameObject);
-            }
         }
 
         // CLIENT is changing scene
@@ -186,7 +126,7 @@ namespace Illu.Networking
             // Game Started
             if (previousScene == menuScene && sceneName != menuScene)
             {
-                GameManager.Instance.TriggerEvent(GameManager.Event.GameStarted);
+                GameManager.Instance.TriggerEvent(GameManager.Event.GameStart);
                 UIConsole.Log("[Client]: Server has started the game");
             }
 
@@ -217,6 +157,9 @@ namespace Illu.Networking
         /*  --------------------------
         *        Regular functions
         *   -------------------------- */
+        
+        [Server]
+        void StartGame() => ServerChangeScene("LevelOne");
 
         // SERVER changes scene for all CLIENTS
         [Server]
@@ -244,85 +187,50 @@ namespace Illu.Networking
             UIConsole.Log("[Server]: Changing scene for all.");
         }
 
-        public override void StartClient()
-        {
-            networkAddress = HostAddress;
-            base.StartClient();
-        }
-
-        //
-        //  Entry point for starting networking 
-        //
-        public void SetConnectionType(bool isLan)
+        public void EnableLAN(bool isLan)
         {
             isLanConnection = isLan;
-            if (isLan)
+            
+            if (!isLan)
+                switchTransport.PickTransport(0);
+            else
             {
                 switchTransport.PickTransport(1);
                 HostAddress = "localhost";
-                Steam.SteamManager.Instance.LobbyLeft();
             }
-            else
-            {
-                switchTransport.PickTransport(0);
-                Steam.SteamManager.Instance.HostLobby();
-            }
+        }
+
+        public void JoinLAN()
+        {
+            EnableLAN(true);
+            StartClient();
         }
 
         public void StartHosting()
         {
-            Debug.Log("StartHosting");
-
-            if(NetworkServer.active)
+            if (NetworkServer.active)
                 StopHost();
 
             StartHost();
-            if (isLanConnection)
-            {
-                Steam.SteamManager.Instance.LobbyLeft();
-            }
-            else
-            {
-                Steam.SteamManager.Instance.HostLobby();
-            }
-        }
 
-        //
-        //  Entry point for joining a server  
-        //
-        public void ClientJoinServer()
-        {
-            //Holds all the different Transports for different connection types
-            var switchTransport = (SwitchTransport)transport;
-
-            if (!isLanConnection)
-            {
-                switchTransport.PickTransport(0);
-                //HostAddress = "localhost";
-            }
-            else
-            {
-                switchTransport.PickTransport(1);
-                HostAddress = "localhost";
-            }
-
-            StartClient();
+            if(!isLanConnection)
+                Illu.Steam.SteamManager.Instance.HostLobby();
         }
 
         /*  --------------------------
         *        Helper functions
         *   -------------------------- */
 
-        private void OnCreateCharacter(NetworkConnection conn, CreateCharacterMessage characterMessage)
+        private void OnCreateLobbyPlayer(NetworkConnection conn, CreateLobbyPlayerMessage msg)
         {
             // playerPrefab is the one assigned in the inspector in Network
             // Manager but you can use different prefabs per race for example
-            GameObject gameobject = Instantiate(playerPrefab);
+            GameObject lobbyPlayer = Instantiate(lobbyPlayerPrefab);
 
             // call this to use this gameobject as the primary controller
-            NetworkServer.AddPlayerForConnection(conn, gameobject);
+            NetworkServer.AddPlayerForConnection(conn, lobbyPlayer);
 
-            UIConsole.Log("[Server]: Created character " + characterMessage.name + " for Client" + "[" + conn.connectionId + "].");
+            UIConsole.Log("[Server]: Created lobby player for Client" + "[" + conn.connectionId + "].");
         }
     }
 }

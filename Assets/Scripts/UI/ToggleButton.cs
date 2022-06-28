@@ -14,16 +14,14 @@ public class ToggleButton : MonoBehaviour, IPointerClickHandler
     [SerializeField] Color endColor;
     [SerializeField] Color knobColor;
     [SerializeField] float Speed = 0.5f;
-
-    [SerializeField] UnityEvent toggleTrue;
-    [SerializeField] UnityEvent toggleFalse;
+    [SerializeField] bool state = false;
+    [SerializeField] UnityEvent<bool> OnToggle;
 
     Image trackImage;
     Image switchImage;
 
-    bool switchState = false;
 
-    void OnEnable()
+    void Start()
     {
         switchTarget.transform.position = start.transform.position;
 
@@ -36,31 +34,25 @@ public class ToggleButton : MonoBehaviour, IPointerClickHandler
         trackImage = track.GetComponent<Image>();
         trackImage.color = startColor;
 
-        Toggle();
+        Toggle(state);
     }
 
+    public void OnPointerClick(PointerEventData eventData) => Toggle(state = !state);
+    
 
-    public void OnPointerClick(PointerEventData eventData)
+    void Toggle(bool state)
     {
-        switchState = !switchState;
-        Toggle();
-    }
+        OnToggle?.Invoke(state);
 
-
-    void Toggle()
-    {
-        if (switchState)
+        if (state)
         {
             switchTarget.transform.DOMoveX(end.transform.position.x, Speed);
             trackImage.DOColor(endColor, Speed);
-            toggleTrue?.Invoke();
-
         }
         else
         {
             switchTarget.transform.DOMoveX(start.transform.position.x, Speed);
             trackImage.DOColor(startColor, Speed);
-            toggleFalse?.Invoke();
         }
     }
 }
