@@ -101,7 +101,7 @@ namespace Illu.Networking
             }
 
             if (!isLanConnection)
-                Illu.Steam.SteamManager.Instance.LobbyDisconnected();
+                Steam.SteamManager.Instance.LobbyDisconnected();
             else
                 EnableLAN(false);
 
@@ -214,7 +214,7 @@ namespace Illu.Networking
             StartHost();
 
             if(!isLanConnection)
-                Illu.Steam.SteamManager.Instance.HostLobby();
+                Steam.SteamManager.Instance.HostLobby();
         }
 
         /*  --------------------------
@@ -226,6 +226,8 @@ namespace Illu.Networking
             // playerPrefab is the one assigned in the inspector in Network
             // Manager but you can use different prefabs per race for example
             GameObject lobbyPlayer = Instantiate(lobbyPlayerPrefab);
+
+            UIConsole.Log("Attempting OnCreateLobbyPlayer ");
 
             // call this to use this gameobject as the primary controller
             NetworkServer.AddPlayerForConnection(conn, lobbyPlayer);

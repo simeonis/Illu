@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class LanUI : NetworkBehaviour
 {
+
     public struct LanPlayer{
         public string Name;
         public uint id;
@@ -13,8 +14,9 @@ public class LanUI : NetworkBehaviour
             Name = name;
             this.id = id;
         }
-    } 
+    }
 
+    [SerializeField] ReadyUpSystem readyUpSystem;
     [SerializeField] private RectTransform lobbyHostTarget;
     [SerializeField] private RectTransform lobbyClientTarget;
 
@@ -27,8 +29,8 @@ public class LanUI : NetworkBehaviour
         // GameManager.Instance.AddListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
         // GameManager.Instance.AddListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
 
-        ReadyUpSystem.Instance.OneReady.AddListener(setPlayerOneStatus);
-        ReadyUpSystem.Instance.TwoReady.AddListener(setPlayerTwoStatus);
+        readyUpSystem.OneReady.AddListener(setPlayerOneStatus);
+        readyUpSystem.TwoReady.AddListener(setPlayerTwoStatus);
     }
 
     void OnDisable()
@@ -37,8 +39,8 @@ public class LanUI : NetworkBehaviour
         // GameManager.Instance.RemoveListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
         // GameManager.Instance.RemoveListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
 
-        ReadyUpSystem.Instance.OneReady.RemoveListener(setPlayerOneStatus);
-        ReadyUpSystem.Instance.TwoReady.RemoveListener(setPlayerTwoStatus);
+        readyUpSystem.OneReady.RemoveListener(setPlayerOneStatus);
+        readyUpSystem.TwoReady.RemoveListener(setPlayerTwoStatus);
     }
 
     override public void OnStartServer() 

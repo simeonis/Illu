@@ -21,6 +21,8 @@ namespace Illu.Steam
         [SerializeField] GameObject steamLobbyPrefab;
         [SerializeField] GameObject steamEmptyLobbyPrefab;
 
+        [SerializeField] ReadyUpSystem readyUpSystem;
+
         // Make a Enum
         List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
         List<SteamFriendLobby> playerCards = new List<SteamFriendLobby>();
@@ -29,16 +31,19 @@ namespace Illu.Steam
         {
             SteamManager.Instance.OnLobbyUpdated.AddListener(GenerateLobby);
 
-            ReadyUpSystem.Instance.OneReady.AddListener(SetPlayerOneStatus);
-            ReadyUpSystem.Instance.TwoReady.AddListener(SetPlayerTwoStatus);
+            if(!isServer)
+                GenerateLobby();
+
+            readyUpSystem.OneReady.AddListener(SetPlayerOneStatus);
+            readyUpSystem.TwoReady.AddListener(SetPlayerTwoStatus);
         }
 
         void OnDisable()
         {
             SteamManager.Instance.OnLobbyUpdated.RemoveListener(GenerateLobby);
 
-            ReadyUpSystem.Instance.OneReady.RemoveListener(SetPlayerOneStatus);
-            ReadyUpSystem.Instance.TwoReady.RemoveListener(SetPlayerTwoStatus); 
+            readyUpSystem.OneReady.RemoveListener(SetPlayerOneStatus);
+            readyUpSystem.TwoReady.RemoveListener(SetPlayerTwoStatus);
         }
 
         void GenerateLobby()

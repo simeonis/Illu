@@ -9,7 +9,6 @@ public class ReadyUpSystem : NetworkBehaviour
     public MyBoolEvent OneReady = new MyBoolEvent();
     public MyBoolEvent TwoReady = new MyBoolEvent();
 
-
     [SyncVar(hook = nameof(PlayerOneStatus))]
     public bool playerOneReady = false;
 
@@ -26,22 +25,6 @@ public class ReadyUpSystem : NetworkBehaviour
     public SyncList<ID> assigned = new SyncList<ID>();
 
     public ID myID;
-
-    public static ReadyUpSystem Instance { get; private set; }
-
-     public void Awake()
-    {
-        // If there is an instance, and it's not me, delete myself.
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this);
-        }
-        else
-        {
-            Instance =  this;
-        }
-    }
-
 
     private void PlayerOneStatus(bool oldValue, bool newValue)
     {

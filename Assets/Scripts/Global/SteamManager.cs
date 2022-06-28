@@ -76,7 +76,7 @@ namespace Illu.Steam
                 // Setting HostAddress in Lobby Metadata
                 lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
                 SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostAddressKey, SteamUser.GetSteamID().ToString());
-                
+
                 OnLobbyUpdated?.Invoke(); // Notify SteamUI to rebuild the lobby
             }
         }
@@ -102,7 +102,6 @@ namespace Illu.Steam
             {
                 NetworkManager.Instance.HostAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostAddressKey);
                 NetworkManager.Instance.StartClient();
-                OnLobbyUpdated?.Invoke(); // Notify SteamUI to rebuild the lobby
             }
         }
 

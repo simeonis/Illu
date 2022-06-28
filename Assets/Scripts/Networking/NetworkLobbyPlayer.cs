@@ -5,20 +5,20 @@ using Illu.Steam;
 public class NetworkLobbyPlayer : NetworkBehaviour
 {
     [SerializeField] GameObject canvas;
+    [SerializeField] ReadyUpSystem readyUpSystem;
 
-    override public void OnStartAuthority()
+    public override void OnStartAuthority()
     {  
         canvas.SetActive(true);
         RequestID(gameObject);
-    }
 
-    public override void OnStartClient() 
-    {
-        Illu.Networking.NetworkManager.Instance.LobbyPlayers.Add(this);
         bool isLan = Illu.Networking.NetworkManager.Instance.isLanConnection;
         GetComponent<SteamUI>().enabled = !isLan;
         GetComponent<LanUI>().enabled = isLan;
     }
+
+    public override void OnStartClient() => Illu.Networking.NetworkManager.Instance.LobbyPlayers.Add(this);
+    
     public override void OnStopClient() 
     {
         Illu.Networking.NetworkManager.Instance.LobbyPlayers.Remove(this);
@@ -26,22 +26,22 @@ public class NetworkLobbyPlayer : NetworkBehaviour
     }
 
     [Client]
-    public void ReadyUP() => CMDSetStatus(ReadyUpSystem.Instance.myID, true);
+    public void ReadyUP() => CMDSetStatus(readyUpSystem.myID, true);
     [Client]
-    public void CancelReadyUP() => CMDSetStatus(ReadyUpSystem.Instance.myID, false);
-    
+    public void CancelReadyUP() => CMDSetStatus(readyUpSystem.myID, false);
+
     [Command]
     public void CMDSetStatus(ReadyUpSystem.ID myID, bool status)
     {
         if (myID == ReadyUpSystem.ID.playerOne)
         {
             Debug.Log("Ready up player one");
-            ReadyUpSystem.Instance.playerOneReady = status;
+            readyUpSystem.playerOneReady = status;
         }
         else
         {
             Debug.Log("Ready up player two");
-            ReadyUpSystem.Instance.playerTwoReady = status;
+            readyUpSystem.playerTwoReady = status;
         }
     }
 
@@ -50,21 +50,21 @@ public class NetworkLobbyPlayer : NetworkBehaviour
     {
         NetworkConnectionToClient conn = go.GetComponent<NetworkIdentity>().connectionToClient;
 
-        if (ReadyUpSystem.Instance.assigned.Count == 0)
+        if (readyUpSystem.assigned.Count == 0)
         {
-            ReadyUpSystem.Instance.assigned.Add(ReadyUpSystem.ID.playerOne);
+            readyUpSystem.assigned.Add(ReadyUpSystem.ID.playerOne);
             //ReadyUpSystem.Instance.myID = ReadyUpSystem.ID.playerOne;
             TargetSetIdOnClient(conn, ReadyUpSystem.ID.playerOne);
         }
         else
         {
-            ReadyUpSystem.Instance.assigned.Add(ReadyUpSystem.ID.playerTwo);
+            readyUpSystem.assigned.Add(ReadyUpSystem.ID.playerTwo);
             // ReadyUpSystem.Instance.myID = ReadyUpSystem.ID.playerTwo;
             TargetSetIdOnClient(conn, ReadyUpSystem.ID.playerTwo);
         }
     }
 
     [TargetRpc]
-    public void TargetSetIdOnClient(NetworkConnection target, ReadyUpSystem.ID id) => ReadyUpSystem.Instance.myID = id;
-    
+    public void TargetSetIdOnClient(NetworkConnection target, ReadyUpSystem.ID id) => readyUpSystem.myID = id;
+
 }

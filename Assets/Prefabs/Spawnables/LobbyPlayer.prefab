@@ -682,7 +682,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 148.89331, y: -385.8813}
+  m_AnchoredPosition: {x: 148.89355, y: -385.88135}
   m_SizeDelta: {x: 500, y: 700}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &5741183953292642575
@@ -1161,7 +1161,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2437410637287333510
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1478,8 +1478,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NetworkRoomPlayer, Assembly-CSharp
+      - m_Target: {fileID: 5287471887746393460}
+        m_TargetAssemblyTypeName: NetworkLobbyPlayer, Assembly-CSharp
         m_MethodName: ReadyUP
         m_Mode: 1
         m_Arguments:
@@ -1487,7 +1487,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: LevelOne
+          m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!1 &7158061513385122899
@@ -1579,6 +1579,7 @@ GameObject:
   - component: {fileID: 7836636298077460997}
   - component: {fileID: 5238090557533713654}
   - component: {fileID: -4129583225098405565}
+  - component: {fileID: 6930595175843121583}
   m_Layer: 0
   m_Name: LobbyPlayer
   m_TagString: Untagged
@@ -1633,6 +1634,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   canvas: {fileID: 6354031691592070635}
+  readyUpSystem: {fileID: 6930595175843121583}
 --- !u!114 &7836636298077460997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1640,7 +1642,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7242622422971727020}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9b3e41fa1f79e6c47985900bf4f0c29c, type: 3}
   m_Name: 
@@ -1659,6 +1661,7 @@ MonoBehaviour:
     type: 3}
   steamEmptyLobbyPrefab: {fileID: 2913364059952556577, guid: 789ec8a8f15a74043a180cb2bf250168,
     type: 3}
+  readyUpSystem: {fileID: 6930595175843121583}
 --- !u!114 &5238090557533713654
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1666,13 +1669,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7242622422971727020}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae5b9a4b4ccd87d4aa4db91872794fe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  readyUpSystem: {fileID: 6930595175843121583}
   lobbyHostTarget: {fileID: 4017971946690042452}
   lobbyClientTarget: {fileID: 2342129423365093235}
   _lobbyPrefab: {fileID: 2913364059952556577, guid: 6db95e59ad1b26e4e9480b925d495002,
@@ -1691,9 +1695,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  readyUpSystem: {fileID: 6930595175843121583}
   readyUp: {fileID: 5330892758491469275}
   startGame: {fileID: 5943405592690915605}
   startBTN: {fileID: 3604433306949251706}
+--- !u!114 &6930595175843121583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7242622422971727020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 674098fce844e4757b7e909e6adbf921, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  BothReady:
+    m_PersistentCalls:
+      m_Calls: []
+  playerOneReady: 0
+  playerTwoReady: 0
+  myID: 0
 --- !u!1 &7346980627910081811
 GameObject:
   m_ObjectHideFlags: 0
@@ -1938,7 +1963,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 297.78613, y: -771.7622}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1542580115974995431
 CanvasRenderer:

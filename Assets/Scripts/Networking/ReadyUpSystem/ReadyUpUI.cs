@@ -6,13 +6,14 @@ namespace Illu.Networking
 {
     public class ReadyUpUI : NetworkBehaviour
     {
+        [SerializeField] ReadyUpSystem readyUpSystem;
         [SerializeField] RectTransform readyUp;
         [SerializeField] RectTransform startGame;
         [SerializeField] Button startBTN;
 
         void OnEnable()
         {
-            ReadyUpSystem.Instance.BothReady.AddListener(OnBothReady);
+            readyUpSystem.BothReady.AddListener(OnBothReady);
             startBTN.onClick.AddListener(handleOnClick);
         }
         void OnBothReady()
