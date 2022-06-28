@@ -10,7 +10,7 @@ namespace Illu.Networking
 
     public class NetworkManager : Mirror.NetworkManager
     {
-        [SerializeField, Scene] string menuScene;
+        [SerializeField] string menuScene;
 
         [Header("Lobby")]
         [SerializeField] GameObject lobbyPlayerPrefab;
