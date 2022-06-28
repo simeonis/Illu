@@ -11,8 +11,8 @@ namespace Illu.Steam
     public class SteamManager : MonoBehaviourSingletonDontDestroy<SteamManager>
     {
         // Callbacks handled by SteamUI
-        [HideInInspector] public UnityEvent<SteamUserRecord> OnLobbyUserJoined = new UnityEvent<SteamUserRecord>();
-        [HideInInspector] public UnityEvent OnLobbyUserLeft = new UnityEvent();
+        // [HideInInspector] public UnityEvent<SteamUserRecord> OnLobbyUserJoined = new UnityEvent<SteamUserRecord>();
+        [HideInInspector] public UnityEvent OnLobbyUpdated = new UnityEvent();
 
         // Callbacks handled by Steam 
         protected Callback<LobbyCreated_t>           lobbyCreated;
@@ -76,6 +76,8 @@ namespace Illu.Steam
                 // Setting HostAddress in Lobby Metadata
                 lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
                 SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostAddressKey, SteamUser.GetSteamID().ToString());
+                
+                OnLobbyUpdated?.Invoke(); // Notify SteamUI to rebuild the lobby
             }
         }
 
@@ -100,6 +102,7 @@ namespace Illu.Steam
             {
                 NetworkManager.Instance.HostAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostAddressKey);
                 NetworkManager.Instance.StartClient();
+                OnLobbyUpdated?.Invoke(); // Notify SteamUI to rebuild the lobby
             }
         }
 
@@ -143,22 +146,22 @@ namespace Illu.Steam
                 // Entered
                 case (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered:
                     UIConsole.Log(string.Format("[Lobby]: {0} has joined.", steamUserChanged.name));
-                    OnLobbyUserJoined?.Invoke(steamUserChanged);
+                    OnLobbyUpdated?.Invoke(); // Notify SteamUI to rebuild the lobby
                     break;
                 // Left
                 case (uint)EChatMemberStateChange.k_EChatMemberStateChangeLeft:
                     UIConsole.Log(string.Format("[Lobby]: {0} has left.", steamUserChanged.name));
-                    OnLobbyUserLeft?.Invoke();
+                    OnLobbyUpdated?.Invoke(); // Notify SteamUI to rebuild the lobby
                     break;
                 // Kicked
                 case (uint)EChatMemberStateChange.k_EChatMemberStateChangeKicked:
                     UIConsole.Log(string.Format("[Lobby]: {0} was kicked by {1}.", steamUserChanged.name, steamUserMakingChange.name));
-                    OnLobbyUserLeft?.Invoke();
+                    OnLobbyUpdated?.Invoke(); // Notify SteamUI to rebuild the lobby
                     break;
                 // Disconnected
                 case (uint)EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
                     UIConsole.Log(string.Format("[Lobby]: {0} disconnected.", steamUserChanged.name));
-                    OnLobbyUserLeft?.Invoke();
+                    OnLobbyUpdated?.Invoke(); // Notify SteamUI to rebuild the lobby
                     break;
                 default:
                     break;

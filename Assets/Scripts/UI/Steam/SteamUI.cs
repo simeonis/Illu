@@ -7,6 +7,9 @@ namespace Illu.Steam
 {
     public class SteamUI : Mirror.NetworkBehaviour
     {
+        [Header("Page")]
+        [SerializeField] GameObject friendPage;
+
         [Header("Target Parent")]
         [SerializeField] RectTransform friendList;
         [SerializeField] RectTransform lobbyHost;
@@ -24,8 +27,7 @@ namespace Illu.Steam
 
         void OnEnable()
         {
-            SteamManager.Instance.OnLobbyUserJoined.AddListener(GenerateLobbyClient);
-            SteamManager.Instance.OnLobbyUserLeft.AddListener(GenerateLobbyUsers);
+            SteamManager.Instance.OnLobbyUpdated.AddListener(GenerateLobby);
 
             ReadyUpSystem.Instance.OneReady.AddListener(SetPlayerOneStatus);
             ReadyUpSystem.Instance.TwoReady.AddListener(SetPlayerTwoStatus);
@@ -33,102 +35,87 @@ namespace Illu.Steam
 
         void OnDisable()
         {
-
-            SteamManager.Instance.OnLobbyUserJoined.RemoveListener(GenerateLobbyClient);
-            SteamManager.Instance.OnLobbyUserLeft.RemoveListener(GenerateLobbyUsers);
+            SteamManager.Instance.OnLobbyUpdated.RemoveListener(GenerateLobby);
 
             ReadyUpSystem.Instance.OneReady.RemoveListener(SetPlayerOneStatus);
             ReadyUpSystem.Instance.TwoReady.RemoveListener(SetPlayerTwoStatus); 
         }
 
-        override public void OnStartClient()
-        {
-            base.OnStartClient();
-
-            if(!Networking.NetworkManager.Instance.isLanConnection)
-                GenerateLobbyUsers();
-        }
-
-        void GenerateLobbyUsers()
+        void GenerateLobby()
         {
             DestroyLobby();
+            GenerateEmptyLobby();
+
             List<SteamUserRecord> lobbyMembers = SteamManager.Instance.GetLobbyUsers();
+
             for(int i = 0; i < lobbyMembers.Count; i++)
-                GenerateLobbyFriend(lobbyMembers[i], isServer, i == 0);
+                GenerateLobbyUser(lobbyMembers[i], isServer, i == 0);
         }
 
-        // triggered on Lobby Join Attempt 
-        void GenerateLobbyEmpty()
+        void GenerateEmptyLobby()
         {
             GameObject lobbyEmpty = Instantiate(steamEmptyLobbyPrefab, lobbyClient);
             SteamEmptyLobby lobbyEmptyDetails = lobbyEmpty.GetComponent<SteamEmptyLobby>();
             lobbyEmptyDetails.addButton.onClick.AddListener(delegate
             {
-                GenerateFriendList();
+                OpenFriendList();
             });
-        }
-
-        // Should be driven by event
-        void RemoveLobbyClient()
-        {
-            DestroyLobbyClient();
-            GenerateLobbyEmpty();
-        }
-
-        //***********************************************************************************************************
-
-        void GenerateLobbyClient(SteamUserRecord steamFriend) => GenerateLobbyFriend(steamFriend, isServer, false);
-
-        void GenerateLobbyFriend(SteamUserRecord steamFriend, bool serverside, bool hostSlot)
-        {
-            GameObject lobbyUser = Instantiate(steamLobbyPrefab, hostSlot ? lobbyHost : lobbyClient);
-            if (!hostSlot && lobbyClient.childCount > 0) Destroy(lobbyClient.GetChild(0).gameObject); // Destroy EmptyLobbyFriend
-
-            SteamFriendLobby lobbyUserDetails = lobbyUser.GetComponent<SteamFriendLobby>();
-            Texture2D tex = GetSteamImageAsTexture2D(steamFriend.avatar);
-
-            lobbyUserDetails.Instantiate(
-                steamFriend,
-                tex,
-                (serverside && !hostSlot),
-                delegate
-                {
-                    SteamManager.Instance.KickUser(steamFriend.id);
-                }
-            );
-
-            playerCards.Add(lobbyUserDetails);
         }
 
         void DestroyLobby()
         {
             DestroyLobbyHost();
             DestroyLobbyClient();
-
             playerCards.Clear();
         }
 
         void DestroyLobbyHost()
         {
             if (lobbyHost.childCount > 0)
-            {
                 foreach (Transform child in lobbyHost) Destroy(child.gameObject);
-            }
         }
 
         void DestroyLobbyClient()
         {
             if (lobbyClient.childCount > 0)
-            {
                 foreach (Transform child in lobbyClient) Destroy(child.gameObject);
-            }
         }
 
-        public void GenerateFriendList()
+        void GenerateLobbyUser(SteamUserRecord steamUser, bool isServer, bool isHost)
         {
-            DestroyFriendList();
+            GameObject lobbyUser = Instantiate(steamLobbyPrefab, isHost ? lobbyHost : lobbyClient);
+            if (!isHost && lobbyClient.childCount > 0) Destroy(lobbyClient.GetChild(0).gameObject); // Destroy EmptyLobbyFriend
 
-            //access friend list 
+            SteamFriendLobby lobbyUserDetails = lobbyUser.GetComponent<SteamFriendLobby>();
+            Texture2D tex = GetSteamImageAsTexture2D(steamUser.avatar);
+
+            lobbyUserDetails.Instantiate(
+                steamUser,
+                tex,
+                (isServer && !isHost),
+                delegate
+                {
+                    SteamManager.Instance.KickUser(steamUser.id);
+                }
+            );
+
+            playerCards.Add(lobbyUserDetails);
+        }
+
+        public void OpenFriendList()
+        {
+            GenerateFriendList();
+            friendPage.SetActive(true);
+        }
+
+        public void CloseFriendList()
+        {
+            friendPage.SetActive(false);
+            DestroyFriendList();
+        }
+
+        void GenerateFriendList()
+        {
             var steamFriends = SteamManager.Instance.GetSteamFriends();
 
             GameObject subList = null;
@@ -181,9 +168,9 @@ namespace Illu.Steam
                 playerCards[caller].SetIndicator(status);
         }
 
-        // /*  --------------------------
-        // *        Helper functions
-        // *   -------------------------- */
+        // *  -------------------------- * \\
+        // *        Helper functions     * \\
+        // *  -------------------------- * \\
         Texture2D GetSteamImageAsTexture2D(int iImage)
         {
             Texture2D ret = null;
