@@ -16,31 +16,38 @@ public class LanUI : NetworkBehaviour
         }
     }
 
-    [SerializeField] ReadyUpSystem readyUpSystem;
-    [SerializeField] private RectTransform lobbyHostTarget;
-    [SerializeField] private RectTransform lobbyClientTarget;
+    Illu.Networking.ReadyUpSystemReference readyUpSystemReference;
+    [SerializeField] RectTransform lobbyHostTarget;
+    [SerializeField] RectTransform lobbyClientTarget;
 
-    [SerializeField] private GameObject _lobbyPrefab;
+    [SerializeField] GameObject _lobbyPrefab;
 
     List<LanLobbyMember> playerCards = new List<LanLobbyMember>();
 
+    void Start()
+    {
+        readyUpSystemReference = FindObjectOfType<Illu.Networking.ReadyUpSystemReference>();
+        readyUpSystemReference.OneReady.AddListener(setPlayerOneStatus);
+        readyUpSystemReference.TwoReady.AddListener(setPlayerTwoStatus);
+   
+    }
+
     void OnEnable()
     {
-        // GameManager.Instance.AddListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
-        // GameManager.Instance.AddListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
-
-        readyUpSystem.OneReady.AddListener(setPlayerOneStatus);
-        readyUpSystem.TwoReady.AddListener(setPlayerTwoStatus);
+        Illu.Networking.NetworkManager.Instance.clientConnect.AddListener(OnClientConnect);
+        Illu.Networking.NetworkManager.Instance.clientDisconnect.AddListener(OnClientDisconnect);
     }
 
     void OnDisable()
     {
-        // remove listener 
-        // GameManager.Instance.RemoveListener(GameManager.Event.S_ClientConnected,    OnClientConnect);
-        // GameManager.Instance.RemoveListener(GameManager.Event.C_ClientDisconnected, OnClientDisconnect);
+        Illu.Networking.NetworkManager.Instance.clientConnect.RemoveListener(OnClientConnect);
+        Illu.Networking.NetworkManager.Instance.clientDisconnect.RemoveListener(OnClientDisconnect);
 
-        readyUpSystem.OneReady.RemoveListener(setPlayerOneStatus);
-        readyUpSystem.TwoReady.RemoveListener(setPlayerTwoStatus);
+        if (readyUpSystemReference)
+        {
+            readyUpSystemReference.OneReady.RemoveListener(setPlayerOneStatus);
+            readyUpSystemReference.TwoReady.RemoveListener(setPlayerTwoStatus);
+        }
     }
 
     override public void OnStartServer() 

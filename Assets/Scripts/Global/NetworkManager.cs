@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using Mirror;
 
@@ -23,9 +24,11 @@ namespace Illu.Networking
         public List<NetworkGamePlayer> GamePlayers { get; } = new List<NetworkGamePlayer>();
 
         public static event Action<NetworkConnection> OnServerReadied;
+        public UnityEvent clientConnect    = new UnityEvent();
+        public UnityEvent clientDisconnect = new UnityEvent();
 
         public string HostAddress { get => networkAddress; set => networkAddress = value; }
-        [HideInInspector] public bool isLanConnection = false;
+        public bool isLanConnection = false;
 
         public static NetworkManager Instance { get; private set; }
 
@@ -78,13 +81,21 @@ namespace Illu.Networking
                 UIConsole.Log("[Server]: Disconnected Client[" + conn.connectionId + "].");
                 return;
             }
+
+            clientConnect?.Invoke();
+        }
+
+        public override void OnServerDisconnect(NetworkConnection conn)
+        {
+            base.OnServerDisconnect(conn);
+            clientDisconnect?.Invoke();
         }
 
         // CLIENT connected to SERVER
         public override void OnClientConnect(NetworkConnection conn)
         {
             base.OnClientConnect(conn);
-
+   
             conn.Send(new CreateLobbyPlayerMessage());
 
             UIConsole.Log("[Client]: Connected to server.");
@@ -96,9 +107,7 @@ namespace Illu.Networking
             base.OnClientDisconnect(conn);
 
             if (SceneManager.GetActiveScene().name != menuScene)
-            {
                 SceneManager.LoadScene(menuScene);
-            }
 
             if (!isLanConnection)
                 Steam.SteamManager.Instance.LobbyDisconnected();

@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
         { Event.GamePaused,       new UnityEvent() },
         { Event.GameResumed,      new UnityEvent() },
         { Event.GameLeft,         new UnityEvent() },
-        { Event.GameLANLeft,         new UnityEvent() },
+        { Event.GameLANLeft,      new UnityEvent() },
         { Event.GameModeTraining, new UnityEvent() },
         { Event.GameModeStandard, new UnityEvent() },
     };

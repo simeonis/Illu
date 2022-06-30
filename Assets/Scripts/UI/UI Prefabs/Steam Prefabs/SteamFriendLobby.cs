@@ -21,8 +21,6 @@ public class SteamFriendLobby : MonoBehaviour
     // Kick Button
     public Button removeButton;
 
-    private bool canKick = true;
-
     public void Instantiate(SteamUserRecord user, Texture2D avatarTex, bool canKick, UnityEngine.Events.UnityAction kick)
     {
         // Prefab Name

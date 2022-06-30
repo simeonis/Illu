@@ -1,50 +1,73 @@
 using Mirror;
-using UnityEngine.Events;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Events;
 
-public class MyBoolEvent : UnityEvent<bool> { }
 public class ReadyUpSystem : NetworkBehaviour
 {
-    [HideInInspector] public UnityEvent BothReady = new UnityEvent();
-    public MyBoolEvent OneReady = new MyBoolEvent();
-    public MyBoolEvent TwoReady = new MyBoolEvent();
+    [Header("UI References")]
+    [SerializeField] RectTransform readyUp;
+    [SerializeField] RectTransform startGame;
+    [SerializeField] Button startBTN;
 
-    [SyncVar(hook = nameof(PlayerOneStatus))]
-    public bool playerOneReady = false;
+    Illu.Networking.ReadyUpSystemReference readyUpSystemReference;
 
-    [SyncVar(hook = nameof(PlayerTwoStatus))]
-    public bool playerTwoReady = false;
+    bool receivedAuthority = false;
 
-    [System.Serializable]
-    public enum ID
-    {   
-        playerOne,
-        playerTwo
+    [SyncVar]
+    [SerializeField] int myID = -1;
+
+    void Start()
+    {
+        readyUpSystemReference = FindObjectOfType<Illu.Networking.ReadyUpSystemReference>();
+        readyUpSystemReference.BothReady.AddListener(OnBothReady);
+
+        startBTN.onClick.AddListener(OnStartBtnClick);
+
+        if (receivedAuthority)
+            RequestID();
     }
 
-    public SyncList<ID> assigned = new SyncList<ID>();
-
-    public ID myID;
-
-    private void PlayerOneStatus(bool oldValue, bool newValue)
+    void OnBothReady(bool ready)
     {
-        OneReady.Invoke(newValue);
-        CheckReady();
-    }
-
-    private void PlayerTwoStatus(bool oldValue, bool newValue)
-    {
-        TwoReady.Invoke(newValue);
-        CheckReady();
-    }
-
-    private void CheckReady()
-    {
-
-        if (playerOneReady && playerTwoReady)
+        if (ready && isServer)
         {
-            BothReady?.Invoke();
+            readyUp.gameObject.SetActive(false);
+            startBTN.gameObject.SetActive(true);
+
         }
     }
 
+    void OnStartBtnClick() => GameManager.Instance.TriggerEvent(GameManager.Event.GameStart);
+
+    public override void OnStartAuthority() => receivedAuthority = true;
+
+    [Client]
+    public void ReadyUP()
+    {
+       if(myID != -1)
+         CMDSetStatus(myID, true);
+    }
+
+    [Client]
+    public void CancelReadyUP() => CMDSetStatus(myID, false);
+
+    [Command]
+    public void CMDSetStatus(int myID, bool status)
+    {
+        if (myID == 0)
+        {
+            readyUpSystemReference.playerOneReady = status;
+        }
+        else
+        {
+            readyUpSystemReference.playerTwoReady = status;
+        }
+    }
+
+    [Command]
+    public void RequestID()
+    {
+        myID = readyUpSystemReference.AddPLayer();
+    }
 }
