@@ -16,7 +16,7 @@ public class LanUI : NetworkBehaviour
         }
     }
 
-    Illu.Networking.ReadyUpSystemReference readyUpSystemReference;
+    Illu.Networking.ReadyUpSystem readyUpSystemReference;
     [SerializeField] RectTransform lobbyHostTarget;
     [SerializeField] RectTransform lobbyClientTarget;
 
@@ -26,7 +26,7 @@ public class LanUI : NetworkBehaviour
 
     void Start()
     {
-        readyUpSystemReference = FindObjectOfType<Illu.Networking.ReadyUpSystemReference>();
+        readyUpSystemReference = FindObjectOfType<Illu.Networking.ReadyUpSystem>();
         readyUpSystemReference.OneReady.AddListener(setPlayerOneStatus);
         readyUpSystemReference.TwoReady.AddListener(setPlayerTwoStatus);
    

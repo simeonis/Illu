@@ -1,73 +1,47 @@
-using Mirror;
+﻿using Mirror;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Events;
 
-public class ReadyUpSystem : NetworkBehaviour
+namespace  Illu.Networking
 {
-    [Header("UI References")]
-    [SerializeField] RectTransform readyUp;
-    [SerializeField] RectTransform startGame;
-    [SerializeField] Button startBTN;
-
-    Illu.Networking.ReadyUpSystemReference readyUpSystemReference;
-
-    bool receivedAuthority = false;
-
-    [SyncVar]
-    [SerializeField] int myID = -1;
-
-    void Start()
+    public class ReadyUpSystem : NetworkBehaviour
     {
-        readyUpSystemReference = FindObjectOfType<Illu.Networking.ReadyUpSystemReference>();
-        readyUpSystemReference.BothReady.AddListener(OnBothReady);
+        [Header("Events")]
+        [HideInInspector] public UnityEvent<bool> BothReady = new UnityEvent<bool>();
+        [HideInInspector] public UnityEvent<bool> OneReady = new UnityEvent<bool>();
+        [HideInInspector] public UnityEvent<bool> TwoReady = new UnityEvent<bool>();
 
-        startBTN.onClick.AddListener(OnStartBtnClick);
+        [SyncVar(hook = nameof(PlayerOneStatus))]
+        public bool playerOneReady = false;
 
-        if (receivedAuthority)
-            RequestID();
-    }
+        [SyncVar(hook = nameof(PlayerTwoStatus))]
+        public bool playerTwoReady = false;
 
-    void OnBothReady(bool ready)
-    {
-        if (ready && isServer)
+        [SyncVar, SerializeField] int idCount = 0;
+
+        public int AddPLayer()
         {
-            readyUp.gameObject.SetActive(false);
-            startBTN.gameObject.SetActive(true);
-
+            var id = idCount;
+            idCount++;
+            return id;
         }
-    }
 
-    void OnStartBtnClick() => GameManager.Instance.TriggerEvent(GameManager.Event.GameStart);
+        public void RemovePlayer() => idCount--;
+        public int  GetIDCount() => idCount;
 
-    public override void OnStartAuthority() => receivedAuthority = true;
-
-    [Client]
-    public void ReadyUP()
-    {
-       if(myID != -1)
-         CMDSetStatus(myID, true);
-    }
-
-    [Client]
-    public void CancelReadyUP() => CMDSetStatus(myID, false);
-
-    [Command]
-    public void CMDSetStatus(int myID, bool status)
-    {
-        if (myID == 0)
+        private void PlayerOneStatus(bool oldValue, bool newValue)
         {
-            readyUpSystemReference.playerOneReady = status;
+            OneReady.Invoke(newValue);
+            CheckReady();
         }
-        else
-        {
-            readyUpSystemReference.playerTwoReady = status;
-        }
-    }
 
-    [Command]
-    public void RequestID()
-    {
-        myID = readyUpSystemReference.AddPLayer();
+        private void PlayerTwoStatus(bool oldValue, bool newValue)
+        {
+            TwoReady.Invoke(newValue);
+            CheckReady();
+        }
+
+        void CheckReady() => BothReady?.Invoke(playerOneReady && playerTwoReady);
+
     }
 }

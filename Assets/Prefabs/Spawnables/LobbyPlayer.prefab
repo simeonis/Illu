@@ -1466,7 +1466,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6930595175843121583}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ReadyUpSystem, Assembly-CSharp
         m_MethodName: ReadyUP
         m_Mode: 1
@@ -1566,7 +1566,7 @@ GameObject:
   - component: {fileID: 5287471887746393460}
   - component: {fileID: 7836636298077460997}
   - component: {fileID: 5238090557533713654}
-  - component: {fileID: 6930595175843121583}
+  - component: {fileID: 668802852199585773}
   m_Layer: 0
   m_Name: LobbyPlayer
   m_TagString: Untagged
@@ -1665,7 +1665,7 @@ MonoBehaviour:
   lobbyClientTarget: {fileID: 2342129423365093235}
   _lobbyPrefab: {fileID: 2913364059952556577, guid: 6db95e59ad1b26e4e9480b925d495002,
     type: 3}
---- !u!114 &6930595175843121583
+--- !u!114 &668802852199585773
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1674,14 +1674,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 7242622422971727020}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 674098fce844e4757b7e909e6adbf921, type: 3}
+  m_Script: {fileID: 11500000, guid: ef1aa78f228b6cf4581a4705a004cf01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
   readyUp: {fileID: 5330892758491469275}
   startGame: {fileID: 5943405592690915605}
-  startBTN: {fileID: 3604433306949251706}
+  startBtn: {fileID: 2230885546057024605}
   myID: -1
 --- !u!1 &7346980627910081811
 GameObject:

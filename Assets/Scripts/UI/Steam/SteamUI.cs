@@ -21,7 +21,7 @@ namespace Illu.Steam
         [SerializeField] GameObject steamLobbyPrefab;
         [SerializeField] GameObject steamEmptyLobbyPrefab;
 
-        Networking.ReadyUpSystemReference readyUpSystemReference;
+        Networking.ReadyUpSystem readyUpSystemReference;
 
         // Make a Enum
         List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
@@ -29,7 +29,7 @@ namespace Illu.Steam
 
         void Start()
         {
-            readyUpSystemReference = FindObjectOfType<Networking.ReadyUpSystemReference>();
+            readyUpSystemReference = FindObjectOfType<Networking.ReadyUpSystem>();
             readyUpSystemReference.OneReady.AddListener(SetPlayerOneStatus);
             readyUpSystemReference.TwoReady.AddListener(SetPlayerTwoStatus);
             SteamManager.Instance.OnLobbyUpdated.AddListener(GenerateLobby);
