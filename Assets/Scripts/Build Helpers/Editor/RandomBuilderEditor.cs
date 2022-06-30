@@ -23,7 +23,7 @@ public class RandomBuilderEditor : Editor
             // Cube
             case 0:
                 builder.CustomMaterial = (Material) EditorGUILayout.ObjectField("Material", builder.CustomMaterial, typeof(Material), true);
-                builder.Amount = EditorGUILayout.IntSlider("Number Of Points", builder.Amount, 0, 500);
+                builder.Amount = EditorGUILayout.IntSlider("Number Of Points", builder.Amount, 0, 5000);
                 builder.BoundSize = EditorGUILayout.Vector3Field("Bound Size", builder.BoundSize);
                 DrawGUIScaling(builder);
                 DrawGUIPivot(builder);
@@ -31,7 +31,7 @@ public class RandomBuilderEditor : Editor
             // Sphere
             case 1:
                 builder.CustomMaterial = (Material) EditorGUILayout.ObjectField("Material", builder.CustomMaterial, typeof(Material), true);
-                builder.Amount = EditorGUILayout.IntSlider("Number Of Points", builder.Amount, 0, 500);
+                builder.Amount = EditorGUILayout.IntSlider("Number Of Points", builder.Amount, 0, 5000);
                 builder.BoundSize = EditorGUILayout.Vector3Field("Bound Size", builder.BoundSize);
                 DrawGUIScaling(builder);
                 DrawGUIPivot(builder);
@@ -39,7 +39,7 @@ public class RandomBuilderEditor : Editor
             // Cylinder
             case 2:
                 builder.CustomMaterial = (Material) EditorGUILayout.ObjectField("Material", builder.CustomMaterial, typeof(Material), true);
-                builder.Amount = EditorGUILayout.IntSlider("Number Of Points", builder.Amount, 0, 500);
+                builder.Amount = EditorGUILayout.IntSlider("Number Of Points", builder.Amount, 0, 5000);
                 builder.BoundSize = EditorGUILayout.Vector3Field("Bound Size", builder.BoundSize);
                 DrawGUIScaling(builder);
                 DrawGUIPivot(builder);

@@ -15,6 +15,7 @@ public class PlayerStateMachine : MonoBehaviour
     [SerializeField] Rig _rightArmRig;
     [SerializeField] Transform _headTarget;
     [SerializeField] Transform _rightArmTarget;
+    [SerializeField] Transform _head;
 
     [Header("Rotation Modifiers")]
     [SerializeField] Transform _playerCamera;
@@ -157,14 +158,18 @@ public class PlayerStateMachine : MonoBehaviour
         RightArmTarget.position = GrapplePoint;
         RightArmTarget.right = (GrapplePoint - ExitPoint).normalized;
         
-        // Head Aim Animation
-        if (Physics.Raycast(_playerCamera.position, _playerCamera.forward, out _cameraMousePos, float.MaxValue))
-            _headTarget.position = _cameraMousePos.point;
-        else
-            _headTarget.position = _playerCamera.position + (_playerCamera.forward * float.MaxValue);
+        SmoothHeadTurn();
 
         _currentState.UpdateStates();
         _currentState.CheckSwitchStates();
+    }
+
+    void SmoothHeadTurn()
+    {
+        float _dot = Vector3.Dot(_playerCamera.forward, _orientation.forward);
+        Vector3 direction = (_head.position - _playerCamera.position).normalized;
+        _headTarget.position = _head.position + direction * 5f;
+        _headRig.weight = Mathf.Min(_dot + 1, 1f);
     }
 
     void FixedUpdate()
