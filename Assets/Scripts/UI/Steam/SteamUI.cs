@@ -27,28 +27,22 @@ namespace Illu.Steam
         List<string> _status = new List<string>() { "Playing Illu", "Online", "Offline" };
         List<SteamFriendLobby> playerCards = new List<SteamFriendLobby>();
 
-        private void Start()
+        void Start()
         {
             readyUpSystemReference = FindObjectOfType<Networking.ReadyUpSystemReference>();
-        }
-
-        void OnEnable()
-        {
+            readyUpSystemReference.OneReady.AddListener(SetPlayerOneStatus);
+            readyUpSystemReference.TwoReady.AddListener(SetPlayerTwoStatus);
             SteamManager.Instance.OnLobbyUpdated.AddListener(GenerateLobby);
 
             if(!isServer)
                 GenerateLobby();
-
-            //readyUpSystemReference.OneReady.AddListener(SetPlayerOneStatus);
-            //readyUpSystemReference.TwoReady.AddListener(SetPlayerTwoStatus);
         }
 
-        void OnDisable()
+        void OnDestroy()
         {
+            readyUpSystemReference.OneReady.RemoveListener(SetPlayerOneStatus);
+            readyUpSystemReference.TwoReady.RemoveListener(SetPlayerTwoStatus);
             SteamManager.Instance.OnLobbyUpdated.RemoveListener(GenerateLobby);
-
-            //readyUpSystemReference.OneReady.RemoveListener(SetPlayerOneStatus);
-            //readyUpSystemReference.TwoReady.RemoveListener(SetPlayerTwoStatus);
         }
 
         void GenerateLobby()
