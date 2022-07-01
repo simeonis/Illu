@@ -1,30 +1,8 @@
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
 
 public class PlayerStateMachine : MonoBehaviour
 {
-    PlayerBaseState _currentState;
-    PlayerStateFactory _states;
-
-    [Header("Grappling Hook")]
-    [SerializeField] GrapplingHookStateMachine _grapplingHook;
-
-    [Header("Animation Modifiers")]
-    [SerializeField] Animator _animator;
-    [SerializeField] Rig _headRig;
-    [SerializeField] Rig _rightArmRig;
-    [SerializeField] Transform _headTarget;
-    [SerializeField] Transform _rightArmTarget;
-    [SerializeField] Transform _head;
-
-    [Header("Rotation Modifiers")]
-    [SerializeField] Transform _playerCamera;
-    [SerializeField] Transform _orientation;
-    [SerializeField] Transform _body;
-    [SerializeField] Rigidbody _rigidbody;
-    float _turnSmoothVelocity;
-
-    [Header("Locomotion Modifiers")]
+    [Header("Locomotion")]
     [SerializeField, Tooltip("Max total speed")]
     float _maxSpeed = 48f;
     [SerializeField, Tooltip("Max walk speed")]
@@ -43,7 +21,7 @@ public class PlayerStateMachine : MonoBehaviour
     float _moveSpeed;
     float _turnFactor;
 
-    [Header("Jump Modifiers")]
+    [Header("Jump")]
     [SerializeField, Tooltip("Apex of jump")]
     float _maxJumpHeight = 1.5f;
     [SerializeField, Tooltip("Time to complete a full jump in seconds")]
@@ -53,7 +31,7 @@ public class PlayerStateMachine : MonoBehaviour
     float _coyoteTimeCounter;
     float _initialJumpVelocity;
 
-    [Header("Fall Modifiers")]
+    [Header("Fall")]
     [SerializeField, Tooltip("Threshold velocity in which the player will count as falling")]
     float _fallThresholdVelocity = 1f;
     [SerializeField, Tooltip("Velocity or lower that ensures a safe landing")]
@@ -61,12 +39,25 @@ public class PlayerStateMachine : MonoBehaviour
     [SerializeField, Tooltip("Velocity or higher that causes a harmful landing")]
     float _harmfulVelocity = 24f;
 
-    [Header("Ground Modifiers")]
+    [Header("Ground")]
     [SerializeField, Tooltip("Layers that the player can collide with")]
     LayerMask _groundMask;
     [SerializeField, Range(0f, 1f), Tooltip("Range from feet that checks if the player is grounded")]
     float _groundDetection = 0.18f;
     bool _isGrounded = false;
+
+    [Header("References")]
+    [SerializeField] Animator _animator;
+    [SerializeField] Transform _body;
+    [SerializeField] GrapplingHookStateMachine _grapplingHook;
+    [SerializeField] Transform _orientation;
+    [SerializeField] Transform _playerCamera;
+    [SerializeField] Rigidbody _rigidbody;
+    float _turnSmoothVelocity;
+
+    // States
+    PlayerBaseState _currentState;
+    PlayerStateFactory _states;
 
     // Player Input
     bool _isMovementPressed = false;
@@ -77,6 +68,7 @@ public class PlayerStateMachine : MonoBehaviour
     float _gravity;
 
     // Getters & Setters - Grappling Hook
+    public bool IsFired { get => _grapplingHook.IsFired; }
     public bool IsGrappled { get => _grapplingHook.IsGrappled; }
     public Vector3 GrapplePoint { get => _grapplingHook.GrapplePoint; }
     public Vector3 ExitPoint { get => _grapplingHook.ExitPoint; }
@@ -90,8 +82,6 @@ public class PlayerStateMachine : MonoBehaviour
     public int IsJumpingHash { get => Animator.StringToHash("isJumping"); }
     public int IsSwingingHash { get => Animator.StringToHash("isSwinging"); }
     public int MoveSpeedHash { get => Animator.StringToHash("moveSpeed"); }
-    public Rig RightArmRig { get => _rightArmRig; }
-    public Transform RightArmTarget { get => _rightArmTarget; }
 
     // Getters & Setters - Rotation
     public Transform Viewpoint { get => _playerCamera; }
@@ -136,10 +126,6 @@ public class PlayerStateMachine : MonoBehaviour
         _gravity = (-2 * _maxJumpHeight) / Mathf.Pow(timeToApex, 2);
         _initialJumpVelocity = (2 * _maxJumpHeight) / timeToApex;
 
-        // Animation
-        _headRig.weight = 1f;
-        _rightArmRig.weight = 0f;
-
         // State
         _states = new PlayerStateFactory(this);
         _currentState = _states.GetState<PlayerGroundState>();
@@ -152,24 +138,9 @@ public class PlayerStateMachine : MonoBehaviour
         // Logic Checks
         _isGrounded = Physics.CheckSphere(_body.position, _groundDetection, _groundMask);
         if (!_isGrounded && _coyoteTimeCounter >= 0) _coyoteTimeCounter -= Time.deltaTime;
-        
-        // Grapple Arm Animation
-        RightArmRig.weight = IsGrappled ? 1f : 0f;
-        RightArmTarget.position = GrapplePoint;
-        RightArmTarget.right = (GrapplePoint - ExitPoint).normalized;
-        
-        SmoothHeadTurn();
 
         _currentState.UpdateStates();
         _currentState.CheckSwitchStates();
-    }
-
-    void SmoothHeadTurn()
-    {
-        float _dot = Vector3.Dot(_playerCamera.forward, _orientation.forward);
-        Vector3 direction = (_head.position - _playerCamera.position).normalized;
-        _headTarget.position = _head.position + direction * 5f;
-        _headRig.weight = Mathf.Min(_dot + 1, 1f);
     }
 
     void FixedUpdate()

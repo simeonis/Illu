@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Events;
 
 public class GrapplingHookStateMachine : MonoBehaviour
 {
@@ -56,6 +57,8 @@ public class GrapplingHookStateMachine : MonoBehaviour
     
     // Getters & Setters - State
     public GrapplingHookBaseState CurrentState { get { return _currentState; } set { _currentState = value; } }
+    public bool IsIdle { get { return _currentState is GrapplingHookIdleState; } }
+    public bool IsFired { get { return _currentState is GrapplingHookFiredState; } }
     public bool IsGrappled { get { return _currentState is GrapplingHookGrappledState; } }
 
     void Start()
