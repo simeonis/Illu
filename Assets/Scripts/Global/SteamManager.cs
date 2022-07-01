@@ -45,12 +45,6 @@ namespace Illu.Steam
 
         void OnDisable()
         {
-            lobbyCreated.Dispose();
-            lobbyEntered.Dispose();
-            lobbyChatMessage.Dispose();
-            lobbyChatUpdate.Dispose();
-            lobbyJoinRequested.Dispose();
-
             GameManager.Instance.RemoveListener(GameManager.Event.GameLeft, LobbyLeft);
         }
 

@@ -23,7 +23,7 @@ public class PlayerCamera : MonoBehaviour
     private GameObject lockedVirtualCamera;
     public void LockCinemachine(bool state)
     {
-        if (camera.TryGetComponent<CinemachineBrain>(out var brain))
+        if (camera && camera.TryGetComponent<CinemachineBrain>(out var brain))
         {
             if (!lockedVirtualCamera)
                 lockedVirtualCamera = brain.ActiveVirtualCamera.VirtualCameraGameObject;

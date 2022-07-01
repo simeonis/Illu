@@ -35,8 +35,6 @@ public class PlayerRigController : MonoBehaviour
 
     void Update()
     {
-        float dot = Vector3.Dot(_playerCamera.forward, _rightShoulderLimiter.forward);
-        Debug.Log(dot);
         HeadRig();
         RightArmRig();
     }

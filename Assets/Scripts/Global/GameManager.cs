@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using Illu.Networking;
 
 public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
@@ -27,13 +28,6 @@ public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
         GameModeStandard,
     }
 
-    public override void Awake()
-    {
-        base.Awake();
-        AddListener(Event.GameResumed, Resume);
-        AddListener(Event.GameModeTraining, StartGame);
-    }
-
     public void TriggerEvent(Event name)
     {
         Debug.Log("TriggerEvent" + name.ToString());
@@ -50,20 +44,6 @@ public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
     public void RemoveListener(Event name, UnityAction listener) => _events[name].RemoveListener(listener);
     
     public void StartGame() => TriggerEvent(Event.GameStart);
-
-    public void Resume()
-    {
-        InputManager.Instance.TogglePlayer();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
-
-    public void Pause()
-    {
-        InputManager.Instance.ToggleMenu();
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-    }
 
     public void LeaveGame()
     {
