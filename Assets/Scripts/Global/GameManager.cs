@@ -1,33 +1,55 @@
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 using UnityEngine;
+using UnityEngine.Events;
+using Illu.Networking;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviourSingletonDontDestroy<GameManager>
 {
-    public static GameManager Instance { get; private set; }
-    private Dictionary<string, Event> _events = new Dictionary<string, Event>();
-
-    void Awake()
+    Dictionary<Event, UnityEvent> _events = new Dictionary<Event, UnityEvent>
     {
-        if (Instance != null) 
-        {
-            // There exist an instance, and it is not me, kill...
-            if (Instance != this) 
-                Destroy(gameObject);
-            return;
-        }
+        { Event.GameStart,        new UnityEvent() },
+        { Event.GamePaused,       new UnityEvent() },
+        { Event.GameResumed,      new UnityEvent() },
+        { Event.GameLeft,         new UnityEvent() },
+        { Event.GameLANLeft,      new UnityEvent() },
+        { Event.GameModeTraining, new UnityEvent() },
+        { Event.GameModeStandard, new UnityEvent() },
+    };
 
-        // There does not exist an instance, create...
-        Instance = this;
-        Event[] events = Resources.LoadAll<Event>("ScriptableObjects/Event");
-        foreach (var e in events) { _events.Add(e.name, e); }
-        DontDestroyOnLoad(gameObject);
+    public enum Event
+    {
+        GameStart,
+        GamePaused,
+        GameResumed,
+        GameLeft,
+        GameLANLeft,
+        GameModeTraining,
+        GameModeStandard,
+    }
+
+    public override void Awake()
+    {
+        base.Awake();
+        AddListener(Event.GameResumed, Resume);
+        AddListener(Event.GameModeTraining, StartGame);
+    }
+
+    public void TriggerEvent(Event name)
+    {
+        Debug.Log("TriggerEvent" + name.ToString());
+        _events[name].Invoke();
     }
 
     public void TriggerEvent(string name)
     {
-        _events[name].Trigger();
+      Event.TryParse(name, out Event requestedEvent);
+      TriggerEvent(requestedEvent);
     }
+
+    public void AddListener(Event name, UnityAction listener) => _events[name].AddListener(listener);
+    public void RemoveListener(Event name, UnityAction listener) => _events[name].RemoveListener(listener);
+    
+    public void StartGame() => TriggerEvent(Event.GameStart);
 
     public void Resume()
     {
@@ -43,8 +65,13 @@ public class GameManager : MonoBehaviour
         Cursor.visible = true;
     }
 
-    public void Exit()
+    public void LeaveGame()
     {
-        Application.Quit();
+        if (NetworkManager.Instance.isLanConnection)
+            TriggerEvent(Event.GameLANLeft);
+        else
+            TriggerEvent(Event.GameLeft);
     }
+
+    public void Exit() =>  Application.Quit();
 }

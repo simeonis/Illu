@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using UnityEngine;
 using Mirror;
 
@@ -16,34 +15,17 @@ public class SwitchTransport : Transport
         if (transports == null || transports.Length == 0)
         {
             Debug.LogError("Switch transport requires at least 1 transport");
+            return;
         }
         selectedTransport = transports[0];
     }
 
-    public void PickTransport(int id)
-    {
-        selectedTransport = transports[id];
-    }
-
-    public override void ClientEarlyUpdate()
-    {
-        selectedTransport.ClientEarlyUpdate();
-    }
-
-    public override void ServerEarlyUpdate()
-    {
-        selectedTransport.ServerEarlyUpdate();
-    }
-
-    public override void ClientLateUpdate()
-    {
-        selectedTransport.ClientLateUpdate();
-    }
-
-    public override void ServerLateUpdate()
-    {
-        selectedTransport.ServerLateUpdate();
-    }
+    public void PickTransport(int id) => selectedTransport = transports[id];
+    public override void ClientEarlyUpdate() => selectedTransport.ClientEarlyUpdate();
+    public override void ServerEarlyUpdate() => selectedTransport.ServerEarlyUpdate();
+    public override void ClientLateUpdate()  => selectedTransport.ClientLateUpdate();
+    public override void ServerLateUpdate()  => selectedTransport.ServerLateUpdate();
+    
 
     void OnEnable()
     {
@@ -61,18 +43,8 @@ public class SwitchTransport : Transport
         }
     }
 
-    public override bool Available()
-    {
-        // available if any of the transports is available
-
-        if (selectedTransport.Available())
-        {
-            return true;
-        }
-
-        return false;
-    }
-
+    public override bool Available() => selectedTransport.Available();
+  
     #region Client
 
     public override void ClientConnect(string address)
@@ -133,38 +105,9 @@ public class SwitchTransport : Transport
     #endregion
 
     #region Server
-    // connection ids get mapped to base transports
-    // if we have 3 transports,  then
-    // transport 0 will produce connection ids [0, 3, 6, 9, ...]
-    // transport 1 will produce connection ids [1, 4, 7, 10, ...]
-    // transport 2 will produce connection ids [2, 5, 8, 11, ...]
-    // int FromBaseId(int transportId, int connectionId)
-    // {
-    //     return connectionId * transports.Length + transportId;
-    // }
-
-    // int ToBaseId(int connectionId)
-    // {
-    //     return connectionId / transports.Length;
-    // }
-
-    // int ToTransportId(int connectionId)
-    // {
-    //     return connectionId % transports.Length;
-    // }
-
-
 
     void AddServerCallbacks()
     {
-        // wire all the base transports to my events
-        // for (int i = 0; i < transports.Length; i++)
-        // {
-        // this is required for the handlers,  if I use i directly
-        // then all the handlers will use the last i
-
-
-
         selectedTransport.OnServerConnected = (baseConnectionId =>
         {
             OnServerConnected.Invoke(baseConnectionId);
@@ -222,16 +165,7 @@ public class SwitchTransport : Transport
 
     public override void ServerSend(int connectionId, ArraySegment<byte> segment, int channelId)
     {
-        // int baseConnectionId = ToBaseId(connectionId);
-        // int transportId = ToTransportId(connectionId);
-
-        // for (int i = 0; i < transports.Length; ++i)
-        // {
-        //     if (i == transportId)
-        //     {
         selectedTransport.ServerSend(connectionId, segment, channelId);
-        //     }
-        // }
     }
 
     public override void ServerStart()
@@ -255,12 +189,7 @@ public class SwitchTransport : Transport
         return selectedTransport.GetMaxPacketSize(channelId);
     }
 
-    public override void Shutdown()
-    {
-
-        selectedTransport.Shutdown();
-
-    }
+    public override void Shutdown() => selectedTransport.Shutdown();
 
     public override string ToString()
     {

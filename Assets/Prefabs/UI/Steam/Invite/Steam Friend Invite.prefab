@@ -196,7 +196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5283019, g: 0.5283019, b: 0.5283019, a: 0.4117647}
+  m_Color: {r: 0, g: 0.5265317, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -225,7 +225,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4933a272a6b6c947b75f06d04fd3059, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  background: {fileID: 2273484595419669975}
   avatar: {fileID: 6615818654619934558}
   steamName: {fileID: 1759593607373971566}
   acceptButton: {fileID: 353972534589365995}

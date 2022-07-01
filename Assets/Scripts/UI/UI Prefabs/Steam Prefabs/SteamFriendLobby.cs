@@ -3,30 +3,45 @@ using UnityEngine.UI;
 using TMPro;
 using Illu.Steam;
 
+[System.Serializable]
 public class SteamFriendLobby : MonoBehaviour
 {
     // Background Color
-    public Image background;
+    Image background;
 
     // Steam Avatar
-    public Image avatar;
+    [SerializeField] Image avatar;
+
+    //Indicator
+    [SerializeField] Image indicator;
 
     // Steam Name
-    public TMP_Text steamName;
+    [SerializeField] TMP_Text steamName;
 
     // Kick Button
     public Button removeButton;
 
-    public void Instantiate(SteamUserRecord user)
+    public void Instantiate(SteamUserRecord user, Texture2D avatarTex, bool canKick, UnityEngine.Events.UnityAction kick)
     {
-        // Prefab name
+        // Prefab Name
         this.name = user.id.ToString();
 
-        // Steam Avatar
-        Texture2D tex = SteamUI.GetSteamImageAsTexture2D(user.avatar);
-        avatar.sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, -tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        // Sprite
+        avatar.sprite = Sprite.Create(
+            avatarTex,
+            new Rect(0.0f, 0.0f,
+            avatarTex.width,
+            -avatarTex.height),
+             new Vector2(0.5f, 0.5f), 100.0f
+            );
 
         // Steam Name
         steamName.text = user.name;
+
+        // Kick Button
+        removeButton.gameObject.SetActive(canKick);
     }
+
+    public void SetIndicator(bool status) => indicator.color = status ? Color.green : Color.red;
+
 }
