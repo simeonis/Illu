@@ -1,5 +1,4 @@
 using UnityEngine.InputSystem;
-using UnityEngine;
 
 public class InputManager : MonoBehaviourSingletonDontDestroy<InputManager>
 {
@@ -39,7 +38,7 @@ public class InputManager : MonoBehaviourSingletonDontDestroy<InputManager>
         ToggleActionMap(playerControls.Player);
     }
 
-    private void ToggleActionMap(InputActionMap actionMap)
+    public void ToggleActionMap(InputActionMap actionMap)
     {
         if (actionMap.enabled) return;
 
