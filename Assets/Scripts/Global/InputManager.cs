@@ -1,4 +1,5 @@
 using UnityEngine.InputSystem;
+using UnityEngine;
 
 public class InputManager : MonoBehaviourSingletonDontDestroy<InputManager>
 {
@@ -8,36 +9,41 @@ public class InputManager : MonoBehaviourSingletonDontDestroy<InputManager>
     {
         base.Awake();
         playerControls = new PlayerControls();
-
-        playerControls.Player.Menu.performed += context => GameManager.Instance.TriggerEvent(GameManager.Event.GamePaused);
-        playerControls.Menu.Menu.performed += context => GameManager.Instance.TriggerEvent(GameManager.Event.GameResumed);
+        ToggleActionMap(playerControls.Player);
+        playerControls.Player.Menu.performed +=  OnMenuPlayer;
+        playerControls.Menu.Menu.performed += OnMenuMenu;
         // playerControls.Land.Console.performed += context => ShowConsole();
         // playerControls.Menu.Console.performed += context => HideConsole();
     }
 
     void OnDisable()
     {
-        playerControls.Player.Menu.performed -= context => GameManager.Instance.TriggerEvent(GameManager.Event.GamePaused);
-        playerControls.Menu.Menu.performed -= context => GameManager.Instance.TriggerEvent(GameManager.Event.GameResumed);
+        if(playerControls != null)
+        {
+            playerControls.Player.Menu.performed -= OnMenuPlayer;
+            playerControls.Menu.Menu.performed -= OnMenuMenu;
+        }
         // playerControls.Land.Console.performed -= context => ShowConsole();
         // playerControls.Menu.Console.performed -= context => HideConsole();
     }
 
-    public void TogglePlayer()
+    void OnMenuPlayer(InputAction.CallbackContext context)
     {
-        ToggleActionMap(playerControls.Player);
+        GameManager.Instance.TriggerEvent(GameManager.Event.GamePaused);
+        ToggleActionMap(playerControls.Menu);
     }
 
-    public void ToggleMenu()
+    void OnMenuMenu(InputAction.CallbackContext context)
     {
-        ToggleActionMap(playerControls.Menu);
+        GameManager.Instance.TriggerEvent(GameManager.Event.GameResumed);
+        ToggleActionMap(playerControls.Player);
     }
 
     private void ToggleActionMap(InputActionMap actionMap)
     {
         if (actionMap.enabled) return;
 
-        Instance.playerControls.Disable(); // Disable ALL action maps
+        playerControls.Disable(); // Disable ALL action maps
         actionMap.Enable(); // Enable ONLY one action map
     }
 }

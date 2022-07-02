@@ -52,7 +52,6 @@ public class PlayerHUD : MonoBehaviour
         resumeScreen.SetActive(true);
         pauseScreen.SetActive(false);
         playerCamera.LockCinemachine(false);
-        InputManager.Instance.TogglePlayer();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -62,7 +61,6 @@ public class PlayerHUD : MonoBehaviour
         resumeScreen.SetActive(false);
         pauseScreen.SetActive(true);
         playerCamera.LockCinemachine(true);
-        InputManager.Instance.ToggleMenu();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
