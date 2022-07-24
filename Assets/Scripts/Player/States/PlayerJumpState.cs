@@ -17,22 +17,22 @@ public class PlayerJumpState : PlayerBaseState
         Ctx.IsJumpPressed = false; // Prevent hold-down jump spam
             
         // Cancel vertical velocity, relative to player's orientation
-        Ctx.PlayerRigidbody.velocity -= Vector3.Project(Ctx.PlayerRigidbody.velocity, Ctx.transform.up);
+        Ctx.Rigidbody.velocity -= Vector3.Project(Ctx.Rigidbody.velocity, Ctx.transform.up);
             
         // Add upwards force, relative to player's orientation
-        Ctx.PlayerRigidbody.AddForce(Ctx.transform.up * Ctx.InitialJumpVelocity, ForceMode.VelocityChange);
+        Ctx.Rigidbody.AddForce(Ctx.transform.up * Ctx.InitialJumpVelocity, ForceMode.VelocityChange);
     }
 
     public override void FixedUpdateState()
     {
-        _verticalVelocity = Vector3.Dot(Ctx.PlayerRigidbody.velocity, Ctx.transform.up);
+        _verticalVelocity = Vector3.Dot(Ctx.Rigidbody.velocity, Ctx.transform.up);
     }
 
     public override void CheckSwitchState()
     {
         if (_verticalVelocity < -Ctx.FallThresholdVelocity)
         {
-            if (Ctx.IsGrappled)
+            if (Ctx.GrapplingHook.IsGrappled)
                 SwitchState(Factory.GetState<PlayerSwingState>());
             else
                 SwitchState(Factory.GetState<PlayerFallState>());

@@ -131,6 +131,8 @@ public class Player : Interactor
     }
 
 #if UNITY_EDITOR
+    [Header("Debug")]
+    public new bool enable = false;
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();

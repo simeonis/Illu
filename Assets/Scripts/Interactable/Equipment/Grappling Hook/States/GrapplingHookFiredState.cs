@@ -13,6 +13,7 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
 
     public override void EnterState()
     {
+        Ctx.FiredEvent?.Invoke();
         ReleaseHook();
         
         // Initialize variables
@@ -28,7 +29,8 @@ public class GrapplingHookFiredState : GrapplingHookBaseState
     public override void UpdateState()
     {
         // Calculate every frame incase of unexpected collisions or move platforms
-        _speedOverLength = Ctx.ProjectileSpeed / Ctx.GrappleDistance;
+        if (Ctx.GrappleDistance > 0.1f)
+            _speedOverLength = Ctx.ProjectileSpeed / Ctx.GrappleDistance;
 
         if (_percent < 1.0f)
         {

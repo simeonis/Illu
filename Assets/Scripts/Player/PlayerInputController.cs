@@ -3,7 +3,7 @@ using Cinemachine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerStateMachine))]
-public class PlayerController : MonoBehaviour
+public class PlayerInputController : MonoBehaviour
 {
     // Mouse variables
     [Header("Mouse Sensitivity")]
@@ -11,14 +11,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] CinemachineVirtualCamera _cinemachineCamera;
     
     CinemachinePOV _cinemachinePOV;
-    PlayerStateMachine _playerStateMachine;
+    IPlayerMotor _playerMotor;
     InputAction _inputMovement;
+
+    void Awake()
+    {
+        _playerMotor = GetComponent<IPlayerMotor>();
+    }
 
     void Start()
     {
-        // Motor
-        _playerStateMachine = GetComponent<PlayerStateMachine>();
-
         // Camera
         _cinemachinePOV = _cinemachineCamera.GetCinemachineComponent<CinemachinePOV>();
         _cinemachinePOV.m_HorizontalAxis.m_MaxSpeed = _sensitivity / 100f * 3.2f;
@@ -54,7 +56,7 @@ public class PlayerController : MonoBehaviour
         InputManager.Instance.playerControls.Player.Sprint.canceled -= onSprint;
     }
 
-    void Update() => _playerStateMachine.SetMovement(_inputMovement.ReadValue<Vector2>());
-    void onJump(InputAction.CallbackContext context) => _playerStateMachine.SetJump(context.ReadValueAsButton());
-    void onSprint(InputAction.CallbackContext context) => _playerStateMachine.SetSprint(context.ReadValueAsButton());
+    void Update() => _playerMotor.SetMovement(_inputMovement.ReadValue<Vector2>());
+    void onJump(InputAction.CallbackContext context) => _playerMotor.SetJump(context.ReadValueAsButton());
+    void onSprint(InputAction.CallbackContext context) => _playerMotor.SetSprint(context.ReadValueAsButton());
 }

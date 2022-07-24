@@ -7,6 +7,7 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
 
     public override void EnterState()
     {
+        Ctx.IdleEvent?.Invoke();
         Ctx.IsPrimaryPressed = false; // Setter prevents value from being set to true
         Ctx.RopeRemaining = Ctx.MaxRopeLength;
         Ctx.RopeRenderer.positionCount = 0;
@@ -17,8 +18,8 @@ public class GrapplingHookIdleState : GrapplingHookBaseState
 
     bool CalculateGrappleTarget()
     {
-        Vector3 origin = FindNearestPointOnLine(Ctx.PlayerViewpoint.position, Ctx.PlayerViewpoint.forward, Ctx.ExitPoint);
-        return SimulateGrapple(origin, Ctx.PlayerViewpoint.forward);
+        Vector3 origin = FindNearestPointOnLine(Ctx.PlayerMotor.Viewpoint.position, Ctx.PlayerMotor.Viewpoint.forward, Ctx.ExitPoint);
+        return SimulateGrapple(origin, Ctx.PlayerMotor.Viewpoint.forward);
     }
 
     Vector3 FindNearestPointOnLine(Vector3 origin, Vector3 direction, Vector3 point)

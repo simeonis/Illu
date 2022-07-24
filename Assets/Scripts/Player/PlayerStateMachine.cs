@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerStateMachine : MonoBehaviour
+public class PlayerStateMachine : MonoBehaviour, IPlayerMotor
 {
     [Header("Locomotion")]
     [SerializeField, Tooltip("Max total speed")]
@@ -48,8 +48,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     [Header("References")]
     [SerializeField] Animator _animator;
-    [SerializeField] Transform _body;
-    [SerializeField] GrapplingHookStateMachine _grapplingHook;
+    [SerializeField] IGrapplingHook _grapplingHook;
     [SerializeField] Transform _orientation;
     [SerializeField] Transform _playerCamera;
     [SerializeField] Rigidbody _rigidbody;
@@ -68,10 +67,7 @@ public class PlayerStateMachine : MonoBehaviour
     float _gravity;
 
     // Getters & Setters - Grappling Hook
-    public bool IsFired { get => _grapplingHook.IsFired; }
-    public bool IsGrappled { get => _grapplingHook.IsGrappled; }
-    public Vector3 GrapplePoint { get => _grapplingHook.GrapplePoint; }
-    public Vector3 ExitPoint { get => _grapplingHook.ExitPoint; }
+    public IGrapplingHook GrapplingHook { get => _grapplingHook; }
     public bool HasLandedFromSwinging { get; set; } = true;
 
     // Getters & Setters - Animation
@@ -86,7 +82,6 @@ public class PlayerStateMachine : MonoBehaviour
     // Getters & Setters - Rotation
     public Transform Viewpoint { get => _playerCamera; }
     public Transform Orientation { get => _orientation; }
-    public Transform Body { get => _body; }
 
     // Getters & Setters - Locomotion
     public float MoveSpeed { get; set; }
@@ -107,6 +102,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     // Getters & Setters - Ground
     public bool IsGrounded { get => _isGrounded; }
+    public LayerMask GroundMask { get => _groundMask; }
 
     // Getters & Setters - Player Input
     public bool IsMovementPressed { get => _isMovementPressed; }
@@ -114,10 +110,15 @@ public class PlayerStateMachine : MonoBehaviour
     public bool IsSprintPressed { get => _isSprintPressed; }
 
     // Getters & Setters - Other
-    public Rigidbody PlayerRigidbody { get => _rigidbody; }
+    public Rigidbody Rigidbody { get => _rigidbody; }
 
     // Getters & Setters - State
     public PlayerBaseState CurrentState { get => _currentState; set => _currentState = value; }
+
+    void Awake()
+    {
+        _grapplingHook = GetComponentInChildren<IGrapplingHook>();
+    }
 
     void Start()
     {
@@ -136,7 +137,7 @@ public class PlayerStateMachine : MonoBehaviour
     void Update()
     {
         // Logic Checks
-        _isGrounded = Physics.CheckSphere(_body.position, _groundDetection, _groundMask);
+        _isGrounded = Physics.CheckSphere(_orientation.position, _groundDetection, _groundMask);
         if (!_isGrounded && _coyoteTimeCounter >= 0) _coyoteTimeCounter -= Time.deltaTime;
 
         _currentState.UpdateStates();
@@ -210,3 +211,37 @@ public class PlayerStateMachine : MonoBehaviour
     public void SetJump(bool isPressed) => _isJumpPressed = isPressed;
     public void SetSprint(bool isPressed) => _isSprintPressed = isPressed;
 }
+
+// RaycastHit kneeHit;
+    // Vector3 goalVel = Vector3.zero;
+    // void Stair()
+    // {
+    //     Vector3 offset = transform.up * KneeOffset;
+    //     Vector3 source = transform.position + (Orientation.forward * KneeDistance);
+    //     Vector3 direction = source - (source + offset); // Knee to feet
+    //     Debug.DrawRay(transform.position, Orientation.forward * KneeDistance, Color.blue, 0f);
+    //     Debug.DrawRay(transform.position + offset, Orientation.forward * KneeDistance, Color.red, 0f);
+    //     Debug.DrawRay(source + offset, direction, Color.yellow, 0f);
+
+    //     // Feet ray collided
+    //     if (IsMovementPressed && Physics.Raycast(transform.position, Orientation.forward, KneeDistance, GroundMask))
+    //     {
+    //         // Knee ray did not collid, therefore step-up
+    //         if (!Physics.Raycast((transform.position + offset), Orientation.forward, KneeDistance, GroundMask))
+    //         {
+    //             if (Physics.Raycast(source + offset, direction, out kneeHit, GroundMask))
+    //             {
+    //                 Vector3 targetVel = transform.position + (transform.up * (direction.magnitude - kneeHit.distance));
+                    
+    //                 goalVel = Vector3.MoveTowards(goalVel, targetVel, 50f * Time.fixedDeltaTime);
+
+    //                 Vector3 currVel = Rigidbody.velocity;
+                   
+    //                 Vector3 neededAccel = (goalVel - currVel) / Time.fixedDeltaTime;
+    //                 neededAccel = Vector3.ClampMagnitude(neededAccel, 100f);
+
+    //                 Rigidbody.AddForce(neededAccel, ForceMode.Acceleration);
+    //             }
+    //         }
+    //     }
+    // }

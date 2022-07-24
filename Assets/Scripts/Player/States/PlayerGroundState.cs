@@ -18,7 +18,7 @@ public class PlayerGroundState : PlayerBaseState
         
         Ctx.HasLandedFromSwinging = true;
         Ctx.CoyoteTimeCounter = Ctx.CoyoteTime;
-        Ctx.Body.localRotation = Quaternion.identity;
+        Ctx.Orientation.rotation = Quaternion.Euler(Vector3.Scale(Ctx.Orientation.eulerAngles, Ctx.transform.up));
     }
 
     public override void ExitState()

@@ -57,7 +57,7 @@ public class SyncPlayer : NetworkBehaviour
     // local authority send time
     float lastClientSendTime;
     [SerializeField] PlayerMotor playerMotor;
-    [SerializeField] PlayerController playerController;
+    [SerializeField] PlayerInputController playerController;
 
     [Header("Things To Turn Off")]
 

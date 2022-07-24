@@ -12,6 +12,7 @@ public class GrapplingHookGrappledState : GrapplingHookBaseState
 
     public override void EnterState()
     {
+        Ctx.GrappledEvent?.Invoke();
         Ctx.RopeRenderer.positionCount = 2;
 
         // TODO: Shorten desiredLength to ensure the player won't hit the ground 
@@ -30,7 +31,7 @@ public class GrapplingHookGrappledState : GrapplingHookBaseState
         currentLength = Mathf.MoveTowards(currentLength, desiredLength, 10f * Time.fixedDeltaTime);
 
         // Predict where player (grapple exit point) will be next physics frame
-        testPosition = Ctx.ExitPoint + (Ctx.PlayerRigidbody.velocity * Time.fixedDeltaTime);
+        testPosition = Ctx.ExitPoint + (Ctx.PlayerMotor.Rigidbody.velocity * Time.fixedDeltaTime);
 
         // Calculate if test position is outside of acceptable rope range
         anchorToPlayer = (testPosition - Ctx.GrapplePoint);
@@ -40,7 +41,7 @@ public class GrapplingHookGrappledState : GrapplingHookBaseState
         }
 
         // Constrain player
-        Ctx.PlayerRigidbody.velocity = (testPosition - Ctx.ExitPoint) / Time.fixedDeltaTime;
+        Ctx.PlayerMotor.Rigidbody.velocity = (testPosition - Ctx.ExitPoint) / Time.fixedDeltaTime;
     }
 
     public override void ExitState()

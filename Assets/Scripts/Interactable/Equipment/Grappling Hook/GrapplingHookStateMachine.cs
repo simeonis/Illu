@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Events;
 
-public class GrapplingHookStateMachine : MonoBehaviour
+public class GrapplingHookStateMachine : MonoBehaviour, IGrapplingHook
 {
     [Header("Projectile")]
     [SerializeField] Transform _hook;
@@ -19,25 +19,25 @@ public class GrapplingHookStateMachine : MonoBehaviour
     [SerializeField, Range(0, 5f)] float _waveHeight = 0.5f;
     [SerializeField] LineRenderer _ropeRenderer;
 
-    [Header("Player")]
-    [SerializeField] Rigidbody _rigidbody;
-    [SerializeField] Transform _viewpoint;
-    bool _isPrimaryPressed = false;
-
     [Header("Scriptable Objects")]
     [SerializeField] FloatVariable _ropeRemaining;
     [SerializeField] FloatVariable _grappleDistance;
 
+    // Player
+    IPlayerMotor _playerMotor;
+    bool _isPrimaryPressed = false;
+
+    // States
     GrapplingHookBaseState _currentState;
     GrapplingHookStateFactory _states;
 
     // Getters & Setters - Projectile
-    public Transform Hook { get { return _hook; } }
-    public Transform HookDefaultParent { get { return _defaultHookParent; } }
-    public Vector3 HookPosition { get { return _hook.position; } set { _hook.position = value; } }
-    public Vector3 ExitPoint { get { return _exitPoint.position; } }
-    public float ProjectileSpeed { get { return _projectileSpeed; } }
-    public LayerMask HookableLayers { get { return _hookableLayers; } }
+    public Transform Hook { get => _hook; }
+    public Transform HookDefaultParent { get => _defaultHookParent; }
+    public Vector3 HookPosition { get => _hook.position; set => _hook.position = value; }
+    public Vector3 ExitPoint { get => _exitPoint.position; }
+    public float ProjectileSpeed { get => _projectileSpeed; }
+    public LayerMask HookableLayers { get => _hookableLayers; }
     public Vector3 GrapplePoint { get; set; }
 
     // Getters & Setters - Rope
@@ -51,15 +51,24 @@ public class GrapplingHookStateMachine : MonoBehaviour
     public LineRenderer RopeRenderer { get { return _ropeRenderer; } }
     
     // Getters & Setters - Player
-    public Rigidbody PlayerRigidbody { get { return _rigidbody; } }
-    public Transform PlayerViewpoint { get { return _viewpoint; } }
+    public IPlayerMotor PlayerMotor { get { return _playerMotor; } }
     public bool IsPrimaryPressed { get { return _isPrimaryPressed; } set { _isPrimaryPressed = false; } }
     
     // Getters & Setters - State
-    public GrapplingHookBaseState CurrentState { get { return _currentState; } set { _currentState = value; } }
-    public bool IsIdle { get { return _currentState is GrapplingHookIdleState; } }
-    public bool IsFired { get { return _currentState is GrapplingHookFiredState; } }
-    public bool IsGrappled { get { return _currentState is GrapplingHookGrappledState; } }
+    public GrapplingHookBaseState CurrentState { get => _currentState; set => _currentState = value; }
+    public bool IsIdle { get => _currentState is GrapplingHookIdleState; }
+    public bool IsFired { get => _currentState is GrapplingHookFiredState; }
+    public bool IsGrappled { get => _currentState is GrapplingHookGrappledState; }
+
+    // Getters & Setters - Events
+    public UnityEvent IdleEvent { get; } = new UnityEvent();
+    public UnityEvent FiredEvent { get; } = new UnityEvent();
+    public UnityEvent GrappledEvent { get; } = new UnityEvent();
+
+    void Awake()
+    {
+        _playerMotor = GetComponentInParent<IPlayerMotor>();
+    }
 
     void Start()
     {
