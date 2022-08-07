@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: 2dfd79e4ffc8b5e4c9c6b31835aa69ce
+guid: 89aec66f9e16d734da610165723fea50
 ModelImporter:
   serializedVersion: 22103
   internalIDToNameTable:
   - first:
       74: -203655887218126122
-    second: Landing Flat Impact
+    second: Swinging
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -20,14 +20,7 @@ ModelImporter:
     removeConstantScaleCurves: 0
     motionNodeName: 
     rigImportErrors: 
-    rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
-      copied configuration does not match position in animation file:\n\t'Left_Thigh_Joint_01'
-      : position error = 133.875427 mm\n\t'Left_Knee_Joint_01' : position error =
-      360.501953 mm\n\t'Left_Ankle_Joint_01' : position error = 413.033173 mm\n\t'Left_Toe_Joint_01'
-      : position error = 131.196091 mm\n\t'Right_Thigh_Joint_01' : position error
-      = 133.875320 mm\n\t'Right_Knee_Joint_01' : position error = 360.502258 mm\n\t'Right_Ankle_Joint_01'
-      : position error = 413.032806 mm\n\t'Right_Toe_Joint_01' : position error =
-      131.196198 mm\n"
+    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -43,11 +36,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Landing Flat Impact
+      name: Swinging
       takeName: mixamo.com
       internalID: 0
-      firstFrame: 14
-      lastFrame: 46
+      firstFrame: 0
+      lastFrame: 25
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -58,7 +51,7 @@ ModelImporter:
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
@@ -83,7 +76,7 @@ ModelImporter:
     importBlendShapes: 1
     importCameras: 1
     importLights: 1
-    nodeNameCollisionStrategy: 0
+    nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
     swapUVChannels: 0
     generateSecondaryUV: 0
@@ -779,8 +772,8 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 2
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
-  importBlendShapeDeformPercent: 0
-  remapMaterialsIfMaterialImportModeIsNone: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
   additionalBone: 0
   userData: 
   assetBundleName: 

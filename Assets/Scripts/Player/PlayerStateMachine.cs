@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class PlayerStateMachine : MonoBehaviour, IPlayerMotor
 {
@@ -48,6 +49,7 @@ public class PlayerStateMachine : MonoBehaviour, IPlayerMotor
 
     [Header("References")]
     [SerializeField] Animator _animator;
+    [SerializeField] CapsuleCollider _collider;
     [SerializeField] IGrapplingHook _grapplingHook;
     [SerializeField] Transform _orientation;
     [SerializeField] Transform _playerCamera;
@@ -118,6 +120,52 @@ public class PlayerStateMachine : MonoBehaviour, IPlayerMotor
     void Awake()
     {
         _grapplingHook = GetComponentInChildren<IGrapplingHook>();
+        InitializeRagdoll();
+        DisableRagdoll();
+    }
+
+    List<Collider> ragdollColliders = new List<Collider>();
+
+    void InitializeRagdoll()
+    {
+        Collider[] colliders = gameObject.GetComponentsInChildren<Collider>();
+
+        foreach(Collider c in colliders)
+        {
+            if (c != _collider)
+            {
+                c.isTrigger = true;
+                ragdollColliders.Add(c);
+            }
+        }
+    }
+
+    public void EnableRagdoll()
+    {
+        _collider.isTrigger = true;
+        _rigidbody.isKinematic = true;
+        _animator.enabled = false;
+
+        foreach(Collider c in ragdollColliders)
+        {
+            c.isTrigger = false;
+            c.attachedRigidbody.velocity = Vector3.zero;
+            c.attachedRigidbody.isKinematic = false;
+        }
+    }
+
+    public void DisableRagdoll()
+    {
+        _collider.isTrigger = false;
+        _rigidbody.isKinematic = false;
+        _animator.enabled = true;
+
+        foreach(Collider c in ragdollColliders)
+        {
+            c.isTrigger = true;
+            c.attachedRigidbody.velocity = Vector3.zero;
+            c.attachedRigidbody.isKinematic = true;
+        }
     }
 
     void Start()
@@ -133,7 +181,6 @@ public class PlayerStateMachine : MonoBehaviour, IPlayerMotor
         _currentState.EnterStates();
     }
 
-    RaycastHit _cameraMousePos;
     void Update()
     {
         // Logic Checks

@@ -34,6 +34,8 @@ public class PlayerInputController : MonoBehaviour
     {
         InputManager.Instance.playerControls.Player.Enable();
 
+        InputManager.Instance.playerControls.Player.AlternateFire.started += OnAlternateFire;
+
         // Jump
         InputManager.Instance.playerControls.Player.Jump.started += onJump;
         InputManager.Instance.playerControls.Player.Jump.canceled += onJump;
@@ -47,6 +49,8 @@ public class PlayerInputController : MonoBehaviour
     {
         InputManager.Instance.playerControls.Player.Disable();
 
+        InputManager.Instance.playerControls.Player.AlternateFire.started -= OnAlternateFire;
+
         // Jump
         InputManager.Instance.playerControls.Player.Jump.started -= onJump;
         InputManager.Instance.playerControls.Player.Jump.canceled -= onJump;
@@ -54,6 +58,21 @@ public class PlayerInputController : MonoBehaviour
         // Sprint
         InputManager.Instance.playerControls.Player.Sprint.started -= onSprint;
         InputManager.Instance.playerControls.Player.Sprint.canceled -= onSprint;
+    }
+
+    bool ragdoll = false;
+    void OnAlternateFire(InputAction.CallbackContext context) 
+    {
+        if (!ragdoll)
+        {
+            _playerMotor.EnableRagdoll();
+            ragdoll = true;
+        }
+        else
+        {
+            _playerMotor.DisableRagdoll();
+            ragdoll = false;
+        }
     }
 
     void Update() => _playerMotor.SetMovement(_inputMovement.ReadValue<Vector2>());

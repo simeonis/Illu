@@ -676,7 +676,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3643799090460603448}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.32326594, y: -0, z: -0, w: 0.94630814}
   m_LocalPosition: {x: 0, y: 7.3945465, z: -6.3279862}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -966,7 +966,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   _groundDetection: 0.18
-  _animator: {fileID: 6321435328984631822}
+  _animator: {fileID: 0}
+  _collider: {fileID: 0}
   _orientation: {fileID: 4333712777098963925}
   _playerCamera: {fileID: 4333712776587452003}
   _rigidbody: {fileID: 2211055216537697564}
@@ -1630,12 +1631,12 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: f04fd086f1acf3743821c47979659133, type: 2}
     - target: {fileID: -6057140222963153312, guid: 320b1c2af77554f99a1658df4a6d3d5c,
         type: 3}
-      propertyPath: m_UpdateMode
-      value: 0
+      propertyPath: m_WarningMessage
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: -6057140222963153312, guid: 320b1c2af77554f99a1658df4a6d3d5c,
         type: 3}
-      propertyPath: m_CullingMode
+      propertyPath: m_ApplyRootMotion
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 320b1c2af77554f99a1658df4a6d3d5c,
@@ -1915,6 +1916,26 @@ MonoBehaviour:
   - {fileID: 7934477983492561729}
   - {fileID: 7650628481043914303}
   - {fileID: 5247194821507980294}
+--- !u!95 &6086938540349341216
+Animator:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1111093785405265255}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!4 &1277469042082723068 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -1301272372085458798, guid: 320b1c2af77554f99a1658df4a6d3d5c,
@@ -2044,12 +2065,6 @@ Transform:
 --- !u!4 &6306168806801231627 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3156614187824677733, guid: 320b1c2af77554f99a1658df4a6d3d5c,
-    type: 3}
-  m_PrefabInstance: {fileID: 8956121439274454126}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &6321435328984631822 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: -6057140222963153312, guid: 320b1c2af77554f99a1658df4a6d3d5c,
     type: 3}
   m_PrefabInstance: {fileID: 8956121439274454126}
   m_PrefabAsset: {fileID: 0}

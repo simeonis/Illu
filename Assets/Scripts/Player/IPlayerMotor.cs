@@ -40,4 +40,8 @@ public interface IPlayerMotor {
     /// Notifies the player when to sprint.
     /// </summary>
     public void SetSprint(bool isPressed);
+
+    public void EnableRagdoll();
+
+    public void DisableRagdoll();
 }
