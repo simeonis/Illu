@@ -29,11 +29,11 @@ public class WorkshopPlayer : MonoBehaviour
         m_rigidbody = GetComponent<Rigidbody>();
         m_collider = GetComponent<CapsuleCollider>();
         m_ragdollColliders = new List<Collider>();
-        m_animator = GetComponent<Animator>();
+        m_animator = GetComponentInChildren<Animator>();
         m_lineRenderer = GetComponentInChildren<LineRenderer>();
 
-        // InitializeRagdoll();
-        // DisableRagdoll();
+        //InitializeRagdoll();
+        //DisableRagdoll();
     }
 
     void Start()
@@ -45,9 +45,9 @@ public class WorkshopPlayer : MonoBehaviour
     void Update()
     {
         // Right Arm
-        Vector3 direction = (m_grapplePoint.position - m_exitPoint.position).normalized;
-        m_rightArmTarget.position = m_exitPoint.position + (direction * 0.25f);
-        m_rightArmTarget.right = direction;
+        // Vector3 direction = (m_grapplePoint.position - m_exitPoint.position).normalized;
+        // m_rightArmTarget.position = m_exitPoint.position + (direction * 0.25f);
+        // m_rightArmTarget.right = direction;
 
         // Body Rotation
         Vector3 bodyToGrapple = m_grapplePoint.position - transform.position;
@@ -83,7 +83,7 @@ public class WorkshopPlayer : MonoBehaviour
     {
         Collider[] colliders = gameObject.GetComponentsInChildren<Collider>();
 
-        foreach(Collider c in colliders)
+        foreach (Collider c in colliders)
         {
             if (c != m_collider)
             {
@@ -107,7 +107,7 @@ public class WorkshopPlayer : MonoBehaviour
         m_collider.isTrigger = true;
         m_animator.enabled = false;
 
-        foreach(Collider c in m_ragdollColliders)
+        foreach (Collider c in m_ragdollColliders)
         {
             c.isTrigger = false;
             c.attachedRigidbody.isKinematic = false;
@@ -121,7 +121,7 @@ public class WorkshopPlayer : MonoBehaviour
         m_collider.isTrigger = false;
         m_animator.enabled = true;
 
-        foreach(Collider c in m_ragdollColliders)
+        foreach (Collider c in m_ragdollColliders)
         {
             c.isTrigger = true;
             c.attachedRigidbody.velocity = Vector3.zero;

@@ -29,8 +29,6 @@ public class Item : Interactable
                 equipmentBody.useGravity = true;
                 // 3. Enable collider
                 equipmentCollider.enabled = true;
-                // 4. Remove reference to player
-                player = null;
             }
             // Pick-Up
             else
